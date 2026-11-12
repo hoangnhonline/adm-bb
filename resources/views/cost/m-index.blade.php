@@ -20,7 +20,20 @@
       <p class="alert alert-info" >{{ Session::get('message') }}</p>
       @endif
       @if($notNH)
-      <a href="{{ route('cost.create',['date_use' => $date_use]) }}" class="btn btn-info btn-sm" style="margin-bottom:5px">Add new cost</a>
+      <div class="row m-cost-actions" style="margin:0 -3px 8px">
+        <div class="col-xs-6" style="padding:3px">
+          <a href="{{ route('cost.create',['date_use' => $date_use]) }}" class="btn btn-info btn-block"><i class="fa fa-plus"></i> Add new cost</a>
+        </div>
+        <div class="col-xs-6" style="padding:3px">
+          <a href="{{ route('cost.bill-upload') }}" class="btn btn-success btn-block"><i class="fa fa-camera"></i> Upload bill</a>
+        </div>
+        <div class="col-xs-6" style="padding:3px">
+          <a href="{{ route('cost.nhap-hang') }}" class="btn btn-primary btn-block"><i class="fa fa-bar-chart"></i> Thống kê nhập hàng</a>
+        </div>
+        <div class="col-xs-6" style="padding:3px">
+          <a href="{{ route('cost.bieu-do-gia') }}" class="btn btn-warning btn-block"><i class="fa fa-line-chart"></i> Biểu đồ giá</a>
+        </div>
+      </div>
       @endif
       <div class="panel panel-default">        
         <div class="panel-body">

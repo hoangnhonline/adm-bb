@@ -23,8 +23,8 @@
         <div class="panel-heading"><h3 class="panel-title">Bộ lọc</h3></div>
         <div class="panel-body">
           <form class="form-inline" role="form" method="GET" action="{{ route('cost.bieu-do-gia') }}" id="searchForm">
-            <div class="form-group" style="min-width:320px">
-              <select class="form-control" name="ingredient_ids[]" id="ingredient_ids" multiple style="width:420px">
+            <div class="form-group" style="width:100%;max-width:440px">
+              <select class="form-control" name="ingredient_ids[]" id="ingredient_ids" multiple style="width:100%">
                 @foreach($ingredientList as $ing)
                   <option value="{{ $ing->id }}" data-aliases="{{ $ing->aliases }}" {{ in_array($ing->id, $arrSearch['ingredient_ids']) ? "selected" : "" }}>{{ $ing->name }}{{ $ing->unit ? ' ('.$ing->unit.')' : '' }}</option>
                 @endforeach
@@ -241,7 +241,7 @@
       var hay = norm(data.text + ' ' + ($(data.element).data('aliases') || ''));
       return hay.indexOf(norm(params.term)) > -1 ? data : null;
     }
-    $('#ingredient_ids').select2({ matcher: matcher, maximumSelectionLength: 5, placeholder: 'Chọn nguyên liệu (tối đa 5)' });
+    $('#ingredient_ids').select2({ matcher: matcher, maximumSelectionLength: 5, placeholder: 'Chọn nguyên liệu (tối đa 5)', width: '100%' });
     $('#ncc_id').select2();
     $('#ingredient_ids').on('change', function () {
       var one = ($(this).val() || []).length === 1;
