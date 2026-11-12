@@ -100,6 +100,9 @@
       <div class="box">
         <div class="box-header with-border">
           <h3 class="box-title">Tổng hợp theo nguyên liệu ({{ $arrSearch['use_date_from'] }} – {{ $arrSearch['use_date_to'] }})</h3>
+          <div class="box-tools" style="top:8px">
+            <a href="{{ route('cost.bieu-do-gia') }}" class="btn btn-sm btn-primary"><i class="fa fa-line-chart"></i> Biểu đồ giá</a>
+          </div>
         </div>
         <div class="box-body table-responsive">
           <table class="table table-bordered table-hover table-condensed">
@@ -129,6 +132,9 @@
                     <a href="{{ route('cost.nhap-hang', array_merge($arrSearch, ['ingredient_id' => $ingKey])) }}">
                       {{ $it->name ?: '(Chưa gắn nguyên liệu)' }}
                     </a>
+                    @if($it->ingredient_id)
+                      <a href="{{ route('cost.bieu-do-gia', ['ingredient_ids' => [$it->ingredient_id], 'branch_ids' => $arrSearch['branch_ids'], 'ncc_id' => $arrSearch['ncc_id']]) }}" title="Biểu đồ giá {{ $it->name }}" style="margin-left:4px">📈</a>
+                    @endif
                   </td>
                   <td>{{ $it->cost_type_id && isset($cateArr[$it->cost_type_id]) ? $cateArr[$it->cost_type_id] : '' }}</td>
                   <td class="text-right">{{ $it->qty !== null ? rtrim(rtrim(number_format($it->qty, 2), '0'), '.') : '' }}</td>
@@ -153,7 +159,7 @@
             </tfoot>
             @endif
           </table>
-          <p class="text-muted" style="margin:0"><i>Số lượng và đơn giá TB chỉ cộng các dòng cùng ĐVT chuẩn của nguyên liệu. Bấm vào tên nguyên liệu để xem từng lần nhập.</i></p>
+          <p class="text-muted" style="margin:0"><i>Số lượng và đơn giá TB chỉ cộng các dòng cùng ĐVT chuẩn của nguyên liệu. Bấm vào tên nguyên liệu để xem từng lần nhập, bấm 📈 để xem biểu đồ giá.</i></p>
         </div>
       </div>
 

@@ -80,6 +80,11 @@
           <i class="fa fa-shopping-basket"></i> <span>NHẬP HÀNG</span>
         </a>
       </li>
+      <li {{ in_array($routeName, ['cost.bieu-do-gia']) ? "class=active" : "" }}>
+        <a href="{{ route('cost.bieu-do-gia') }}">
+          <i class="fa fa-line-chart"></i> <span>BIỂU ĐỒ GIÁ</span>
+        </a>
+      </li>
       @endif
       @if(Auth::user()->id != 3 && Auth::user()->role == 1)
 

@@ -714,6 +714,201 @@ class CostController extends Controller
             'cateList', 'cateArr', 'branchList', 'beachArr', 'nccList', 'nccArr', 'ingredientList'));
     }
 
+    /**
+     * Biểu đồ giá nguyên liệu: giá theo từng lần nhập (mỗi bill = 1 điểm) hoặc bình quân theo ngày.
+     * Đơn giá = thành tiền / số lượng, chỉ lấy dòng có SL > 0, tiền > 0 và đúng ĐVT chuẩn của nguyên liệu.
+     */
+    public function bieuDoGia(Request $request)
+    {
+        $from = $request->use_date_from ? $request->use_date_from : date('d/m/Y', strtotime('-6 months'));
+        $to = $request->use_date_to ? $request->use_date_to : date('d/m/Y');
+        $fromDate = $this->toSqlDate($from) ?: date('Y-m-d', strtotime('-6 months'));
+        $toDate = $this->toSqlDate($to) ?: date('Y-m-d');
+        if($toDate < $fromDate){
+            $toDate = $fromDate;
+            $to = $from;
+        }
+        $ingredientIds = array_values(array_unique(array_filter(array_map('intval', (array) $request->ingredient_ids))));
+        $ingredientIds = array_slice($ingredientIds, 0, 5);
+        $arrSearch = [
+            'use_date_from' => $from,
+            'use_date_to' => $to,
+            'ingredient_ids' => $ingredientIds,
+            'branch_ids' => $request->branch_ids ? array_map('intval', (array) $request->branch_ids) : [],
+            'ncc_id' => $request->ncc_id ? (int) $request->ncc_id : null,
+            'include_review' => $request->include_review ? 1 : 0,
+            'mode' => $request->mode == 'ngay' ? 'ngay' : 'lan',
+            'by_ncc' => ($request->by_ncc && count($ingredientIds) == 1) ? 1 : 0,
+        ];
+
+        $ingredientList = Ingredient::orderBy('name')->get();
+        $ingArr = $ingredientList->keyBy('id');
+        $branchList = Branch::where('status', 1)->orderBy('display_order')->get();
+        $beachArr = $branchList->pluck('name', 'id');
+        $nccList = NhaCungCap::where('status', 1)->orderBy('display_order')->orderBy('name')->get();
+        $nccArr = NhaCungCap::pluck('name', 'id');
+
+        $series = [];
+        $history = [];
+        $summary = [];
+        $skipped = ['unit' => 0, 'zero' => 0, 'review' => 0];
+
+        if($ingredientIds){
+            $base = DB::table('cost_detail as d')
+                ->join('cost as c', 'c.id', '=', 'd.cost_id')
+                ->join('ingredient as i', 'i.id', '=', 'd.ingredient_id')
+                ->where('c.status', '>', 0)
+                ->whereIn('d.ingredient_id', $ingredientIds)
+                ->where('c.date_use', '>=', $fromDate)
+                ->where('c.date_use', '<=', $toDate);
+            if($arrSearch['branch_ids']){
+                $base->whereIn('c.branch_id', $arrSearch['branch_ids']);
+            }
+            if($arrSearch['ncc_id']){
+                $base->where('c.ncc_id', $arrSearch['ncc_id']);
+            }
+
+            $sameUnit = "(d.unit IS NULL OR d.unit = '' OR d.unit = i.unit)";
+            $skipped['review'] = $arrSearch['include_review'] ? 0 : (clone $base)->where('d.need_review', 1)->count();
+            if(!$arrSearch['include_review']){
+                $base->where('d.need_review', 0);
+            }
+            $skipped['unit'] = (clone $base)->whereRaw("NOT $sameUnit")->count();
+            $skipped['zero'] = (clone $base)->whereRaw($sameUnit)
+                ->where(function($q){
+                    $q->whereNull('d.quantity')->orWhere('d.quantity', '<=', 0)
+                      ->orWhereNull('d.amount')->orWhere('d.amount', '<=', 0);
+                })->count();
+
+            // Gộp theo (bill, nguyên liệu): 1 bill có nhiều dòng cùng nguyên liệu (vd tỏi xay + tỏi lột) = 1 lần nhập
+            $rows = (clone $base)
+                ->whereRaw($sameUnit)
+                ->where('d.quantity', '>', 0)
+                ->where('d.amount', '>', 0)
+                ->select(
+                    'd.cost_id', 'd.ingredient_id', 'c.date_use', 'c.branch_id', 'c.ncc_id',
+                    DB::raw('SUM(d.quantity) as qty'),
+                    DB::raw('SUM(d.amount) as amount'),
+                    DB::raw('MAX(d.need_review) as need_review')
+                )
+                ->groupBy('d.cost_id', 'd.ingredient_id', 'c.date_use', 'c.branch_id', 'c.ncc_id')
+                ->orderBy('c.date_use')->orderBy('d.cost_id')
+                ->get();
+
+            // Lịch sử từng lần nhập + chênh lệch so với lần trước (cùng nguyên liệu)
+            $prev = [];
+            foreach($rows as $r){
+                $price = (float) $r->amount / (float) $r->qty;
+                $ingId = (int) $r->ingredient_id;
+                $p = $prev[$ingId] ?? null;
+                $history[] = [
+                    'cost_id' => (int) $r->cost_id,
+                    'ingredient_id' => $ingId,
+                    'date' => $r->date_use,
+                    'branch' => $beachArr[$r->branch_id] ?? '',
+                    'ncc_id' => (int) $r->ncc_id,
+                    'ncc' => $nccArr[$r->ncc_id] ?? '(Chưa có NCC)',
+                    'qty' => (float) $r->qty,
+                    'amount' => (int) $r->amount,
+                    'price' => $price,
+                    'diff' => $p !== null ? $price - $p : null,
+                    'diff_pct' => ($p !== null && $p > 0) ? ($price - $p) / $p * 100 : null,
+                    'need_review' => (int) $r->need_review,
+                ];
+                $prev[$ingId] = $price;
+            }
+
+            // Tóm tắt theo nguyên liệu
+            foreach($ingredientIds as $ingId){
+                $list = array_values(array_filter($history, function($h) use ($ingId){ return $h['ingredient_id'] == $ingId; }));
+                if(!$list){
+                    $summary[$ingId] = null;
+                    continue;
+                }
+                $prices = array_column($list, 'price');
+                $sumAmount = array_sum(array_column($list, 'amount'));
+                $sumQty = array_sum(array_column($list, 'qty'));
+                $first = $list[0];
+                $last = $list[count($list) - 1];
+                $minIdx = array_keys($prices, min($prices))[0];
+                $maxIdx = array_keys($prices, max($prices))[0];
+                $summary[$ingId] = [
+                    'count' => count($list),
+                    'min' => $list[$minIdx],
+                    'max' => $list[$maxIdx],
+                    'avg' => $sumQty > 0 ? $sumAmount / $sumQty : null,
+                    'first' => $first,
+                    'last' => $last,
+                    'change_pct' => $first['price'] > 0 ? ($last['price'] - $first['price']) / $first['price'] * 100 : null,
+                    'qty' => $sumQty,
+                    'amount' => $sumAmount,
+                ];
+            }
+
+            // Dữ liệu biểu đồ
+            $groups = [];
+            foreach($history as $h){
+                if($arrSearch['by_ncc']){
+                    $key = 'n' . $h['ncc_id'];
+                    $name = $h['ncc'];
+                }else{
+                    $key = 'i' . $h['ingredient_id'];
+                    $name = optional($ingArr->get($h['ingredient_id']))->name;
+                }
+                if(!isset($groups[$key])){
+                    $groups[$key] = ['name' => $name, 'unit' => optional($ingArr->get($h['ingredient_id']))->unit, 'items' => []];
+                }
+                $groups[$key]['items'][] = $h;
+            }
+            foreach($groups as $g){
+                $data = [];
+                if($arrSearch['mode'] == 'ngay'){
+                    $byDay = [];
+                    foreach($g['items'] as $h){
+                        $d = $h['date'];
+                        if(!isset($byDay[$d])) $byDay[$d] = ['qty' => 0, 'amount' => 0, 'bills' => [], 'ncc' => []];
+                        $byDay[$d]['qty'] += $h['qty'];
+                        $byDay[$d]['amount'] += $h['amount'];
+                        $byDay[$d]['bills'][] = 'CP' . $h['cost_id'];
+                        $byDay[$d]['ncc'][$h['ncc']] = 1;
+                    }
+                    foreach($byDay as $d => $v){
+                        $data[] = [
+                            'x' => strtotime($d . ' UTC') * 1000,
+                            'y' => round($v['amount'] / $v['qty']),
+                            'qty' => round($v['qty'], 3),
+                            'amount' => $v['amount'],
+                            'bill' => implode(', ', $v['bills']),
+                            'ncc' => implode(', ', array_keys($v['ncc'])),
+                            'branch' => '',
+                            'cost_id' => count($v['bills']) == 1 ? (int) substr($v['bills'][0], 2) : null,
+                        ];
+                    }
+                }else{
+                    foreach($g['items'] as $h){
+                        $data[] = [
+                            'x' => strtotime($h['date'] . ' UTC') * 1000,
+                            'y' => round($h['price']),
+                            'qty' => round($h['qty'], 3),
+                            'amount' => $h['amount'],
+                            'bill' => 'CP' . $h['cost_id'],
+                            'ncc' => $h['ncc'],
+                            'branch' => $h['branch'],
+                            'cost_id' => $h['cost_id'],
+                        ];
+                    }
+                }
+                $series[] = ['name' => $g['name'], 'unit' => $g['unit'], 'data' => $data];
+            }
+        }
+
+        // Lịch sử hiển thị mới nhất trước
+        $history = array_reverse($history);
+
+        return view('cost.bieu-do-gia', compact('arrSearch', 'ingredientList', 'ingArr', 'branchList', 'nccList',
+            'series', 'history', 'summary', 'skipped'));
+    }
+
     private function toSqlDate($dmy)
     {
         $tmp = explode('/', (string) $dmy);
