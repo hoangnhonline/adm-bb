@@ -24,6 +24,6 @@ class NhaCungCap extends Model  {
      *
      * @var array
      */
-    protected $fillable = ['name', 'status'];
+    protected $fillable = ['name', 'group_name', 'phone', 'address', 'contact_name', 'notes', 'display_order', 'status'];
     
 }

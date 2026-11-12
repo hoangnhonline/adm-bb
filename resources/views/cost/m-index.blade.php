@@ -185,6 +185,9 @@
                     @endif         
                     <br>               
                     <i class="  glyphicon glyphicon-usd"></i>{{ number_format($item->amount) }} x {{ number_format($item->price) }} = {{ number_format($item->total_money) }}
+                    @if($item->detail_check == 1)
+                    <span class="label label-danger">Lệch chi tiết {{ number_format($item->detail_total - $item->total_money) }}</span>
+                    @endif
                            <br>                      
                     @if($item->notes)
                     <span style="color:red; font-size: 13px !important; font-style: italic;">{!! nl2br($item->notes) !!}</span>

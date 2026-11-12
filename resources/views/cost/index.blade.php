@@ -22,6 +22,7 @@
       @endif
       @if($notNH)
       <a href="{{ route('cost.create',['month' => $month, 'cate_id' => $cate_id]) }}" class="btn btn-info btn-sm" style="margin-bottom:5px">Add new</a>
+      <a href="{{ route('cost.nhap-hang') }}" class="btn btn-success btn-sm" style="margin-bottom:5px"><i class="fa fa-bar-chart"></i> Thống kê nhập hàng</a>
       @endif
       <div class="panel panel-default">
         <div class="panel-heading">
@@ -62,6 +63,12 @@
                 @endforeach
               </select>
             </div>  
+            <div class="form-group">
+              <select class="form-control select2" name="detail_check" id="detail_check">
+                <option value="">--Chi tiết hàng--</option>
+                <option value="1" {{ ($arrSearch['detail_check'] ?? null) == 1 ? "selected" : "" }}>Lệch tiền – cần kiểm tra</option>
+              </select>
+            </div>
                
             <div class="form-group">              
               <select class="form-control select2" name="nguoi_chi" id="nguoi_chi">
@@ -288,6 +295,9 @@
                 <td class="text-right">{{ number_format($item->price) }}</td>
                 <td class="text-right">
                   {{ number_format($item->total_money) }}                   
+                  @if($item->detail_check == 1)
+                    <br><span class="label label-danger" title="Tổng chi tiết hàng: {{ number_format($item->detail_total) }}">Lệch {{ number_format($item->detail_total - $item->total_money) }}</span>
+                  @endif
                 </td>
                 <td class="text-center" style="white-space: nowrap;" data-id="{{ $item->nguoi_chi }}">
                  @if($item->nguoi_chi)

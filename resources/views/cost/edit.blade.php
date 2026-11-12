@@ -76,9 +76,7 @@
                   <label>Cost category<span class="red-star">*</span></label>
                   <select class="form-control select2" id="cate_id" name="cate_id">     
                       <option value="">--Chọn--</option>      
-                      @foreach($cateList as $cate)
-                      <option value="{{ $cate->id }}" {{ old('cate_id', $detail->cate_id) == $cate->id ? "selected" : "" }}>{{ $cate->name }}</option>
-                      @endforeach
+                      @include('cost._cate-options', ['selectedCate' => old('cate_id', $detail->cate_id)])
                   </select>
                 </div>             
               <input type="hidden" name="type" value="1">               
@@ -89,6 +87,7 @@
                     <label for="notes">Content</label>
                     <textarea class="form-control" name="notes" id="notes">{!! old('notes', $detail->notes) !!}</textarea>
                   </div>
+                  @include('cost._details')
                   <div class="tinh-toan" >
                     <div class="form-group col-md-4 col-xs-6">
                       <label for="price">Price</label>
@@ -246,6 +245,7 @@
 </div>
 @stop
 @section('js')
+@include('cost._details-js')
 <script type="text/javascript">
   $(document).on('click', '#btnSaveBankAjax', function(){
       $(this).attr('disabled', 'disabled');

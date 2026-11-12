@@ -75,6 +75,11 @@
           <i class="glyphicon glyphicon-usd"></i> <span>CHI PHÍ</span>
         </a>
       </li>
+      <li {{ in_array($routeName, ['cost.nhap-hang']) ? "class=active" : "" }}>
+        <a href="{{ route('cost.nhap-hang') }}">
+          <i class="fa fa-shopping-basket"></i> <span>NHẬP HÀNG</span>
+        </a>
+      </li>
       @endif
       @if(Auth::user()->id != 3 && Auth::user()->role == 1)
 

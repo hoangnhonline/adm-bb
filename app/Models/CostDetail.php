@@ -2,28 +2,27 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-
+/**
+ * Dòng hàng trong 1 bill chi phí (cost).
+ * source: 1 = nhập tay trên form, 2 = bóc tách từ cost.notes (dữ liệu cũ)
+ * need_review: 1 = cần người kiểm tra lại
+ */
 class CostDetail extends Model  {
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
-    protected $table = 'cost_detail';   
+    protected $table = 'cost_detail';
 
-     /**
-     * Indicates if the model should be timestamped.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = ['content', 'amount', 'price', 'total', 'notes', 'image_url', 'date_use', 'status'];
-    
-    
+    public $timestamps = true;
+
+    protected $fillable = ['cost_id', 'ingredient_id', 'quantity', 'unit', 'unit_price', 'amount', 'notes',
+                           'need_review', 'source', 'created_user'];
+
+    public function cost()
+    {
+        return $this->belongsTo('App\Models\Cost', 'cost_id');
+    }
+
+    public function ingredient()
+    {
+        return $this->belongsTo('App\Models\Ingredient', 'ingredient_id');
+    }
 }

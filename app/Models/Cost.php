@@ -20,7 +20,7 @@ class Cost extends Model  {
      */
     public $timestamps = true;
 
-    protected $fillable = [ 'total_money', 'type', 'status', 'date_use', 'notes', 'image_url', 'content', 'cate_id', 'booking_id', 'amount', 'price', 'nguoi_chi', 'hdv_id', 'partner_id', 'city_id', 'is_fixed', 'cano_nhap', 'hoang_the', 'branch_id', 'created_user', 'updated_user','unc_type', 'time_chi_tien', 'sms_chi', 'thuc_chi', 'bank_info_id', 'xe_4t', 'image_list', 'ncc_id'];
+    protected $fillable = [ 'total_money', 'type', 'status', 'date_use', 'notes', 'image_url', 'content', 'cate_id', 'booking_id', 'amount', 'price', 'nguoi_chi', 'hdv_id', 'partner_id', 'city_id', 'is_fixed', 'cano_nhap', 'hoang_the', 'branch_id', 'created_user', 'updated_user','unc_type', 'time_chi_tien', 'sms_chi', 'thuc_chi', 'bank_info_id', 'xe_4t', 'image_list', 'ncc_id', 'detail_total', 'detail_check'];
 
     public function details()
     {

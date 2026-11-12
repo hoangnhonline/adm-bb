@@ -84,9 +84,7 @@
                   <label>Cost category<span class="red-star">*</span></label>
                   <select class="form-control select2" id="cate_id" name="cate_id">     
                       <option value="">--Chọn--</option>      
-                      @foreach($cateList as $cate)
-                      <option value="{{ $cate->id }}" {{ old('cate_id', $detail->cate_id) == $cate->id ? "selected" : "" }}>{{ $cate->name }}</option>
-                      @endforeach
+                      @include('cost._cate-options', ['selectedCate' => old('cate_id', $detail->cate_id)])
                   </select>
                 </div>             
               </div>
@@ -126,6 +124,7 @@
                     <label for="notes">Nội dung</label>
                     <textarea class="form-control" name="notes" id="notes">{!! old('notes', $detail->notes) !!}</textarea>
                   </div>
+                  @include('cost._details')
                   <div class="tinh-toan" >
                     <div class="form-group col-xs-4">
                       <label for="price">Giá</label>
@@ -142,6 +141,15 @@
                     </div>
                   </div>
                 </div>
+                 <div class="form-group" >
+                      <label>Nhà cung cấp</label>
+                      <select class="form-control select2" name="ncc_id" id="ncc_id">
+                        <option value="">--Chọn--</option>
+                        @foreach($nccList as $ncc)
+                        <option value="{{ $ncc->id }}" {{ old('ncc_id', $detail->ncc_id) == $ncc->id ? "selected" : "" }}>{{ $ncc->name }}</option>
+                        @endforeach
+                      </select>
+                  </div>
                  <div class="form-group" >
                       <label>Payer <span class="red-star">*</span></label>
                       <select class="form-control select2" name="nguoi_chi" id="nguoi_chi">
@@ -238,6 +246,7 @@
 </div>
 @stop
 @section('js')
+@include('cost._details-js')
 <script type="text/javascript">
   $(document).on('click', '#btnSaveBankAjax', function(){
       $(this).attr('disabled', 'disabled');

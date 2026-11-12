@@ -94,11 +94,7 @@
 
                   <select class="form-control select2" id="cate_id" name="cate_id">
                     <option value="">--Chọn--</option>
-                    @foreach($cateList as $cate)
-                      <option value="{{ $cate->id }}" {{ old('cate_id', $cate_id) == $cate->id ? "selected" : "" }}>
-                        {{ $cate->name }}
-                      </option>
-                    @endforeach
+                    @include('cost._cate-options', ['selectedCate' => old('cate_id', $cate_id)])
                   </select>
                 </div>
 
@@ -111,6 +107,8 @@
                   <label for="notes">Content</label>
                   <textarea class="form-control" name="notes" id="notes" rows="3">{!! old('notes') !!}</textarea>
                 </div>
+
+                @include('cost._details')
 
                 <div class="tinh-toan">
                   <div class="form-group col-md-4 col-xs-6">
@@ -280,6 +278,7 @@
 @stop
 
 @section('js')
+@include('cost._details-js')
 <script type="text/javascript">
   // Save bank account via ajax
   $(document).on('click', '#btnSaveBankAjax', function(){

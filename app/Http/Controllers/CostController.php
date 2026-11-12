@@ -15,23 +15,15 @@ use App\Models\Partner;
 use App\Models\BankInfo;
 use App\Models\Branch;
 use App\Models\NhaCungCap;
+use App\Models\Ingredient;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\User;
-use Helper, File, Session, Auth, Image, Hash;
+use Helper, File, Session, Auth, Image, Hash, DB;
 
 class CostController extends Controller
 {
 
-    public function cal(){
-       $all = Cost::all();
-       foreach($all as $a){
-            $date_use = $a->date_use;
-            foreach($a->details as $b){
-                $b->update(['date_use' => $date_use]);
-            }
-       }
-    }
     public function changeValueByColumn(Request $request){
         $id = $request->id;
         $column = $request->col;
@@ -73,6 +65,7 @@ class CostController extends Controller
         $arrSearch['status'] = $status = $request->status ?? null;
         $arrSearch['id_search'] = $id_search = $request->id_search ?? null;
         $arrSearch['ncc_id'] = $ncc_id = $request->ncc_id ?? null;
+        $arrSearch['detail_check'] = $detail_check = $request->detail_check ?? null;
         $arrSearch['branch_id'] = $branch_id = $request->branch_id ? $request->branch_id : null;
         $arrSearch['use_date_from'] = $use_date_from = $date_use = date('d/m/Y', strtotime($mindate));
         $query = Cost::where('status', '>', 0);
@@ -107,6 +100,9 @@ class CostController extends Controller
         }
         if($ncc_id){
             $query->where('ncc_id', $ncc_id);
+        }
+        if($detail_check == 1){
+            $query->where('detail_check', 1);
         }
          // if($branch_id){
          //        $arrSearch['branch_id'] = $branch_id;
@@ -379,10 +375,11 @@ class CostController extends Controller
 
         $cate_id = $request->cate_id ? $request->cate_id : null;
         $date_use = $request->date_use ? $request->date_use : null;
-        $cateList = CostType::orderBy('display_order')->get();
-        $cateListShow = CostType::where('is_show', 1)->orderBy('display_order')->get();
+        $cateList = CostType::where('status', 1)->orderBy('display_order')->get();
+        $cateListShow = CostType::where('is_show', 1)->where('status', 1)->orderBy('display_order')->get();
         
-        $nccList = NhaCungCap::get();
+        $nccList = NhaCungCap::where('status', 1)->orderBy('display_order')->orderBy('name')->get();
+        $ingredientList = Ingredient::active()->orderBy('name')->get();
         
         $partnerList = null;
         if($cate_id){
@@ -394,7 +391,7 @@ class CostController extends Controller
         $bankInfoList = BankInfo::all();
         $vietNameBanks = \App\Helpers\Helper::getVietNamBanks();
         $branchList = Branch::where('status', 1)->orderBy('display_order')->get();
-        return view('cost.create', compact('cate_id', 'date_use', 'cateList', 'month', 'partnerList', 'bankInfoList', 'vietNameBanks', 'branchList', 'nccList', 'cateListShow'));
+        return view('cost.create', compact('cate_id', 'date_use', 'cateList', 'month', 'partnerList', 'bankInfoList', 'vietNameBanks', 'branchList', 'nccList', 'cateListShow', 'ingredientList'));
     }
     public function sms(Request $request)
     {
@@ -453,11 +450,18 @@ class CostController extends Controller
         if($dataArr['nguoi_chi'] == 1){ // tien mat thi trang thai Da Thanh Toan
             $dataArr['status'] = 2;
         }
-        $arrData['created_user'] = $arrData['updated_user'] = Auth::user()->id;
+        // (sửa lỗi cũ: trước đây gán vào $arrData nên created_user không bao giờ được lưu)
+        $dataArr['created_user'] = $dataArr['updated_user'] = Auth::user()->id;
         if(isset($dataArr['image_tmp_url'])){
             $dataArr['image_list'] = json_encode($dataArr['image_tmp_url']);
         }
-        $rs = Cost::create($dataArr);
+        unset($dataArr['detail_total'], $dataArr['detail_check']);
+        $details = $request->input('details', []);
+        $rs = DB::transaction(function () use ($dataArr, $details) {
+            $cost = Cost::create($dataArr);
+            $this->saveDetails($cost, $details);
+            return $cost;
+        });
 
         Session::flash('message', 'Tạo mới thành công');
         $use_date_from = date('d/m/Y', strtotime($dataArr['date_use']));
@@ -502,7 +506,7 @@ class CostController extends Controller
         if($dataArr['nguoi_chi'] == 1){ // tien mat thi trang thai Da Thanh Toan
             $dataArr['status'] = 2;
         }
-        $arrData['updated_user'] = Auth::user()->id;
+        $dataArr['updated_user'] = Auth::user()->id;
         if(isset($dataArr['old_image'])){
             $dataArr['image_list'] = $dataArr['old_image'];
         }
@@ -511,7 +515,12 @@ class CostController extends Controller
         $new_image = isset($dataArr['image_tmp_url']) ? $dataArr['image_tmp_url'] : [];
         $image_list = array_merge($old_image, $new_image);
         $dataArr['image_list'] = json_encode($image_list);
-        $model->update($dataArr);
+        unset($dataArr['detail_total'], $dataArr['detail_check'], $dataArr['created_user']);
+        $details = $request->input('details', []);
+        DB::transaction(function () use ($model, $dataArr, $details) {
+            $model->update($dataArr);
+            $this->saveDetails($model, $details);
+        });
 
         Session::flash('message', 'Cập nhật thành công');
 
@@ -538,25 +547,35 @@ class CostController extends Controller
     {
 
         $detail = Cost::find($id);
-        $nccList = NhaCungCap::get();
+        $nccList = NhaCungCap::where('status', 1)->orWhere('id', $detail->ncc_id)->orderBy('display_order')->orderBy('name')->get();
         //$cateList = CostType::orderBy('display_order')->get();
         $partnerList = Partner::where('cost_type_id', $detail->cate_id)->get();
-        $cateList = CostType::orderBy('display_order')->get();
+        $cateList = CostType::where('status', 1)->orWhere('id', $detail->cate_id)->orderBy('display_order')->get();
+        $ingredientList = Ingredient::active()->orderBy('name')->get();
+        $details = $detail->details()->with('ingredient')->orderBy('id')->get();
 
         $bankInfoList = BankInfo::all();
         $vietNameBanks = \App\Helpers\Helper::getVietNamBanks();
         $branchList = Branch::where('status', 1)->orderBy('display_order')->get();
-        return view('cost.edit', compact( 'detail', 'cateList', 'partnerList', 'bankInfoList', 'vietNameBanks', 'branchList', 'nccList'));
+        return view('cost.edit', compact( 'detail', 'cateList', 'partnerList', 'bankInfoList', 'vietNameBanks', 'branchList', 'nccList', 'ingredientList', 'details'));
     }
     public function copy($id)
     {
 
         $detail = Cost::find($id);
-        $cateList = CostType::orderBy('display_order')->get();
+        $cateList = CostType::where('status', 1)->orderBy('display_order')->get();
         $partnerList = Partner::where('cost_type_id', $detail->cate_id)->get();
         $bankInfoList = BankInfo::all();
         $vietNameBanks = \App\Helpers\Helper::getVietNamBanks();
-        return view('cost.copy', compact( 'detail', 'cateList', 'partnerList', 'bankInfoList', 'vietNameBanks'));
+        $branchList = Branch::where('status', 1)->orderBy('display_order')->get();
+        $nccList = NhaCungCap::where('status', 1)->orderBy('display_order')->orderBy('name')->get();
+        $ingredientList = Ingredient::active()->orderBy('name')->get();
+        // Copy bill -> copy luôn dòng chi tiết (bỏ id để lưu thành dòng mới)
+        $details = $detail->details()->orderBy('id')->get()->map(function ($d) {
+            return ['ingredient_id' => $d->ingredient_id, 'quantity' => $d->quantity, 'unit' => $d->unit,
+                    'unit_price' => $d->unit_price, 'amount' => $d->amount, 'notes' => $d->notes, 'need_review' => 0];
+        });
+        return view('cost.copy', compact( 'detail', 'cateList', 'partnerList', 'bankInfoList', 'vietNameBanks', 'branchList', 'nccList', 'ingredientList', 'details'));
     }
     /**
     * Remove the specified resource from storage.
@@ -564,6 +583,205 @@ class CostController extends Controller
     * @param  int  $id
     * @return Response
     */
+    /**
+    * Lưu các dòng hàng (cost_detail) của 1 bill.
+    * - Chỉ xử lý khi form có gửi bảng chi tiết (details_submitted=1) để không xóa nhầm dữ liệu từ form khác.
+    * - Dòng có id -> cập nhật, dòng mới -> thêm, dòng bị xóa trên form -> xóa.
+    * - detail_total = tổng tiền các dòng; detail_check = 1 khi tổng dòng khác tổng bill (vẫn cho lưu).
+    */
+    private function saveDetails(Cost $cost, $rows)
+    {
+        if(request()->input('details_submitted') != 1){
+            // Form không có bảng chi tiết: giữ nguyên dòng, chỉ đối chiếu lại với Total mới
+            if($cost->detail_total !== null){
+                $cost->detail_check = ((int) $cost->detail_total != (int) $cost->total_money) ? 1 : 0;
+                $cost->save();
+            }
+            return;
+        }
+        $rows = is_array($rows) ? $rows : [];
+        $existing = $cost->details()->get()->keyBy('id');
+        $keepIds = [];
+        $sum = 0;
+        $count = 0;
+        foreach($rows as $row){
+            $ingredientId = !empty($row['ingredient_id']) ? (int) $row['ingredient_id'] : null;
+            $quantity = $this->toNumber($row['quantity'] ?? null, true);
+            $unitPrice = $this->toNumber($row['unit_price'] ?? null);
+            $amount = $this->toNumber($row['amount'] ?? null);
+            $notes = isset($row['notes']) ? trim($row['notes']) : null;
+            $unit = isset($row['unit']) ? trim($row['unit']) : null;
+            if(!$ingredientId && $quantity === null && $amount === null && !$notes){
+                continue; // dòng trống
+            }
+            if($amount === null && $quantity !== null && $unitPrice !== null){
+                $amount = (int) round($quantity * $unitPrice);
+            }
+            $data = [
+                'ingredient_id' => $ingredientId,
+                'quantity' => $quantity,
+                'unit' => $unit !== '' ? $unit : null,
+                'unit_price' => $unitPrice,
+                'amount' => $amount,
+                'notes' => $notes !== '' ? mb_substr($notes, 0, 255) : null,
+                'need_review' => !empty($row['need_review']) ? 1 : 0,
+            ];
+            $id = !empty($row['id']) ? (int) $row['id'] : null;
+            if($id && $existing->has($id)){
+                $existing[$id]->update($data);
+                $keepIds[] = $id;
+            }else{
+                $data['cost_id'] = $cost->id;
+                $data['source'] = 1;
+                $data['created_user'] = Auth::user()->id;
+                CostDetail::create($data);
+            }
+            $sum += (int) $amount;
+            $count++;
+        }
+        $deleteIds = $existing->keys()->diff($keepIds)->all();
+        if($deleteIds){
+            CostDetail::whereIn('id', $deleteIds)->delete();
+        }
+        $cost->detail_total = $count > 0 ? $sum : null;
+        $cost->detail_check = ($count > 0 && $sum != (int) $cost->total_money) ? 1 : 0;
+        $cost->save();
+    }
+
+    /**
+    * "1,5" -> 1.5 (số lượng) ; "200,000" / "200.000" -> 200000 (tiền)
+    */
+    private function toNumber($value, $decimal = false)
+    {
+        if($value === null) return null;
+        $value = trim((string) $value);
+        if($value === '') return null;
+        if($decimal){
+            $value = str_replace(' ', '', $value);
+            if(strpos($value, ',') !== false && strpos($value, '.') === false){
+                $value = str_replace(',', '.', $value);
+            }else{
+                $value = str_replace(',', '', $value);
+            }
+            return is_numeric($value) ? (float) $value : null;
+        }
+        $value = preg_replace('/[^0-9\-]/', '', $value);
+        return $value === '' || $value === '-' ? null : (int) $value;
+    }
+
+    /**
+    * Báo cáo nhập hàng theo nguyên liệu (cost_detail).
+    */
+    public function nhapHang(Request $request)
+    {
+        $from = $request->use_date_from ? $request->use_date_from : date('01/m/Y');
+        $to = $request->use_date_to ? $request->use_date_to : date('t/m/Y');
+        $fromDate = $this->toSqlDate($from) ?: date('Y-m-01');
+        $toDate = $this->toSqlDate($to) ?: date('Y-m-t');
+        if($toDate < $fromDate){
+            $toDate = $fromDate;
+            $to = $from;
+        }
+        $arrSearch = [
+            'use_date_from' => $from,
+            'use_date_to' => $to,
+            'branch_ids' => $request->branch_ids ? (array) $request->branch_ids : [],
+            'ncc_id' => $request->ncc_id ?? null,
+            'cate_id' => $request->cate_id ?? null,
+            'ingredient_id' => $request->ingredient_id ?? null,
+            'include_review' => $request->include_review ? 1 : 0,
+        ];
+
+        $base = DB::table('cost_detail as d')
+            ->join('cost as c', 'c.id', '=', 'd.cost_id')
+            ->leftJoin('ingredient as i', 'i.id', '=', 'd.ingredient_id')
+            ->where('c.status', '>', 0)
+            ->where('c.date_use', '>=', $fromDate)
+            ->where('c.date_use', '<=', $toDate);
+        if($arrSearch['branch_ids']){
+            $base->whereIn('c.branch_id', $arrSearch['branch_ids']);
+        }
+        if($arrSearch['ncc_id']){
+            $base->where('c.ncc_id', $arrSearch['ncc_id']);
+        }
+        if($arrSearch['cate_id']){
+            $base->where('i.cost_type_id', $arrSearch['cate_id']);
+        }
+        $reviewRows = (clone $base)->where('d.need_review', 1)->count();
+        if(!$arrSearch['include_review']){
+            $base->where('d.need_review', 0);
+        }
+
+        // Tổng hợp theo nguyên liệu. Số lượng chỉ cộng các dòng cùng ĐVT chuẩn của nguyên liệu.
+        $sameUnit = "(d.unit IS NULL OR d.unit = '' OR d.unit = i.unit)";
+        $items = (clone $base)
+            ->select(
+                'd.ingredient_id', 'i.name', 'i.unit', 'i.cost_type_id',
+                DB::raw("SUM(CASE WHEN $sameUnit THEN d.quantity END) as qty"),
+                DB::raw('SUM(d.amount) as amount'),
+                DB::raw("SUM(CASE WHEN $sameUnit AND d.quantity > 0 AND d.amount > 0 THEN d.amount END) as amount_has_qty"),
+                DB::raw("SUM(CASE WHEN $sameUnit AND d.quantity > 0 AND d.amount > 0 THEN d.quantity END) as qty_has_amount"),
+                DB::raw('COUNT(DISTINCT d.cost_id) as bills'),
+                DB::raw('COUNT(*) as line_count'),
+                DB::raw('SUM(d.need_review) as review_lines')
+            )
+            ->groupBy('d.ingredient_id', 'i.name', 'i.unit', 'i.cost_type_id')
+            ->orderBy('amount', 'desc')
+            ->get();
+        $totalAmount = $items->sum('amount');
+
+        // Chi tiết từng dòng khi chọn 1 nguyên liệu ('none' = dòng chưa gắn nguyên liệu)
+        $lines = collect();
+        if($arrSearch['ingredient_id']){
+            $q = (clone $base)->select('d.*', 'c.date_use', 'c.branch_id', 'c.ncc_id', 'c.total_money', 'c.detail_check', 'i.name as ingredient_name', 'i.unit as ingredient_unit');
+            if($arrSearch['ingredient_id'] == 'none'){
+                $q->whereNull('d.ingredient_id');
+            }else{
+                $q->where('d.ingredient_id', $arrSearch['ingredient_id']);
+            }
+            $lines = $q->orderBy('c.date_use')->orderBy('d.cost_id')->get();
+        }
+
+        // Độ phủ dữ liệu: bill nhóm "Giá vốn" trong kỳ có / chưa có chi tiết
+        $cover = DB::table('cost as c')
+            ->join('cost_type as t', 't.id', '=', 'c.cate_id')
+            ->where('c.status', '>', 0)
+            ->where('t.group_name', 'like', 'Giá vốn%')
+            ->where('c.date_use', '>=', $fromDate)
+            ->where('c.date_use', '<=', $toDate);
+        if($arrSearch['branch_ids']){
+            $cover->whereIn('c.branch_id', $arrSearch['branch_ids']);
+        }
+        if($arrSearch['ncc_id']){
+            $cover->where('c.ncc_id', $arrSearch['ncc_id']);
+        }
+        $coverage = $cover->select(
+                DB::raw('COUNT(*) as bills'),
+                DB::raw('SUM(c.total_money) as money'),
+                DB::raw('SUM(CASE WHEN EXISTS (SELECT 1 FROM cost_detail x WHERE x.cost_id = c.id) THEN 1 ELSE 0 END) as bills_detail'),
+                DB::raw('SUM(CASE WHEN EXISTS (SELECT 1 FROM cost_detail x WHERE x.cost_id = c.id) THEN c.total_money ELSE 0 END) as money_detail'),
+                DB::raw('SUM(c.detail_check) as bills_check')
+            )->first();
+
+        $cateList = CostType::where('status', 1)->orderBy('display_order')->get();
+        $cateArr = $cateList->pluck('name', 'id');
+        $branchList = Branch::where('status', 1)->orderBy('display_order')->get();
+        $beachArr = $branchList->pluck('name', 'id');
+        $nccList = NhaCungCap::where('status', 1)->orderBy('display_order')->orderBy('name')->get();
+        $nccArr = NhaCungCap::pluck('name', 'id');
+        $ingredientList = Ingredient::orderBy('name')->get();
+
+        return view('cost.nhap-hang', compact('items', 'lines', 'totalAmount', 'reviewRows', 'coverage', 'arrSearch',
+            'cateList', 'cateArr', 'branchList', 'beachArr', 'nccList', 'nccArr', 'ingredientList'));
+    }
+
+    private function toSqlDate($dmy)
+    {
+        $tmp = explode('/', (string) $dmy);
+        if(count($tmp) != 3 || !checkdate((int) $tmp[1], (int) $tmp[0], (int) $tmp[2])) return null;
+        return sprintf('%04d-%02d-%02d', $tmp[2], $tmp[1], $tmp[0]);
+    }
+
     public function destroy($id)
     {
         // delete
