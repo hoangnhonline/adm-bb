@@ -51,7 +51,7 @@ class UserController extends Controller
         ];
         if (Auth::validate($dataArr)) {
             $dataArr['status'] = 1;
-            if (Auth::attempt($dataArr)) {                    
+            if (Auth::attempt($dataArr, true)) { // luôn ghi nhớ đăng nhập: không hết hạn cho đến khi Logout                    
                 return redirect()->route('w-articles.index'); 
             }else{
                 Session::flash('error', 'Tài khoản đã bị khóa.'); 

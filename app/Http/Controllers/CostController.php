@@ -16,6 +16,7 @@ use App\Models\BankInfo;
 use App\Models\Branch;
 use App\Models\NhaCungCap;
 use App\Models\Ingredient;
+use App\Services\CostDetailService;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\User;
@@ -599,74 +600,12 @@ class CostController extends Controller
             }
             return;
         }
-        $rows = is_array($rows) ? $rows : [];
-        $existing = $cost->details()->get()->keyBy('id');
-        $keepIds = [];
-        $sum = 0;
-        $count = 0;
-        foreach($rows as $row){
-            $ingredientId = !empty($row['ingredient_id']) ? (int) $row['ingredient_id'] : null;
-            $quantity = $this->toNumber($row['quantity'] ?? null, true);
-            $unitPrice = $this->toNumber($row['unit_price'] ?? null);
-            $amount = $this->toNumber($row['amount'] ?? null);
-            $notes = isset($row['notes']) ? trim($row['notes']) : null;
-            $unit = isset($row['unit']) ? trim($row['unit']) : null;
-            if(!$ingredientId && $quantity === null && $amount === null && !$notes){
-                continue; // dòng trống
-            }
-            if($amount === null && $quantity !== null && $unitPrice !== null){
-                $amount = (int) round($quantity * $unitPrice);
-            }
-            $data = [
-                'ingredient_id' => $ingredientId,
-                'quantity' => $quantity,
-                'unit' => $unit !== '' ? $unit : null,
-                'unit_price' => $unitPrice,
-                'amount' => $amount,
-                'notes' => $notes !== '' ? mb_substr($notes, 0, 255) : null,
-                'need_review' => !empty($row['need_review']) ? 1 : 0,
-            ];
-            $id = !empty($row['id']) ? (int) $row['id'] : null;
-            if($id && $existing->has($id)){
-                $existing[$id]->update($data);
-                $keepIds[] = $id;
-            }else{
-                $data['cost_id'] = $cost->id;
-                $data['source'] = 1;
-                $data['created_user'] = Auth::user()->id;
-                CostDetail::create($data);
-            }
-            $sum += (int) $amount;
-            $count++;
-        }
-        $deleteIds = $existing->keys()->diff($keepIds)->all();
-        if($deleteIds){
-            CostDetail::whereIn('id', $deleteIds)->delete();
-        }
-        $cost->detail_total = $count > 0 ? $sum : null;
-        $cost->detail_check = ($count > 0 && $sum != (int) $cost->total_money) ? 1 : 0;
-        $cost->save();
+        CostDetailService::saveRows($cost, $rows, Auth::user()->id, 1);
     }
 
-    /**
-    * "1,5" -> 1.5 (số lượng) ; "200,000" / "200.000" -> 200000 (tiền)
-    */
     private function toNumber($value, $decimal = false)
     {
-        if($value === null) return null;
-        $value = trim((string) $value);
-        if($value === '') return null;
-        if($decimal){
-            $value = str_replace(' ', '', $value);
-            if(strpos($value, ',') !== false && strpos($value, '.') === false){
-                $value = str_replace(',', '.', $value);
-            }else{
-                $value = str_replace(',', '', $value);
-            }
-            return is_numeric($value) ? (float) $value : null;
-        }
-        $value = preg_replace('/[^0-9\-]/', '', $value);
-        return $value === '' || $value === '-' ? null : (int) $value;
+        return CostDetailService::toNumber($value, $decimal);
     }
 
     /**

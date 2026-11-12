@@ -445,6 +445,10 @@ Route::group([
         Route::get('{id}/destroy', ['as' => 'cost.destroy', 'uses' => 'CostController@destroy']);  
         Route::get('/change-value', ['as' => 'cost.change-value-by-column', 'uses' => 'CostController@changeValueByColumn']);
         Route::get('/ajax-cost-type', ['as' => 'cost.ajax-cost-type', 'uses' => 'CostController@ajaxGetCostType']);
+        // API nhập chi phí nhanh (Claude gọi từ trình duyệt đã đăng nhập)
+        Route::get('/api/master-data', ['as' => 'cost.api.master-data', 'uses' => 'CostApiController@masterData']);
+        Route::post('/api/check-duplicate', ['as' => 'cost.api.check-duplicate', 'uses' => 'CostApiController@checkDuplicate']);
+        Route::post('/api/store-batch', ['as' => 'cost.api.store-batch', 'uses' => 'CostApiController@storeBatch']);
     }); 
     Route::group(['prefix' => 'grandworld-schedule'], function () {        
         Route::get('/', ['as' => 'grandworld-schedule.index', 'uses' => 'GrandworldScheduleController@index']);

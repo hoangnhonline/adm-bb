@@ -201,6 +201,7 @@
                   <td>
                     @if($ln->need_review) <span class="label label-warning">Cần KT</span> @endif
                     @if($ln->source == 2) <span class="label label-default" title="Bóc tách từ ghi chú cũ">Ghi chú cũ</span> @endif
+                    @if($ln->source == 3) <span class="label label-info" title="Đọc từ ảnh hóa đơn">Đọc từ ảnh</span> @endif
                   </td>
                 </tr>
               @empty
