@@ -22,7 +22,7 @@ use Auth, DB;
  */
 class CostApiController extends Controller
 {
-    const DEFAULT_NGUOI_CHI = 1; // Tiền mặt
+    const DEFAULT_NGUOI_CHI = 2; // Tiền mặt (collecter id 2)
     const DEFAULT_STATUS = 2;    // Paid
     const SOURCE_API = 2;        // cost_detail.source: nhập qua API
     const MAX_IMAGE_BYTES = 8388608; // 8MB / ảnh
@@ -115,7 +115,7 @@ class CostApiController extends Controller
                     $errors[] = "$label: nghi trùng với cost id ".implode(', ', array_column($dups, 'id'))." (gửi allow_duplicate=true nếu vẫn muốn lưu)";
                 }
             }
-            if($nguoiChi == 1){ // tiền mặt thì luôn Đã thanh toán (giống CostController@store)
+            if(in_array($nguoiChi, [1, self::DEFAULT_NGUOI_CHI])){ // tiền mặt thì luôn Đã thanh toán
                 $status = 2;
             }
             $prepared[] = [
@@ -157,10 +157,13 @@ class CostApiController extends Controller
                     $data = $p['data'];
                     $data['created_user'] = $data['updated_user'] = $userId;
                     if($paths){
+                        // Giống bill nhập tay: ảnh chính ở image_url (đường dẫn tương đối với uploads/)
                         $data['image_url'] = $paths[0];
-                        $data['image_list'] = json_encode(array_map(function ($path) {
-                            return $this->imageListValue($path);
-                        }, $paths));
+                        if(count($paths) > 1){
+                            $data['image_list'] = json_encode(array_map(function ($path) {
+                                return $this->imageListValue($path);
+                            }, $paths));
+                        }
                     }
                     $cost = Cost::create($data);
                     CostDetailService::saveRows($cost, $p['details'], $userId, self::SOURCE_API);
@@ -219,10 +222,10 @@ class CostApiController extends Controller
         return [$bin, $map[$info['mime']]];
     }
 
-    /** Lưu ảnh vào public/uploads/cost/Y/m/d/, trả về đường dẫn tương đối với uploads/ */
+    /** Lưu ảnh vào public/uploads/Y/m/d/, trả về đường dẫn tương đối với uploads/ */
     private function saveImage($img)
     {
-        $dir = 'cost/'.date('Y/m/d').'/';
+        $dir = date('Y/m/d').'/'; // cùng thư mục với ảnh upload từ form (uploads/Y/m/d/)
         $full = config('plantotravel.upload_path').$dir;
         if(!is_dir($full)){
             mkdir($full, 0777, true);
