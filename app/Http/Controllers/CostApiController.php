@@ -19,6 +19,9 @@ use Auth, DB;
  *  GET  /cost/api/master-data      danh mục để map ID + csrf_token
  *  POST /cost/api/check-duplicate  kiểm tra bill trùng (cùng ngày + cùng tổng tiền)
  *  POST /cost/api/store-batch      lưu nhiều bill (all-or-nothing)
+ *  GET  /cost/bill-upload          trang kéo thả ảnh bill -> uploads/bill-inbox/
+ *  POST /cost/api/upload-bill      nhận ảnh bill (multipart files[])
+ *  GET  /cost/api/inbox            danh sách ảnh chờ nhập; store-batch nhận "inbox_files":["tên file"]
  */
 class CostApiController extends Controller
 {
@@ -26,6 +29,55 @@ class CostApiController extends Controller
     const DEFAULT_STATUS = 2;    // Paid
     const SOURCE_API = 2;        // cost_detail.source: nhập qua API
     const MAX_IMAGE_BYTES = 8388608; // 8MB / ảnh
+    const INBOX_DIR = 'bill-inbox/'; // ảnh bill chờ nhập, nằm trong public/uploads/
+
+    /** Trang upload bill (kéo thả ảnh) */
+    public function billUpload()
+    {
+        return view('cost.bill-upload');
+    }
+
+    /** POST multipart files[]: lưu ảnh vào uploads/bill-inbox/ */
+    public function uploadBill(Request $request)
+    {
+        $files = $request->file('files', []);
+        $saved = [];
+        $errors = [];
+        $map = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        $dir = config('plantotravel.upload_path').self::INBOX_DIR;
+        if(!is_dir($dir)){
+            mkdir($dir, 0775, true);
+        }
+        foreach((array) $files as $file){
+            if(!$file || !$file->isValid()){
+                $errors[] = 'File upload lỗi';
+                continue;
+            }
+            $info = @getimagesize($file->getRealPath());
+            if(!$info || !isset($map[$info['mime']]) || $file->getSize() > self::MAX_IMAGE_BYTES){
+                $errors[] = $file->getClientOriginalName().': chỉ nhận jpg/png/webp, tối đa 8MB';
+                continue;
+            }
+            $name = date('Ymd-His').'-'.substr(md5(uniqid('', true)), 0, 6).'.'.$map[$info['mime']];
+            $file->move($dir, $name);
+            $saved[] = ['name' => $name, 'url' => config('plantotravel.upload_url').self::INBOX_DIR.$name];
+        }
+        return response()->json(['ok' => count($errors) == 0, 'saved' => $saved, 'errors' => $errors]);
+    }
+
+    /** GET: danh sách ảnh bill đang chờ nhập (cũ nhất trước) */
+    public function inbox()
+    {
+        $dir = config('plantotravel.upload_path').self::INBOX_DIR;
+        $list = [];
+        foreach(is_dir($dir) ? scandir($dir) : [] as $f){
+            if(!preg_match('/^[\w\-]+\.(jpg|png|webp)$/', $f)) continue;
+            $list[] = ['name' => $f, 'url' => config('plantotravel.upload_url').self::INBOX_DIR.$f,
+                       'size' => filesize($dir.$f), 'uploaded_at' => date('Y-m-d H:i:s', filemtime($dir.$f))];
+        }
+        usort($list, function ($a, $b) { return strcmp($a['name'], $b['name']); });
+        return response()->json(['items' => $list]);
+    }
 
     public function masterData()
     {
@@ -109,6 +161,15 @@ class CostApiController extends Controller
                     $images[] = ['name' => $img['name'] ?? 'bill', 'bin' => $bin[0], 'ext' => $bin[1]];
                 }
             }
+            $inboxFiles = [];
+            foreach((array) ($c['inbox_files'] ?? []) as $f){
+                $f = basename((string) $f);
+                if(!preg_match('/^[\w\-]+\.(jpg|png|webp)$/', $f) || !is_file(config('plantotravel.upload_path').self::INBOX_DIR.$f)){
+                    $errors[] = "$label: không thấy ảnh $f trong bill-inbox";
+                }else{
+                    $inboxFiles[] = $f;
+                }
+            }
             if($date && $total && empty($c['allow_duplicate'])){
                 $dups = $this->findDuplicates($date, $total);
                 if($dups){
@@ -137,6 +198,7 @@ class CostApiController extends Controller
                 ],
                 'details' => (array) ($c['details'] ?? []),
                 'images' => $images,
+                'inbox_files' => $inboxFiles,
             ];
         }
         if($errors){
@@ -146,13 +208,17 @@ class CostApiController extends Controller
         // 2. Ghi ảnh + DB
         $userId = Auth::user()->id;
         $savedFiles = [];
+        $movedFiles = [];
         try{
-            $ids = DB::transaction(function () use ($prepared, $userId, &$savedFiles) {
+            $ids = DB::transaction(function () use ($prepared, $userId, &$savedFiles, &$movedFiles) {
                 $ids = [];
                 foreach($prepared as $p){
                     $paths = [];
                     foreach($p['images'] as $img){
                         $paths[] = $savedFiles[] = $this->saveImage($img);
+                    }
+                    foreach($p['inbox_files'] as $f){
+                        $paths[] = $this->moveInboxFile($f, $movedFiles);
                     }
                     $data = $p['data'];
                     $data['created_user'] = $data['updated_user'] = $userId;
@@ -176,6 +242,9 @@ class CostApiController extends Controller
         }catch(\Exception $e){
             foreach($savedFiles as $f){
                 @unlink(config('plantotravel.upload_path').$f);
+            }
+            foreach($movedFiles as $m){ // trả ảnh về bill-inbox
+                @rename(config('plantotravel.upload_path').$m[1], config('plantotravel.upload_path').$m[0]);
             }
             return response()->json(['ok' => false, 'errors' => ['Lỗi khi lưu: '.$e->getMessage()]], 500);
         }
@@ -236,6 +305,23 @@ class CostApiController extends Controller
             throw new \Exception('Không ghi được ảnh '.$file);
         }
         return $dir.$file;
+    }
+
+    /** Chuyển ảnh từ uploads/bill-inbox/ sang uploads/Y/m/d/, trả về đường dẫn tương đối với uploads/ */
+    private function moveInboxFile($name, &$movedFiles)
+    {
+        $dir = date('Y/m/d').'/';
+        $full = config('plantotravel.upload_path').$dir;
+        if(!is_dir($full)){
+            mkdir($full, 0775, true);
+        }
+        $from = self::INBOX_DIR.$name;
+        $to = $dir.'bill-'.$name;
+        if(!@rename(config('plantotravel.upload_path').$from, config('plantotravel.upload_path').$to)){
+            throw new \Exception('Không chuyển được ảnh '.$name);
+        }
+        $movedFiles[] = [$from, $to];
+        return $to;
     }
 
     /** Định dạng phần tử trong cost.image_list (giống ảnh upload từ form, hiển thị bằng Helper::showImage) */

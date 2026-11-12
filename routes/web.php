@@ -450,6 +450,9 @@ Route::group([
         Route::get('/api/master-data', ['as' => 'cost.api.master-data', 'uses' => 'CostApiController@masterData']);
         Route::post('/api/check-duplicate', ['as' => 'cost.api.check-duplicate', 'uses' => 'CostApiController@checkDuplicate']);
         Route::post('/api/store-batch', ['as' => 'cost.api.store-batch', 'uses' => 'CostApiController@storeBatch']);
+        Route::get('/bill-upload', ['as' => 'cost.bill-upload', 'uses' => 'CostApiController@billUpload']);
+        Route::post('/api/upload-bill', ['as' => 'cost.api.upload-bill', 'uses' => 'CostApiController@uploadBill']);
+        Route::get('/api/inbox', ['as' => 'cost.api.inbox', 'uses' => 'CostApiController@inbox']);
     }); 
     Route::group(['prefix' => 'grandworld-schedule'], function () {        
         Route::get('/', ['as' => 'grandworld-schedule.index', 'uses' => 'GrandworldScheduleController@index']);

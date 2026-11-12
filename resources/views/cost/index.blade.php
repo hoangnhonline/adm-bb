@@ -22,6 +22,7 @@
       @endif
       @if($notNH)
       <a href="{{ route('cost.create',['month' => $month, 'cate_id' => $cate_id]) }}" class="btn btn-info btn-sm" style="margin-bottom:5px">Add new</a>
+      <a href="{{ route('cost.bill-upload') }}" class="btn btn-success btn-sm" style="margin-bottom:5px">Upload bill</a>
       <a href="{{ route('cost.nhap-hang') }}" class="btn btn-success btn-sm" style="margin-bottom:5px"><i class="fa fa-bar-chart"></i> Thống kê nhập hàng</a>
       @endif
       <div class="panel panel-default">
