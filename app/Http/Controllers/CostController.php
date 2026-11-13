@@ -613,15 +613,52 @@ class CostController extends Controller
     */
     public function nhapHang(Request $request)
     {
-        $from = $request->use_date_from ? $request->use_date_from : date('01/m/Y');
-        $to = $request->use_date_to ? $request->use_date_to : date('t/m/Y');
-        $fromDate = $this->toSqlDate($from) ?: date('Y-m-01');
-        $toDate = $this->toSqlDate($to) ?: date('Y-m-t');
-        if($toDate < $fromDate){
-            $toDate = $fromDate;
-            $to = $from;
+        // Kỳ thống kê: week | month | year | custom (custom = ô từ ngày - đến ngày)
+        $period = in_array($request->period, ['week', 'month', 'year', 'custom']) ? $request->period
+            : ($request->use_date_from || $request->use_date_to ? 'custom' : 'month');
+        $anchor = $request->date && strtotime($request->date) ? strtotime($request->date) : time();
+        $prevAnchor = $nextAnchor = null;
+        if($period == 'week'){
+            $fromDate = date('Y-m-d', strtotime('monday this week', $anchor));
+            $toDate = date('Y-m-d', strtotime($fromDate.' +6 days'));
+            $prevFrom = date('Y-m-d', strtotime($fromDate.' -7 days'));
+            $prevTo = date('Y-m-d', strtotime($fromDate.' -1 day'));
+            $periodLabel = 'Tuần '.date('d/m', strtotime($fromDate)).' - '.date('d/m/Y', strtotime($toDate));
+            $prevAnchor = $prevFrom;
+            $nextAnchor = date('Y-m-d', strtotime($fromDate.' +7 days'));
+        }elseif($period == 'month'){
+            $fromDate = date('Y-m-01', $anchor);
+            $toDate = date('Y-m-t', $anchor);
+            $prevFrom = date('Y-m-01', strtotime($fromDate.' -1 month'));
+            $prevTo = date('Y-m-t', strtotime($prevFrom));
+            $periodLabel = 'Tháng '.date('m/Y', $anchor);
+            $prevAnchor = $prevFrom;
+            $nextAnchor = date('Y-m-01', strtotime($fromDate.' +1 month'));
+        }elseif($period == 'year'){
+            $fromDate = date('Y-01-01', $anchor);
+            $toDate = date('Y-12-31', $anchor);
+            $prevFrom = date('Y-01-01', strtotime($fromDate.' -1 year'));
+            $prevTo = date('Y-12-31', strtotime($prevFrom));
+            $periodLabel = 'Năm '.date('Y', $anchor);
+            $prevAnchor = $prevFrom;
+            $nextAnchor = date('Y-01-01', strtotime($fromDate.' +1 year'));
+        }else{
+            $fromDate = $this->toSqlDate($request->use_date_from ?: date('01/m/Y')) ?: date('Y-m-01');
+            $toDate = $this->toSqlDate($request->use_date_to ?: date('t/m/Y')) ?: date('Y-m-t');
+            if($toDate < $fromDate){
+                $toDate = $fromDate;
+            }
+            $days = (int) round((strtotime($toDate) - strtotime($fromDate)) / 86400) + 1;
+            $prevFrom = date('Y-m-d', strtotime($fromDate.' -'.$days.' days'));
+            $prevTo = date('Y-m-d', strtotime($fromDate.' -1 day'));
+            $periodLabel = date('d/m/Y', strtotime($fromDate)).' - '.date('d/m/Y', strtotime($toDate));
         }
+        $from = date('d/m/Y', strtotime($fromDate));
+        $to = date('d/m/Y', strtotime($toDate));
+        $sort = $request->sort == 'qty' ? 'qty' : 'amount';
         $arrSearch = [
+            'period' => $period,
+            'sort' => $sort,
             'use_date_from' => $from,
             'use_date_to' => $to,
             'branch_ids' => $request->branch_ids ? (array) $request->branch_ids : [],
@@ -631,21 +668,25 @@ class CostController extends Controller
             'include_review' => $request->include_review ? 1 : 0,
         ];
 
-        $base = DB::table('cost_detail as d')
-            ->join('cost as c', 'c.id', '=', 'd.cost_id')
-            ->leftJoin('ingredient as i', 'i.id', '=', 'd.ingredient_id')
-            ->where('c.status', '>', 0)
-            ->where('c.date_use', '>=', $fromDate)
-            ->where('c.date_use', '<=', $toDate);
-        if($arrSearch['branch_ids']){
-            $base->whereIn('c.branch_id', $arrSearch['branch_ids']);
-        }
-        if($arrSearch['ncc_id']){
-            $base->where('c.ncc_id', $arrSearch['ncc_id']);
-        }
-        if($arrSearch['cate_id']){
-            $base->where('i.cost_type_id', $arrSearch['cate_id']);
-        }
+        $makeBase = function ($f, $t) use ($arrSearch) {
+            $q = DB::table('cost_detail as d')
+                ->join('cost as c', 'c.id', '=', 'd.cost_id')
+                ->leftJoin('ingredient as i', 'i.id', '=', 'd.ingredient_id')
+                ->where('c.status', '>', 0)
+                ->where('c.date_use', '>=', $f)
+                ->where('c.date_use', '<=', $t);
+            if($arrSearch['branch_ids']){
+                $q->whereIn('c.branch_id', $arrSearch['branch_ids']);
+            }
+            if($arrSearch['ncc_id']){
+                $q->where('c.ncc_id', $arrSearch['ncc_id']);
+            }
+            if($arrSearch['cate_id']){
+                $q->where('i.cost_type_id', $arrSearch['cate_id']);
+            }
+            return $q;
+        };
+        $base = $makeBase($fromDate, $toDate);
         $reviewRows = (clone $base)->where('d.need_review', 1)->count();
         if(!$arrSearch['include_review']){
             $base->where('d.need_review', 0);
@@ -667,7 +708,25 @@ class CostController extends Controller
             ->groupBy('d.ingredient_id', 'i.name', 'i.unit', 'i.cost_type_id')
             ->orderBy('amount', 'desc')
             ->get();
+        if($sort == 'qty'){
+            $items = $items->sortByDesc(function ($it) { return [(float) $it->qty, (float) $it->amount]; })->values();
+        }
         $totalAmount = $items->sum('amount');
+
+        // Kỳ trước (cùng bộ lọc) để so sánh
+        $prevBase = $makeBase($prevFrom, $prevTo);
+        if(!$arrSearch['include_review']){
+            $prevBase->where('d.need_review', 0);
+        }
+        $prevMap = [];
+        foreach($prevBase->select('d.ingredient_id',
+                DB::raw("SUM(CASE WHEN $sameUnit THEN d.quantity END) as qty"),
+                DB::raw('SUM(d.amount) as amount'))
+            ->groupBy('d.ingredient_id')->get() as $p){
+            $prevMap[$p->ingredient_id ?: 'none'] = $p;
+        }
+        $prevTotal = 0;
+        foreach($prevMap as $p){ $prevTotal += (float) $p->amount; }
 
         // Chi tiết từng dòng khi chọn 1 nguyên liệu ('none' = dòng chưa gắn nguyên liệu)
         $lines = collect();
@@ -711,7 +770,8 @@ class CostController extends Controller
         $ingredientList = Ingredient::orderBy('name')->get();
 
         return view('cost.nhap-hang', compact('items', 'lines', 'totalAmount', 'reviewRows', 'coverage', 'arrSearch',
-            'cateList', 'cateArr', 'branchList', 'beachArr', 'nccList', 'nccArr', 'ingredientList'));
+            'cateList', 'cateArr', 'branchList', 'beachArr', 'nccList', 'nccArr', 'ingredientList',
+            'period', 'periodLabel', 'prevAnchor', 'nextAnchor', 'prevFrom', 'prevTo', 'prevMap', 'prevTotal', 'sort', 'fromDate'));
     }
 
     /**

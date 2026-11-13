@@ -16,7 +16,32 @@
       <div class="panel panel-default">
         <div class="panel-heading"><h3 class="panel-title">Bộ lọc</h3></div>
         <div class="panel-body">
+          @php
+            $navParams = array_merge($arrSearch, ['ingredient_id' => null, 'use_date_from' => null, 'use_date_to' => null]);
+            $periodNames = ['week' => 'Tuần', 'month' => 'Tháng', 'year' => 'Năm', 'custom' => 'Tùy chọn'];
+          @endphp
+          <div style="margin-bottom:10px">
+            <div class="btn-group">
+              @foreach(['week', 'month', 'year'] as $p)
+                <a href="{{ route('cost.nhap-hang', array_merge($navParams, ['period' => $p, 'date' => null])) }}" class="btn btn-sm {{ $period == $p ? 'btn-primary' : 'btn-default' }}">{{ $periodNames[$p] }}</a>
+              @endforeach
+              <span class="btn btn-sm {{ $period == 'custom' ? 'btn-primary' : 'btn-default' }}" style="cursor:default">Tùy chọn (chọn ngày bên dưới)</span>
+            </div>
+            <span style="font-size:16px;margin-left:10px;vertical-align:middle">
+              @if($prevAnchor)
+                <a href="{{ route('cost.nhap-hang', array_merge($navParams, ['period' => $period, 'date' => $prevAnchor])) }}" class="btn btn-default btn-xs" title="Kỳ trước"><i class="fa fa-chevron-left"></i></a>
+              @endif
+              <b>{{ $periodLabel }}</b>
+              @if($nextAnchor)
+                <a href="{{ route('cost.nhap-hang', array_merge($navParams, ['period' => $period, 'date' => $nextAnchor])) }}" class="btn btn-default btn-xs" title="Kỳ sau"><i class="fa fa-chevron-right"></i></a>
+              @endif
+            </span>
+            <span class="text-muted" style="margin-left:10px">So với kỳ trước: {{ date('d/m/Y', strtotime($prevFrom)) }} - {{ date('d/m/Y', strtotime($prevTo)) }}</span>
+          </div>
           <form class="form-inline" role="form" method="GET" action="{{ route('cost.nhap-hang') }}" id="searchForm">
+            <input type="hidden" name="period" id="f_period" value="{{ $period }}">
+            <input type="hidden" name="date" value="{{ $period != 'custom' ? $fromDate : '' }}">
+            <input type="hidden" name="sort" value="{{ $sort }}">
             <div class="form-group">
               <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_from" placeholder="Từ ngày" value="{{ $arrSearch['use_date_from'] }}" style="width:110px">
             </div>
@@ -96,6 +121,25 @@
         </div>
       </div>
 
+      {{-- Top 10 --}}
+      @php
+        $top = $items->filter(function ($it) { return $it->ingredient_id; })->take(10)->map(function ($it) {
+          return ['name' => $it->name, 'unit' => $it->unit, 'qty' => (float) $it->qty, 'amount' => (float) $it->amount];
+        })->values();
+        $diffTotal = $prevTotal > 0 ? round(($totalAmount - $prevTotal) / $prevTotal * 100, 1) : null;
+      @endphp
+      @if($top->count())
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <h3 class="box-title">Top 10 nguyên liệu nhập nhiều nhất theo {{ $sort == 'qty' ? 'số lượng' : 'tiền' }} – {{ $periodLabel }}</h3>
+          @if($diffTotal !== null)
+            <span style="margin-left:10px" class="{{ $diffTotal >= 0 ? 'text-red' : 'text-green' }}">Tổng tiền nhập {{ $diffTotal >= 0 ? '▲' : '▼' }} {{ abs($diffTotal) }}% so với kỳ trước ({{ number_format($prevTotal) }})</span>
+          @endif
+        </div>
+        <div class="box-body"><div id="topChart" style="height:{{ 60 + $top->count() * 32 }}px"></div></div>
+      </div>
+      @endif
+
       {{-- Tổng hợp theo nguyên liệu --}}
       <div class="box">
         <div class="box-header with-border">
@@ -111,12 +155,15 @@
                 <th style="width:1%">#</th>
                 <th>Nguyên liệu</th>
                 <th>Nhóm</th>
-                <th class="text-right">Số lượng</th>
+                <th class="text-right"><a href="{{ route('cost.nhap-hang', array_merge($arrSearch, ['ingredient_id' => null, 'sort' => 'qty', 'date' => $period != 'custom' ? $fromDate : null])) }}">Số lượng {!! $sort == 'qty' ? '▼' : '' !!}</a></th>
                 <th>ĐVT</th>
                 <th class="text-right">Đơn giá TB</th>
-                <th class="text-right">Tiền</th>
+                <th class="text-right"><a href="{{ route('cost.nhap-hang', array_merge($arrSearch, ['ingredient_id' => null, 'sort' => 'amount', 'date' => $period != 'custom' ? $fromDate : null])) }}">Tiền {!! $sort == 'amount' ? '▼' : '' !!}</a></th>
                 <th class="text-right">% tiền</th>
-                <th class="text-center">Số bill</th>
+                <th class="text-center">Số lần nhập</th>
+                <th class="text-right">SL kỳ trước</th>
+                <th class="text-right">Tiền kỳ trước</th>
+                <th class="text-right">± tiền</th>
                 <th class="text-center">Dòng cần KT</th>
               </tr>
             </thead>
@@ -125,6 +172,9 @@
                 @php
                   $avg = ($it->qty_has_amount ?? 0) > 0 ? $it->amount_has_qty / $it->qty_has_amount : null;
                   $ingKey = $it->ingredient_id ?: 'none';
+                  $pv = $prevMap[$ingKey] ?? null;
+                  $pvAmount = $pv ? (float) $pv->amount : 0;
+                  $diffPct = $pvAmount > 0 ? round(($it->amount - $pvAmount) / $pvAmount * 100, 1) : null;
                 @endphp
                 <tr>
                   <td>{{ $k + 1 }}</td>
@@ -143,10 +193,19 @@
                   <td class="text-right"><b>{{ number_format($it->amount) }}</b></td>
                   <td class="text-right">{{ $totalAmount > 0 ? number_format($it->amount / $totalAmount * 100, 1) : 0 }}%</td>
                   <td class="text-center">{{ $it->bills }}</td>
+                  <td class="text-right">{{ $pv && $pv->qty !== null ? rtrim(rtrim(number_format($pv->qty, 2), '0'), '.') : '' }}</td>
+                  <td class="text-right">{{ $pv ? number_format($pvAmount) : '' }}</td>
+                  <td class="text-right">
+                    @if($diffPct === null)
+                      <span class="label label-info">Mới</span>
+                    @else
+                      <span class="{{ $diffPct >= 0 ? 'text-red' : 'text-green' }}">{{ $diffPct >= 0 ? '▲' : '▼' }} {{ abs($diffPct) }}%</span>
+                    @endif
+                  </td>
                   <td class="text-center">{!! $it->review_lines > 0 ? '<span class="label label-warning">'.$it->review_lines.'</span>' : '' !!}</td>
                 </tr>
               @empty
-                <tr><td colspan="10" class="text-center">Chưa có dữ liệu chi tiết hàng trong kỳ này.</td></tr>
+                <tr><td colspan="13" class="text-center">Chưa có dữ liệu chi tiết hàng trong kỳ này.</td></tr>
               @endforelse
             </tbody>
             @if($items->count())
@@ -155,6 +214,8 @@
                 <th colspan="6" class="text-right">Tổng</th>
                 <th class="text-right">{{ number_format($totalAmount) }}</th>
                 <th colspan="3"></th>
+                <th class="text-right">{{ number_format($prevTotal) }}</th>
+                <th></th>
               </tr>
             </tfoot>
             @endif
@@ -234,8 +295,30 @@
 </div>
 @stop
 @section('js')
+@if($top->count())
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script type="text/javascript">
+(function(){
+  var data = @json($top);
+  var byQty = {{ $sort == 'qty' ? 'true' : 'false' }};
+  Highcharts.chart('topChart', {
+    chart: { type: 'bar' }, title: { text: null }, credits: { enabled: false }, legend: { enabled: false },
+    xAxis: { categories: data.map(function(r){ return r.name + (byQty && r.unit ? ' (' + r.unit + ')' : ''); }), title: { text: null } },
+    yAxis: { title: { text: byQty ? 'Số lượng' : 'Tiền nhập (đ)' } },
+    tooltip: { formatter: function(){ var r = data[this.point.index];
+      return '<b>' + r.name + '</b><br>SL: ' + Highcharts.numberFormat(r.qty, 2, ',', '.') + ' ' + (r.unit || '') +
+             '<br>Tiền: ' + Highcharts.numberFormat(r.amount, 0, ',', '.') + ' đ'; } },
+    plotOptions: { bar: { dataLabels: { enabled: true, formatter: function(){ return Highcharts.numberFormat(this.y, byQty ? 1 : 0, ',', '.'); } } } },
+    series: [{ color: '#3c8dbc', data: data.map(function(r){ return byQty ? r.qty : r.amount; }) }]
+  });
+})();
+</script>
+@endif
 <script type="text/javascript">
   $(document).ready(function () {
+    $('#searchForm input[name="use_date_from"], #searchForm input[name="use_date_to"]').on('change', function () {
+      $('#f_period').val('custom');
+    });
     $('#searchForm input[name="branch_ids[]"], #include_review').change(function () {
       $('#searchForm').submit();
     });
