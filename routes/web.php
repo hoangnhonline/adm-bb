@@ -35,7 +35,6 @@ Route::get('zalo', ['uses' => 'ZaloController@zalo', 'as' => 'zalo']);
 Route::get('zalo2', ['uses' => 'ZaloController@zalo2', 'as' => 'zalo2']);
 Route::get('reset-pass', ['uses' => 'AccountController@resetPass', 'as' => 'resetPass']);
 Route::get('/change-value-chung', ['as' => 'change-value-by-column-chung', 'uses' => 'GeneralController@changeValueByColumnChung']);
-Route::get('/report/dish', ['as' => 'report.dish', 'uses' => 'ReportController@dishReport']);
 
 Route::post('api-sms-payment', ['uses' => 'BookingController@smsPayment', 'as' => 'api-sms-payment']);
 Route::group(['prefix' => 'report-guest'], function () {  
@@ -193,6 +192,7 @@ Route::group([
     });
     Route::group(['prefix' => 'report'], function () {  
         Route::get('/chi-phi', ['as' => 'report.chi-phi', 'uses' => 'ReportController@chiphi']);
+        Route::get('/dish', ['as' => 'report.dish', 'uses' => 'ReportController@dishReport']);
         Route::get('/customer-by-level', ['as' => 'report.customer-by-level', 'uses' => 'ReportController@customerByLevel']);
         Route::get('/doanh-thu-thang', ['as' => 'report.doanh-thu-thang', 'uses' => 'ReportController@doanhthuthang']);
         Route::get('/doanh-thu', ['as' => 'report.doanh-thu', 'uses' => 'ReportController@doanhthuview']);

@@ -85,6 +85,11 @@
           <i class="fa fa-line-chart"></i> <span>BIỂU ĐỒ GIÁ</span>
         </a>
       </li>
+      <li {{ in_array($routeName, ['report.dish']) ? "class=active" : "" }}>
+        <a href="{{ route('report.dish') }}">
+          <i class="fa fa-trophy"></i> <span>MÓN BÁN CHẠY</span>
+        </a>
+      </li>
       @endif
       @if(Auth::user()->id != 3 && Auth::user()->role == 1)
 
