@@ -453,6 +453,7 @@ Route::group([
         Route::get('/bill-upload', ['as' => 'cost.bill-upload', 'uses' => 'CostApiController@billUpload']);
         Route::post('/api/upload-bill', ['as' => 'cost.api.upload-bill', 'uses' => 'CostApiController@uploadBill']);
         Route::get('/api/inbox', ['as' => 'cost.api.inbox', 'uses' => 'CostApiController@inbox']);
+        Route::post('/api/inbox-delete', ['as' => 'cost.api.inbox-delete', 'uses' => 'CostApiController@inboxDelete']);
     }); 
     Route::group(['prefix' => 'grandworld-schedule'], function () {        
         Route::get('/', ['as' => 'grandworld-schedule.index', 'uses' => 'GrandworldScheduleController@index']);

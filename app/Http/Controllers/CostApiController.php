@@ -21,6 +21,7 @@ use Auth, DB;
  *  POST /cost/api/store-batch      lưu nhiều bill (all-or-nothing)
  *  GET  /cost/bill-upload          trang kéo thả ảnh bill -> uploads/bill-inbox/
  *  POST /cost/api/upload-bill      nhận ảnh bill (multipart files[])
+ *  POST /cost/api/inbox-delete     bỏ 1 ảnh khỏi danh sách chờ (chuyển vào bill-inbox-trash/)
  *  GET  /cost/api/inbox            danh sách ảnh chờ nhập; store-batch nhận "inbox_files":["tên file"]
  */
 class CostApiController extends Controller
@@ -63,6 +64,24 @@ class CostApiController extends Controller
             $saved[] = ['name' => $name, 'url' => config('plantotravel.upload_url').self::INBOX_DIR.$name];
         }
         return response()->json(['ok' => count($errors) == 0, 'saved' => $saved, 'errors' => $errors]);
+    }
+
+    /** POST {name}: bỏ ảnh khỏi danh sách chờ -> chuyển sang uploads/bill-inbox-trash/ (khôi phục được) */
+    public function inboxDelete(Request $request)
+    {
+        $name = basename((string) $request->input('name'));
+        $from = config('plantotravel.upload_path').self::INBOX_DIR.$name;
+        if(!preg_match('/^[\w\-]+\.(jpg|png|webp)$/', $name) || !is_file($from)){
+            return response()->json(['ok' => false, 'errors' => ['Không thấy ảnh '.$name]], 404);
+        }
+        $trash = config('plantotravel.upload_path').'bill-inbox-trash/';
+        if(!is_dir($trash)){
+            mkdir($trash, 0775, true);
+        }
+        if(!@rename($from, $trash.$name)){
+            return response()->json(['ok' => false, 'errors' => ['Không xóa được ảnh '.$name]], 500);
+        }
+        return response()->json(['ok' => true]);
     }
 
     /** GET: danh sách ảnh bill đang chờ nhập (cũ nhất trước) */

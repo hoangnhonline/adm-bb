@@ -34,7 +34,7 @@
       .then(function(r){ return r.json(); }).then(function(d){
         document.getElementById('inbox-count').textContent = d.items.length;
         document.getElementById('inbox-list').innerHTML = d.items.map(function(i){
-          return '<div class="col-md-2 col-xs-6" style="margin-bottom:10px"><a href="'+i.url+'" target="_blank"><img src="'+i.url+'" class="img-thumbnail" style="height:160px;width:100%;object-fit:cover"></a><div style="font-size:11px;color:#666">'+i.name+'</div></div>';
+          return '<div class="col-md-2 col-xs-6" style="margin-bottom:10px"><a href="'+i.url+'" target="_blank"><img src="'+i.url+'" class="img-thumbnail" style="height:160px;width:100%;object-fit:cover"></a><div style="font-size:11px;color:#666">'+i.name+'</div><button type="button" class="btn btn-danger btn-xs btn-del-bill" data-name="'+i.name+'" style="margin-top:3px">Xóa</button></div>';
         }).join('');
       });
   }
@@ -50,6 +50,19 @@
         loadInbox();
       }).catch(function(){ st.innerHTML = '<span class="text-danger">Upload lỗi, thử lại.</span>'; });
   }
+  document.getElementById('inbox-list').addEventListener('click', function(e){
+    var btn = e.target.closest('.btn-del-bill');
+    if(!btn) return;
+    if(!confirm('Xóa ảnh này khỏi danh sách chờ?')) return;
+    btn.disabled = true;
+    fetch('{{ route('cost.api.inbox-delete') }}', {method:'POST', credentials:'same-origin',
+      headers:{'X-CSRF-TOKEN':token,'Accept':'application/json','Content-Type':'application/json'},
+      body: JSON.stringify({name: btn.getAttribute('data-name')})})
+      .then(function(r){ return r.json(); }).then(function(d){
+        if(!d.ok){ alert(d.errors.join('\n')); btn.disabled = false; }
+        loadInbox();
+      }).catch(function(){ alert('Xóa lỗi, thử lại.'); btn.disabled = false; });
+  });
   zone.addEventListener('click', function(){ input.click(); });
   input.addEventListener('change', function(){ upload(input.files); input.value=''; });
   zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.style.background='#e3f1ff'; });
