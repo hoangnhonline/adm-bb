@@ -193,6 +193,7 @@ Route::group([
     Route::group(['prefix' => 'report'], function () {  
         Route::get('/chi-phi', ['as' => 'report.chi-phi', 'uses' => 'ReportController@chiphi']);
         Route::get('/dish', ['as' => 'report.dish', 'uses' => 'ReportController@dishReport']);
+        Route::get('/chi-phi-doanh-thu', ['as' => 'report.chi-phi-doanh-thu', 'uses' => 'ReportController@chiPhiDoanhThu']);
         Route::get('/customer-by-level', ['as' => 'report.customer-by-level', 'uses' => 'ReportController@customerByLevel']);
         Route::get('/doanh-thu-thang', ['as' => 'report.doanh-thu-thang', 'uses' => 'ReportController@doanhthuthang']);
         Route::get('/doanh-thu', ['as' => 'report.doanh-thu', 'uses' => 'ReportController@doanhthuview']);

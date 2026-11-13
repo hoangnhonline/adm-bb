@@ -158,6 +158,145 @@ class ReportController extends Controller
             'prevAnchor', 'nextAnchor', 'branch_id', 'group', 'sort', 'branchList', 'sumQty', 'sumMoney',
             'prevSumMoney', 'totalBread', 'totalDrink', 'totalOther'));
     }
+    /**
+     * Tỷ lệ từng loại chi phí trên doanh thu (theo Tuần / Tháng / Năm / Tùy chọn, lọc chi nhánh).
+     * Doanh thu = tổng tiền bill (booking.total_price) - giảm giá (booking.discount), bỏ bill hủy (chỉ status 1, 2).
+     * Chi phí đầu tư (Setup/mở chi nhánh, Visa/vé máy bay NV) tách riêng, không tính vào tỷ lệ vận hành.
+     */
+    public function chiPhiDoanhThu(Request $request)
+    {
+        $period = in_array($request->period, ['week', 'month', 'year', 'custom']) ? $request->period : 'month';
+        $anchor = $request->date && strtotime($request->date) ? strtotime($request->date) : time();
+        $branch_id = $request->branch_id ? (int) $request->branch_id : null;
+        $prevAnchor = $nextAnchor = null;
+        if($period == 'custom' && $request->from && $request->to && strtotime($request->from) && strtotime($request->to)){
+            $from = date('Y-m-d', strtotime($request->from));
+            $to = date('Y-m-d', strtotime($request->to));
+            if($from > $to){ list($from, $to) = [$to, $from]; }
+            $days = (int) round((strtotime($to) - strtotime($from)) / 86400) + 1;
+            $prevFrom = date('Y-m-d', strtotime($from.' -'.$days.' days'));
+            $prevTo = date('Y-m-d', strtotime($from.' -1 day'));
+            $label = date('d/m/Y', strtotime($from)).' - '.date('d/m/Y', strtotime($to));
+        }else{
+            if($period == 'custom'){ $period = 'month'; }
+            if($period == 'week'){
+                $from = date('Y-m-d', strtotime('monday this week', $anchor));
+                $to = date('Y-m-d', strtotime($from.' +6 days'));
+                $prevFrom = date('Y-m-d', strtotime($from.' -7 days'));
+                $prevTo = date('Y-m-d', strtotime($from.' -1 day'));
+                $label = 'Tuần '.date('d/m', strtotime($from)).' - '.date('d/m/Y', strtotime($to));
+                $nextAnchor = date('Y-m-d', strtotime($from.' +7 days'));
+            }elseif($period == 'month'){
+                $from = date('Y-m-01', $anchor);
+                $to = date('Y-m-t', $anchor);
+                $prevFrom = date('Y-m-01', strtotime($from.' -1 month'));
+                $prevTo = date('Y-m-t', strtotime($prevFrom));
+                $label = 'Tháng '.date('m/Y', $anchor);
+                $nextAnchor = date('Y-m-01', strtotime($from.' +1 month'));
+            }else{
+                $from = date('Y-01-01', $anchor);
+                $to = date('Y-12-31', $anchor);
+                $prevFrom = date('Y-01-01', strtotime($from.' -1 year'));
+                $prevTo = date('Y-12-31', strtotime($prevFrom));
+                $label = 'Năm '.date('Y', $anchor);
+                $nextAnchor = date('Y-01-01', strtotime($from.' +1 year'));
+            }
+            $prevAnchor = $prevFrom;
+        }
+
+        // Loại chi phí tách riêng (đầu tư, không tính vào tỷ lệ vận hành)
+        $investCateIds = [4, 75];
+        // Nhóm nhân sự (labor cost) theo group_name của danh mục, trừ loại đầu tư
+        $laborGroup = 'Nhân sự';
+
+        $revenue = function ($f, $t) use ($branch_id) {
+            $q = DB::table('booking')->whereIn('status', [1, 2])->whereBetween('use_date', [$f, $t]);
+            if($branch_id){ $q->where('branch_id', $branch_id); }
+            $r = $q->select(DB::raw('SUM(total_price) as gross'), DB::raw('SUM(IFNULL(discount, 0)) as discount'),
+                            DB::raw('COUNT(*) as bills'))->first();
+            return ['gross' => (float) $r->gross, 'discount' => (float) $r->discount,
+                    'net' => (float) $r->gross - (float) $r->discount, 'bills' => (int) $r->bills];
+        };
+        $costByCate = function ($f, $t) use ($branch_id) {
+            $q = DB::table('cost')->where('status', '>', 0)->whereBetween('date_use', [$f, $t]);
+            if($branch_id){ $q->where('branch_id', $branch_id); }
+            return $q->select('cate_id', DB::raw('SUM(total_money) as money'), DB::raw('COUNT(*) as cnt'))
+                     ->groupBy('cate_id')->get()->keyBy('cate_id');
+        };
+
+        $rev = $revenue($from, $to);
+        $prevRev = $revenue($prevFrom, $prevTo);
+        $cur = $costByCate($from, $to);
+        $prev = $costByCate($prevFrom, $prevTo);
+
+        $cateList = CostType::orderBy('display_order')->get()->keyBy('id');
+        $groups = [];      // nhóm vận hành
+        $invest = [];      // chi phí đầu tư tách riêng
+        $totals = ['cost' => 0, 'prev_cost' => 0, 'food' => 0, 'labor' => 0, 'prev_food' => 0, 'prev_labor' => 0,
+                   'invest' => 0, 'prev_invest' => 0];
+        $cateIds = array_unique(array_merge($cur->keys()->all(), $prev->keys()->all()));
+        foreach($cateIds as $cid){
+            $ct = $cateList[$cid] ?? null;
+            $money = isset($cur[$cid]) ? (float) $cur[$cid]->money : 0;
+            $prevMoney = isset($prev[$cid]) ? (float) $prev[$cid]->money : 0;
+            $row = [
+                'cate_id' => $cid,
+                'name' => $ct ? $ct->name : '(Chưa phân loại)',
+                'order' => $ct ? (int) $ct->display_order : 999,
+                'money' => $money,
+                'count' => isset($cur[$cid]) ? (int) $cur[$cid]->cnt : 0,
+                'prev_money' => $prevMoney,
+                'pct_rev' => $rev['net'] > 0 ? $money / $rev['net'] * 100 : null,
+                'prev_pct_rev' => $prevRev['net'] > 0 ? $prevMoney / $prevRev['net'] * 100 : null,
+            ];
+            if(in_array((int) $cid, $investCateIds)){
+                $invest[] = $row;
+                $totals['invest'] += $money;
+                $totals['prev_invest'] += $prevMoney;
+                continue;
+            }
+            $gname = $ct && $ct->group_name ? $ct->group_name : 'Khác';
+            if(!isset($groups[$gname])){
+                $groups[$gname] = ['name' => $gname, 'order' => $row['order'], 'money' => 0, 'prev_money' => 0, 'rows' => []];
+            }
+            $groups[$gname]['rows'][] = $row;
+            $groups[$gname]['money'] += $money;
+            $groups[$gname]['prev_money'] += $prevMoney;
+            $groups[$gname]['order'] = min($groups[$gname]['order'], $row['order']);
+            $totals['cost'] += $money;
+            $totals['prev_cost'] += $prevMoney;
+            if(mb_strpos($gname, 'Giá vốn') === 0){
+                $totals['food'] += $money;
+                $totals['prev_food'] += $prevMoney;
+            }
+            if($gname == $laborGroup){
+                $totals['labor'] += $money;
+                $totals['prev_labor'] += $prevMoney;
+            }
+        }
+        foreach($groups as &$g){
+            usort($g['rows'], function ($a, $b) { return $a['order'] <=> $b['order']; });
+        }
+        unset($g);
+        uasort($groups, function ($a, $b) { return $a['order'] <=> $b['order']; });
+
+        $pct = function ($v, $base) { return $base > 0 ? $v / $base * 100 : null; };
+        $kpi = [
+            'food' => [$pct($totals['food'], $rev['net']), $pct($totals['prev_food'], $prevRev['net'])],
+            'labor' => [$pct($totals['labor'], $rev['net']), $pct($totals['prev_labor'], $prevRev['net'])],
+            'prime' => [$pct($totals['food'] + $totals['labor'], $rev['net']), $pct($totals['prev_food'] + $totals['prev_labor'], $prevRev['net'])],
+            'cost' => [$pct($totals['cost'], $rev['net']), $pct($totals['prev_cost'], $prevRev['net'])],
+        ];
+        $remain = $rev['net'] - $totals['cost'];
+        $prevRemain = $prevRev['net'] - $totals['prev_cost'];
+
+        $branchList = Branch::where('status', 1)->orderBy('display_order')->get();
+
+        return view('report.chi-phi-doanh-thu', compact('period', 'label', 'from', 'to', 'prevFrom', 'prevTo',
+            'prevAnchor', 'nextAnchor', 'branch_id', 'branchList', 'rev', 'prevRev', 'groups', 'invest', 'totals',
+            'kpi', 'remain', 'prevRemain'));
+    }
+
     public function chiphi(Request $request){
         $monthDefault = date('m');
         $month = $request->month ?? $monthDefault;

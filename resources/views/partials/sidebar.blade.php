@@ -90,6 +90,11 @@
           <i class="fa fa-trophy"></i> <span>MÓN BÁN CHẠY</span>
         </a>
       </li>
+      <li {{ in_array($routeName, ['report.chi-phi-doanh-thu']) ? "class=active" : "" }}>
+        <a href="{{ route('report.chi-phi-doanh-thu') }}">
+          <i class="fa fa-pie-chart"></i> <span>CHI PHÍ / DOANH THU</span>
+        </a>
+      </li>
       @endif
       @if(Auth::user()->id != 3 && Auth::user()->role == 1)
 
