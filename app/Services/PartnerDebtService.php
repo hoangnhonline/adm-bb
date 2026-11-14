@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
  * Quy tắc (theo yêu cầu anh Hoàng 14/11/2026):
  *  - Bill chỉ tính hoa hồng khi có đối tác VÀ tick "Có chiết khấu" (co_chiet_khau = 1). Mặc định không.
  *  - Bill có món tên bắt đầu bằng "BUFFET" => bill buffet: hoa hồng = tổng SL món BUFFET × mức/khách của đối tác (mặc định 20.000).
- *  - Ngược lại => alacarte: hoa hồng = (tổng bill − giảm giá) × % của đối tác (mặc định 10%).
+ *  - Ngược lại => alacarte: hoa hồng = (tổng bill − giảm giá) × % (nhập riêng trên bill, hoặc % của đối tác; mặc định 15%).
  *  - Bill "Ghi nợ" => đối tác nợ lại (tổng bill − giảm giá).
  *  - Bill hợp lệ: status khác 0 (xóa) và 3 (hủy).
  *
@@ -50,9 +50,11 @@ class PartnerDebtService
         if ($b->doi_tac_id && $b->co_chiet_khau) {
             $p = Partner::find($b->doi_tac_id);
             if ($p) {
+                // % alacarte: ưu tiên % nhập riêng trên bill (com_pct), không có thì theo đối tác
+                $pct = isset($b->com_pct) && $b->com_pct !== null ? (float) $b->com_pct : (float) $p->com_alacarte_pct;
                 $com = $billType == 1
                     ? $pax * (int) $p->com_buffet_per_pax
-                    : (int) round($net * (float) $p->com_alacarte_pct / 100);
+                    : (int) round($net * $pct / 100);
             }
         }
         $upd = ['bill_type' => $billType, 'pax' => $pax, 'com_amount' => $com];

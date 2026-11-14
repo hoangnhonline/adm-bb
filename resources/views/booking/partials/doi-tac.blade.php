@@ -3,6 +3,7 @@
   $dtId = old('doi_tac_id', $bk->doi_tac_id ?? '');
   $dtCk = old('co_chiet_khau', $bk->co_chiet_khau ?? 0);
   $dtNo = old('ghi_no', $bk->ghi_no ?? 0);
+  $dtPct = old('com_pct', isset($bk->com_pct) && $bk->com_pct !== null ? rtrim(rtrim(number_format($bk->com_pct, 2, '.', ''), '0'), '.') : '');
   $dtTypes = array_map('__', \App\Models\Partner::$doiTacTypes);
 @endphp
 <input type="hidden" name="doi_tac_form" value="1">
@@ -22,7 +23,14 @@
   <div class="form-group col-md-3 col-xs-6 dt-opt" style="padding-top:25px">
     <label style="font-weight:normal;cursor:pointer"><input type="checkbox" name="co_chiet_khau" id="co_chiet_khau" value="1" {{ $dtCk ? 'checked' : '' }}> {{ __('Có chiết khấu (tính hoa hồng)') }}</label>
   </div>
-  <div class="form-group col-md-4 col-xs-6 dt-opt" style="padding-top:25px">
+  <div class="form-group col-md-2 col-xs-6 dt-opt dt-pct">
+    <label>{{ __('% hoa hồng alacarte') }}</label>
+    <div class="input-group input-group-sm">
+      <input type="text" name="com_pct" id="com_pct" class="form-control" value="{{ $dtPct }}" placeholder="{{ __('theo đối tác') }}" autocomplete="off">
+      <span class="input-group-addon">%</span>
+    </div>
+  </div>
+  <div class="form-group col-md-2 col-xs-6 dt-opt" style="padding-top:25px">
     <label style="font-weight:normal;cursor:pointer"><input type="checkbox" name="ghi_no" id="ghi_no" value="1" {{ $dtNo ? 'checked' : '' }}> {{ __('Ghi nợ (đối tác trả sau)') }}</label>
   </div>
   <div class="col-xs-12 dt-opt" style="padding-bottom:8px">
@@ -39,6 +47,11 @@
     var has = !!$('#doi_tac_id').val();
     $('.dt-opt').toggle(has);
     if(!has){ $('#dt-preview').text(''); return; }
+    $('.dt-pct').toggle($('#co_chiet_khau').is(':checked'));
+    // ô % để trống = theo % của đối tác
+    $('#com_pct').attr('placeholder', opt.data('pct') + '% (' + {!! json_encode(__('theo đối tác')) !!} + ')');
+    var pctIn = String($('#com_pct').val() || '').replace(',', '.');
+    var pct = pctIn !== '' && !isNaN(parseFloat(pctIn)) ? parseFloat(pctIn) : parseFloat(opt.data('pct'));
     var pax = 0;
     $('.services').each(function(){
       var r = $(this), t = (r.find('.cate option:selected').text()||'').toUpperCase();
@@ -52,7 +65,7 @@
     }else if(pax > 0){
       txt = {!! json_encode(__('Bill BUFFET – hoa hồng dự kiến')) !!} + ': ' + pax + ' ' + {!! json_encode(__('khách')) !!} + ' × ' + fmt(opt.data('buffet')) + ' = ' + fmt(pax*opt.data('buffet')) + ' đ';
     }else{
-      txt = {!! json_encode(__('Bill ALACARTE – hoa hồng dự kiến')) !!} + ': ' + opt.data('pct') + '% × ' + fmt(net) + ' = ' + fmt(net*opt.data('pct')/100) + ' đ';
+      txt = {!! json_encode(__('Bill ALACARTE – hoa hồng dự kiến')) !!} + ': ' + pct + '% × ' + fmt(net) + ' = ' + fmt(net*pct/100) + ' đ';
     }
     if($('#ghi_no').is(':checked')) txt += ' | ' + {!! json_encode(__('Ghi nợ')) !!} + ': ' + fmt(net) + ' đ';
     $('#dt-preview').text(txt);
@@ -60,7 +73,7 @@
   function bind(){
     var $ = window.jQuery; if(!$){ return setTimeout(bind, 200); }
     $(document).on('change', '#doi_tac_id, #co_chiet_khau, #ghi_no, .cate, .amount', function(){ setTimeout(dtPreview, 50); });
-    $(document).on('keyup change', '#discount, #total_price', function(){ setTimeout(dtPreview, 50); });
+    $(document).on('keyup change', '#discount, #total_price, #com_pct', function(){ setTimeout(dtPreview, 50); });
     $(dtPreview);
   }
   bind();

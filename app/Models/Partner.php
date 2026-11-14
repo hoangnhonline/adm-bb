@@ -53,6 +53,7 @@ class Partner extends Model  {
         'hdv'   => 'HDV',
         'ptt'   => 'Plan To Travel',
         'cano'  => 'Cty cano',
+        'driver' => 'Tài xế',
     ];
     public static function doiTacList()
     {

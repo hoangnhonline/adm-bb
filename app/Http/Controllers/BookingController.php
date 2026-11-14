@@ -849,7 +849,11 @@ class BookingController extends Controller
         $totalRevenueKoGiam = 0;
         $totalRupees = 0;
         $totalDrinks = 0;
+        $totalVat = 0; $totalCom = 0; $totalNet = 0; // VAT + hoa hồng đối tác (14/11/2026)
         foreach($allList as $item){
+            $totalNet += $item->total_price - $item->discount;
+            $totalVat += \App\Services\AppSetting::vatOf($item->total_price, $item->discount, $item->no_vat, $item->branch_id);
+            $totalCom += (int) $item->com_amount;
             $totalRevenueKoGiam+= $item->total_price;
             $totalRevenue+= $item->con_lai;
             $totalRupees+= $item->rupees;
@@ -921,7 +925,7 @@ class BookingController extends Controller
         }
         
       
-        return view($view, compact( 'items', 'arrSearch', 'keyword', 'time_type', 'month', 'year', 'month_do', 'arrData', 'chietkhauList', 'branch_id', 'cateList', 'use_date_from_format', 'use_date_to_format', 'branchList', 'beachArr', 'partners', 'partner_id', 'cateArr', 'totalRevenue', 'totalRupees', 'totalDrinks', 'isView', 'totalRevenueKoGiam', 'doiTacList'));
+        return view($view, compact( 'items', 'arrSearch', 'keyword', 'time_type', 'month', 'year', 'month_do', 'arrData', 'chietkhauList', 'branch_id', 'cateList', 'use_date_from_format', 'use_date_to_format', 'branchList', 'beachArr', 'partners', 'partner_id', 'cateArr', 'totalRevenue', 'totalRupees', 'totalDrinks', 'isView', 'totalRevenueKoGiam', 'doiTacList', 'totalVat', 'totalCom', 'totalNet'));
 
     }
 
@@ -2270,13 +2274,16 @@ $pendingSummary = $pendingSummary->map(function ($r) {
     {
         // Form cũ không có khối đối tác => không đụng tới các trường này
         if(!isset($dataArr['doi_tac_form'])){
-            unset($dataArr['doi_tac_id'], $dataArr['co_chiet_khau'], $dataArr['ghi_no'], $dataArr['bill_type'], $dataArr['pax'], $dataArr['com_amount']);
+            unset($dataArr['doi_tac_id'], $dataArr['co_chiet_khau'], $dataArr['ghi_no'], $dataArr['bill_type'], $dataArr['pax'], $dataArr['com_amount'], $dataArr['com_pct']);
             return $dataArr;
         }
         unset($dataArr['doi_tac_form']);
         $dataArr['doi_tac_id'] = !empty($dataArr['doi_tac_id']) ? (int) $dataArr['doi_tac_id'] : null;
         $dataArr['co_chiet_khau'] = ($dataArr['doi_tac_id'] && isset($dataArr['co_chiet_khau'])) ? 1 : 0;
         $dataArr['ghi_no'] = ($dataArr['doi_tac_id'] && isset($dataArr['ghi_no'])) ? 1 : 0;
+        // % hoa hồng alacarte riêng cho bill (để trống = theo đối tác)
+        $pct = isset($dataArr['com_pct']) ? str_replace(',', '.', trim((string) $dataArr['com_pct'])) : '';
+        $dataArr['com_pct'] = ($dataArr['co_chiet_khau'] && $pct !== '' && is_numeric($pct)) ? max(0, min(100, (float) $pct)) : null;
         // các trường do hệ thống tính, không nhận từ form
         unset($dataArr['bill_type'], $dataArr['pax'], $dataArr['com_amount']);
         return $dataArr;

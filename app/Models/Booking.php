@@ -70,7 +70,8 @@ class Booking extends Model  {
                             'ghi_no',
                             'bill_type',
                             'pax',
-                            'com_amount'
+                            'com_amount',
+                            'com_pct'
                             ];
     public static function getList($params = []){
         $query = self::where('status', 1);

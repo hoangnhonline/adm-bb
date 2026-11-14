@@ -100,6 +100,11 @@
           <i class="fa fa-dashboard"></i> <span>{{ __('TỔNG QUAN') }}</span>
         </a>
       </li>
+      <li {{ in_array($routeName, ['report.vat']) ? "class=active" : "" }}>
+        <a href="{{ route('report.vat') }}">
+          <i class="fa fa-percent"></i> <span>{{ __('VAT & HOA HỒNG') }}</span>
+        </a>
+      </li>
       <li {{ in_array($routeName, ['bill-anomaly.index']) ? "class=active" : "" }}>
         <a href="{{ route('bill-anomaly.index') }}">
           <i class="fa fa-exclamation-circle"></i> <span>{{ __('BILL BẤT THƯỜNG') }}</span>

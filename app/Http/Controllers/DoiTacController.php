@@ -48,10 +48,34 @@ class DoiTacController extends Controller
         return view('doi-tac.index', compact('items', 'balances', 'tong', 'types', 'type', 'name'));
     }
 
+    /** Lưu cài đặt hoa hồng mặc định (dùng cho đối tác mới) */
+    public function saveSettings(Request $request)
+    {
+        $pct = max(0, min(100, (float) str_replace(',', '.', (string) $request->com_alacarte_pct_default)));
+        $pax = max(0, (int) str_replace([',', '.'], '', (string) $request->com_buffet_per_pax_default));
+        $old = ['com_alacarte_pct_default' => \App\Services\AppSetting::get('com_alacarte_pct_default'),
+            'com_buffet_per_pax_default' => \App\Services\AppSetting::get('com_buffet_per_pax_default')];
+        \App\Services\AppSetting::set('com_alacarte_pct_default', $pct);
+        \App\Services\AppSetting::set('com_buffet_per_pax_default', $pax);
+        $applied = 0;
+        if ($request->apply_all) { // áp dụng cho tất cả đối tác hiện có
+            $applied = Partner::where('doi_tac', 1)->update(['com_alacarte_pct' => $pct, 'com_buffet_per_pax' => $pax]);
+            foreach (Partner::where('doi_tac', 1)->pluck('id') as $pid) PartnerDebtService::recalcPartner($pid);
+        }
+        try {
+            DB::table('activity_log')->insert(['user_id' => Auth::id(), 'model' => 'settings', 'model_id' => null, 'action' => 'updated',
+                'old_values' => json_encode($old), 'new_values' => json_encode(['com_alacarte_pct_default' => $pct, 'com_buffet_per_pax_default' => $pax, 'apply_all' => $applied]),
+                'request_uid' => app()->bound('request_uid') ? app('request_uid') : null, 'url' => 'POST doi-tac/settings', 'ip' => $request->ip(), 'created_at' => date('Y-m-d H:i:s')]);
+        } catch (\Throwable $e) {}
+        Session::flash('message', __('Đã lưu cài đặt hoa hồng mặc định') . ($applied ? ' – ' . __('đã áp dụng cho :n đối tác', ['n' => $applied]) : ''));
+        return redirect()->route('doi-tac.index');
+    }
+
     // ---------------------------------------------------------------- thêm / sửa
     public function create()
     {
-        $detail = new Partner(['com_buffet_per_pax' => 20000, 'com_alacarte_pct' => 10, 'pay_term_days' => 0, 'type' => 'cano']);
+        $detail = new Partner(['com_buffet_per_pax' => (int) \App\Services\AppSetting::get('com_buffet_per_pax_default'),
+            'com_alacarte_pct' => (float) \App\Services\AppSetting::get('com_alacarte_pct_default'), 'pay_term_days' => 0, 'type' => 'cano']);
         return view('doi-tac.form', ['detail' => $detail, 'types' => array_map('__', Partner::$doiTacTypes),
             'branchList' => Branch::where('status', 1)->orderBy('display_order')->get()]);
     }

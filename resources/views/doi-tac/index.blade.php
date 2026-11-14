@@ -23,6 +23,26 @@
       <div class="info-box-content"><span class="info-box-text">{{ __('Ròng (+ đối tác nợ / − mình nợ)') }}</span><span class="info-box-number">{{ $nf($tong['rong']) }}</span></div></div></div>
   </div>
 
+  @if(\App\Services\Perm::can('partner.edit'))
+  <div class="box box-default collapsed-box" id="comSettings">
+    <div class="box-header with-border"><h3 class="box-title" style="font-size:15px"><i class="fa fa-cog"></i> {{ __('Cài đặt hoa hồng mặc định') }}:
+      {{ __('alacarte') }} <b>{{ rtrim(rtrim(number_format((float) \App\Services\AppSetting::get('com_alacarte_pct_default'), 2), '0'), '.') }}%</b> ·
+      {{ __('buffet') }} <b>{{ number_format((int) \App\Services\AppSetting::get('com_buffet_per_pax_default')) }}</b>/{{ __('khách') }}</h3>
+      <div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> {{ __('Sửa') }}</button></div></div>
+    <div class="box-body">
+      <form class="form-inline" method="POST" action="{{ route('doi-tac.settings') }}">
+        {!! csrf_field() !!}
+        <label>{{ __('Hoa hồng alacarte (%)') }}</label>
+        <input type="text" name="com_alacarte_pct_default" class="form-control input-sm" style="width:80px" value="{{ rtrim(rtrim(number_format((float) \App\Services\AppSetting::get('com_alacarte_pct_default'), 2, '.', ''), '0'), '.') }}">
+        &nbsp; <label>{{ __('Hoa hồng buffet (đ / khách)') }}</label>
+        <input type="text" name="com_buffet_per_pax_default" class="form-control input-sm number" style="width:110px" value="{{ (int) \App\Services\AppSetting::get('com_buffet_per_pax_default') }}">
+        &nbsp; <label style="font-weight:normal"><input type="checkbox" name="apply_all" value="1"> {{ __('Áp dụng cho tất cả đối tác hiện có (và tính lại bill cũ)') }}</label>
+        <button class="btn btn-primary btn-sm" onclick="return !this.form.apply_all.checked || confirm({{ json_encode(__('Đổi mức hoa hồng cho tất cả đối tác và tính lại hoa hồng các bill cũ?')) }})">{{ __('Lưu') }}</button>
+      </form>
+      <p class="text-muted" style="margin:6px 0 0">{{ __('Mức mặc định dùng cho đối tác mới. Từng đối tác vẫn sửa mức riêng được; trên từng bill cũng nhập được % riêng.') }}</p>
+    </div>
+  </div>
+  @endif
   <div class="box">
     <div class="box-header with-border">
       <form class="form-inline" method="GET" action="{{ route('doi-tac.index') }}">

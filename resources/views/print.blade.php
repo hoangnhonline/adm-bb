@@ -95,14 +95,14 @@ Hotline: +84981478544 </p>
     </tr>
      @if($detail->no_vat == 0)
     <tr style="font-size:12px !important;">
-        <td style="text-align: right; font-weight: bold">VAT (8%)</td>
-        <td style="text-align: right; font-weight: bold">{{ number_format($detail->con_lai*0.08) }}
+        <td style="text-align: right; font-weight: bold">VAT ({{ config('bombay.vat_rate', 8) }}%)</td>
+        <td style="text-align: right; font-weight: bold">{{ number_format($detail->con_lai*config('bombay.vat_rate', 8)/100) }}
      
         </td>
     </tr>
     <tr style="font-size:12px !important;">
         <td style="text-align: right; font-weight: bold">TOTAL</td>
-        <td style="text-align: right; font-weight: bold">{{ number_format($detail->con_lai*1.08) }}
+        <td style="text-align: right; font-weight: bold">{{ number_format($detail->con_lai*(1+config('bombay.vat_rate', 8)/100)) }}
             <!-- <br>
             @php
             $fx = app(\App\Services\CurrencyService::class);
@@ -133,15 +133,15 @@ Hotline: +84981478544 </p>
     </tr> 
     @if($detail->no_vat == 0)
     <tr style="font-size:12px !important;">
-        <td style="text-align: right; font-weight: bold">VAT (8%)</td>
-        <td style="text-align: right; font-weight: bold">{{ number_format($total*0.08) }}
+        <td style="text-align: right; font-weight: bold">VAT ({{ config('bombay.vat_rate', 8) }}%)</td>
+        <td style="text-align: right; font-weight: bold">{{ number_format($total*config('bombay.vat_rate', 8)/100) }}
      
         </td>
     </tr>  
 
     <tr style="font-size:12px !important;">
         <td style="text-align: right; font-weight: bold">TOTAL</td>
-        <td style="text-align: right; font-weight: bold">{{ number_format($total*1.08) }}
+        <td style="text-align: right; font-weight: bold">{{ number_format($total*(1+config('bombay.vat_rate', 8)/100)) }}
      
         </td>
     </tr>

@@ -69,7 +69,7 @@ return [
         // Đối tác & công nợ
         'doi-tac.index' => 'partner.view', 'doi-tac.show' => 'partner.view', 'doi-tac.report' => 'partner.view', 'doi-tac.export' => 'partner.view',
         'doi-tac.create' => 'partner.create', 'doi-tac.store' => 'partner.create',
-        'doi-tac.edit' => 'partner.edit', 'doi-tac.update' => 'partner.edit', 'doi-tac.destroy' => 'partner.edit', 'doi-tac.recalc' => 'partner.edit',
+        'doi-tac.edit' => 'partner.edit', 'doi-tac.update' => 'partner.edit', 'doi-tac.destroy' => 'partner.edit', 'doi-tac.recalc' => 'partner.edit', 'doi-tac.settings' => 'partner.edit',
         'doi-tac.transaction.store' => 'partner.transaction', 'doi-tac.transaction.cancel' => 'partner.transaction',
         // Danh mục
         'dish.index' => 'catalog.view', 'partner.index' => 'catalog.view',
@@ -79,6 +79,7 @@ return [
         'dish.destroy' => 'catalog.delete', 'partner.destroy' => 'catalog.delete',
         // Tổng quan & bill bất thường
         'tong-quan.index' => 'report.view',
+        'report.vat' => 'report.view', 'report.vat.no-vat' => 'bill.edit',
         'bill-anomaly.index' => 'bill_alert.view', 'bill-anomaly.review' => 'bill_alert.edit',
         // Tài khoản
         'account.index' => 'account.view',
@@ -113,6 +114,7 @@ return [
         ['cost.bieu-do-gia', 'purchase.view', 'fa-line-chart', 'BIỂU ĐỒ GIÁ'],
         ['report.dish', 'report.view', 'fa-trophy', 'MÓN BÁN CHẠY'],
         ['report.chi-phi-doanh-thu', 'report.view', 'fa-pie-chart', 'CHI PHÍ / DOANH THU'],
+        ['report.vat', 'report.view', 'fa-percent', 'VAT & HOA HỒNG'],
         ['bill-anomaly.index', 'bill_alert.view', 'fa-exclamation-circle', 'BILL BẤT THƯỜNG'],
         ['doi-tac.index', 'partner.view', 'fa-handshake-o', 'ĐỐI TÁC & CÔNG NỢ'],
         ['doi-tac.report', 'partner.view', 'fa-line-chart', 'BÁO CÁO CÔNG NỢ ĐỐI TÁC'],

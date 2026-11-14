@@ -40,7 +40,7 @@ class ActivityLogPresenter
             'per_com' => 'Chiết khấu (%)', 'commision' => 'Tiền chiết khấu', 'tien_coc' => 'Tiền cọc', 'extra_fee' => 'Phụ thu',
             'take_away' => 'Mang đi (Take away)', 'indian' => 'Khách Ấn', 'no_vat' => 'Không VAT', 'da_thu' => 'Đã thu',
             'partner_id' => 'Đối tác (cũ)', 'hdv_id' => 'HDV', 'doi_tac_id' => 'Đối tác', 'co_chiet_khau' => 'Có chiết khấu (hoa hồng)',
-            'ghi_no' => 'Ghi nợ', 'bill_type' => 'Loại bill', 'pax' => 'Số khách buffet', 'com_amount' => 'Hoa hồng đối tác',
+            'ghi_no' => 'Ghi nợ', 'bill_type' => 'Loại bill', 'pax' => 'Số khách buffet', 'com_amount' => 'Hoa hồng đối tác', 'com_pct' => '% hoa hồng alacarte',
             'checked' => 'Đã kiểm tra', 'xe_4t' => 'Xe 4T', 'chiet_khau' => 'Chiết khấu',
         ],
         'booking_detail' => [

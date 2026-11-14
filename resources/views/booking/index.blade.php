@@ -146,6 +146,12 @@
                 @if($totalDrinks > 0)
                 - {{ __('Tổng tiền đồ uống') }}: <span style="color: red">{{ number_format($totalDrinks) }}</span>
                 @endif
+                @if(isset($totalVat))
+                <br><small>{{ __('Chưa VAT') }}: <b>{{ number_format($totalNet) }}</b> · VAT: <b style="color:#c0392b">{{ number_format($totalVat) }}</b>
+                  · {{ __('Tổng thanh toán') }}: <b>{{ number_format($totalNet + $totalVat) }}</b>
+                  @if($totalCom > 0) · {{ __('Hoa hồng đối tác') }}: <b style="color:#d68910">{{ number_format($totalCom) }}</b>@endif
+                  @if(\App\Services\Perm::can('report.view')) · <a href="{{ route('report.vat') }}">{{ __('Báo cáo VAT & hoa hồng') }}</a>@endif</small>
+                @endif
               @endif
               
               </h3>
@@ -270,8 +276,9 @@
 
                   <br>
                   {{ __('Order:') }} <span style="color:blue">{{ $item->id }}</span>
-                  @if($item->branch_id == 12)
-                  <br> + VAT: {{ number_format($item->con_lai*1.08) }}</td>
+                  @if(!\App\Services\AppSetting::isNoVat($item->no_vat, $item->branch_id))
+                  @php $vatItem = \App\Services\AppSetting::vatOf($item->total_price, $item->discount, $item->no_vat, $item->branch_id); @endphp
+                  <br>VAT: {{ number_format($vatItem) }} · {{ __('Tổng thanh toán') }}: <b>{{ number_format($item->total_price - $item->discount + $vatItem) }}</b>
                   @endif
                 </td>               
           
