@@ -228,6 +228,7 @@ Route::group([
         Route::get('/chi-phi', ['as' => 'report.chi-phi', 'uses' => 'ReportController@chiphi']);
         Route::get('/dish', ['as' => 'report.dish', 'uses' => 'ReportController@dishReport']);
         Route::get('/vat', ['as' => 'report.vat', 'uses' => 'VatReportController@index']);
+        Route::get('/thu-tien-nguoi', ['as' => 'report.thu-tien-nguoi', 'uses' => 'ThuTienReportController@index']);
         Route::post('/vat/no-vat', ['as' => 'report.vat.no-vat', 'uses' => 'VatReportController@setNoVat']);
         Route::get('/chi-phi-doanh-thu', ['as' => 'report.chi-phi-doanh-thu', 'uses' => 'ReportController@chiPhiDoanhThu']);
         Route::get('/customer-by-level', ['as' => 'report.customer-by-level', 'uses' => 'ReportController@customerByLevel']);
