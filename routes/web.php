@@ -86,6 +86,10 @@ Route::group([
     });
     Route::post('/filter-prefs/save', ['as' => 'filter-prefs.save', 'uses' => 'FilterPrefController@save']); // bộ lọc tùy chọn theo user
     Route::get('/locale/{lang}', ['as' => 'locale.change', 'uses' => 'LocaleController@change']); // đa ngôn ngữ VI/EN
+    // Tổng quan & bill bất thường (14/11/2026)
+    Route::get('/tong-quan', ['as' => 'tong-quan.index', 'uses' => 'OverviewController@index']);
+    Route::get('/bill-bat-thuong', ['as' => 'bill-anomaly.index', 'uses' => 'BillAnomalyController@index']);
+    Route::post('/bill-bat-thuong/review', ['as' => 'bill-anomaly.review', 'uses' => 'BillAnomalyController@review']);
     // Phân quyền (chỉ tài khoản quản trị chính)
     Route::group(['prefix' => 'phan-quyen'], function () {
         Route::get('/', ['as' => 'phan-quyen.index', 'uses' => 'RoleController@index']);

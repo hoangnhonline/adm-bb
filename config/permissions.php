@@ -29,6 +29,7 @@ return [
         'partner'     => ['label' => 'Đối tác & công nợ', 'actions' => ['view', 'create', 'edit', 'transaction']],
         'catalog'     => ['label' => 'Danh mục (món ăn, NCC)', 'actions' => ['view', 'create', 'edit', 'delete']],
         'account'     => ['label' => 'Tài khoản', 'actions' => ['view', 'edit']],
+        'bill_alert'  => ['label' => 'Bill bất thường (Sửa = đánh dấu đã xem)', 'actions' => ['view', 'edit']],
     ],
 
     'always' => [
@@ -76,6 +77,9 @@ return [
         'dish.edit' => 'catalog.edit', 'dish.update' => 'catalog.edit', 'dish.change-value-by-column' => 'catalog.edit',
         'partner.edit' => 'catalog.edit', 'partner.update' => 'catalog.edit', 'partner.change-value-by-column' => 'catalog.edit',
         'dish.destroy' => 'catalog.delete', 'partner.destroy' => 'catalog.delete',
+        // Tổng quan & bill bất thường
+        'tong-quan.index' => 'report.view',
+        'bill-anomaly.index' => 'bill_alert.view', 'bill-anomaly.review' => 'bill_alert.edit',
         // Tài khoản
         'account.index' => 'account.view',
         'account.create' => 'account.edit', 'account.store' => 'account.edit', 'account.edit' => 'account.edit', 'account.update' => 'account.edit',
@@ -98,6 +102,7 @@ return [
 
     // Menu cho tài khoản có nhóm quyền: [route, mã quyền, icon, nhãn]
     'menu' => [
+        ['tong-quan.index', 'report.view', 'fa-dashboard', 'TỔNG QUAN'],
         ['booking.index', 'bill.view', 'fa-list', 'QUẢN LÝ BILL'],
         ['booking.create', 'bill.create', 'fa-plus', 'TẠO BILL'],
         ['booking.orders', 'kitchen.view', 'fa-cutlery', 'BẾP'],
@@ -108,6 +113,7 @@ return [
         ['cost.bieu-do-gia', 'purchase.view', 'fa-line-chart', 'BIỂU ĐỒ GIÁ'],
         ['report.dish', 'report.view', 'fa-trophy', 'MÓN BÁN CHẠY'],
         ['report.chi-phi-doanh-thu', 'report.view', 'fa-pie-chart', 'CHI PHÍ / DOANH THU'],
+        ['bill-anomaly.index', 'bill_alert.view', 'fa-exclamation-circle', 'BILL BẤT THƯỜNG'],
         ['doi-tac.index', 'partner.view', 'fa-handshake-o', 'ĐỐI TÁC & CÔNG NỢ'],
         ['doi-tac.report', 'partner.view', 'fa-line-chart', 'BÁO CÁO CÔNG NỢ ĐỐI TÁC'],
         ['dish.index', 'catalog.view', 'fa-book', 'MÓN ĂN'],

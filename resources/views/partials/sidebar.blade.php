@@ -95,6 +95,16 @@
           <i class="fa fa-trophy"></i> <span>{{ __('MÓN BÁN CHẠY') }}</span>
         </a>
       </li>
+      <li {{ in_array($routeName, ['tong-quan.index']) ? "class=active" : "" }}>
+        <a href="{{ route('tong-quan.index') }}">
+          <i class="fa fa-dashboard"></i> <span>{{ __('TỔNG QUAN') }}</span>
+        </a>
+      </li>
+      <li {{ in_array($routeName, ['bill-anomaly.index']) ? "class=active" : "" }}>
+        <a href="{{ route('bill-anomaly.index') }}">
+          <i class="fa fa-exclamation-circle"></i> <span>{{ __('BILL BẤT THƯỜNG') }}</span>
+        </a>
+      </li>
       <li {{ in_array($routeName, ['report.chi-phi-doanh-thu']) ? "class=active" : "" }}>
         <a href="{{ route('report.chi-phi-doanh-thu') }}">
           <i class="fa fa-pie-chart"></i> <span>{{ __('CHI PHÍ / DOANH THU') }}</span>
