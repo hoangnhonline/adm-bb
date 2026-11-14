@@ -48,32 +48,6 @@
       
       <div class="box">
       <div class="box-body">
-      <table class="table table-bordered table-hover" style="font-size: 16px;font-weight: bold; display: none;">
-        <?php 
-        $tong_loi_nhuan = $tong_thuc_thu - $tong_chi; 
-        ?>
-            <tr style="background-color:red; color:#fff">
-            <td>
-                Tổng lợi nhuận
-              </td>
-              <td class="text-right">
-                {{ number_format($tong_loi_nhuan) }}
-              </td>
-            </tr>
-            <tr>
-              <td>A Phương</td>
-              <td class="text-right">{{ number_format($tong_loi_nhuan*0.325) }}</td>
-            </tr>
-            <tr>
-              <td>Hoàng</td>
-              <td class="text-right">{{ number_format($tong_loi_nhuan*0.575) }}</td>
-            </tr>
-           
-            <tr>
-              <td>A Cường</td>
-              <td class="text-right">{{ number_format($tong_loi_nhuan*0.1) }}</td>
-            </tr>
-          </table>
           </div>
         </box>
       <div class="box">       

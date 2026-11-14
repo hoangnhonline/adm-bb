@@ -783,5 +783,16 @@
     "CHI PHÍ & NHẬP HÀNG": "COSTS & PURCHASING",
     "Danh sách đối tác": "Partners",
     "Thu tiền theo người": "Collections by receiver",
-    "Thêm bill mới": "New bill"
+    "Thêm bill mới": "New bill",
+    "Ngoài doanh thu, thu thêm của khách": "Collected from customers on top of revenue",
+    "Biên lợi nhuận": "Profit margin",
+    "Doanh thu = tổng bill − giảm giá (chưa VAT). Lợi nhuận = doanh thu − chi phí. Hoa hồng đối tác đã chi nằm trong chi phí.": "Revenue = bill total − discount (before VAT). Profit = revenue − costs. Partner commission paid is included in costs.",
+    "Vận hành": "Operating",
+    "Khác": "Other",
+    "Tháng sau": "Next month",
+    "Xem theo ngày": "View by day",
+    "so với": "vs",
+    "Thống kê tháng": "Monthly statistics",
+    "Lợi nhuận": "Profit",
+    "Chi phí theo danh mục": "Costs by category"
 }
