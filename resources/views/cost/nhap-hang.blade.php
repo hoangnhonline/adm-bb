@@ -146,6 +146,16 @@
           <h3 class="box-title">{{ __('Tổng hợp theo nguyên liệu') }} ({{ $arrSearch['use_date_from'] }} – {{ $arrSearch['use_date_to'] }})</h3>
           <div class="box-tools" style="top:8px">
             <a href="{{ route('cost.bieu-do-gia') }}" class="btn btn-sm btn-primary"><i class="fa fa-line-chart"></i> {{ __('Biểu đồ giá') }}</a>
+            @php
+              try {
+                $cbParams = $period == 'custom'
+                  ? ['period' => 'custom', 'from' => $fromDate, 'to' => date('Y-m-d', strtotime(str_replace('/', '-', $arrSearch['use_date_to'])))]
+                  : ['period' => $period, 'date' => $fromDate];
+                $cbParams['branch_ids'] = $arrSearch['branch_ids'];
+                $cbCount = count(\App\Services\PurchaseAlertService::compute($cbParams)['rows']);
+              } catch (\Throwable $e) { $cbCount = null; $cbParams = []; }
+            @endphp
+            <a href="{{ route('cost.canh-bao-nhap', $cbParams) }}" class="btn btn-sm {{ $cbCount ? 'btn-danger' : 'btn-default' }}"><i class="fa fa-exclamation-triangle"></i> {{ __('Cảnh báo nhập tăng') }}@if($cbCount) ({{ $cbCount }})@endif</a>
           </div>
         </div>
         <div class="box-body table-responsive">

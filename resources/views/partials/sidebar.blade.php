@@ -80,6 +80,11 @@
           <i class="fa fa-shopping-basket"></i> <span>{{ __('NHẬP HÀNG') }}</span>
         </a>
       </li>
+      <li {{ in_array($routeName, ['cost.canh-bao-nhap']) ? "class=active" : "" }}>
+        <a href="{{ route('cost.canh-bao-nhap') }}">
+          <i class="fa fa-exclamation-triangle"></i> <span>{{ __('CẢNH BÁO NHẬP HÀNG') }}</span>
+        </a>
+      </li>
       <li {{ in_array($routeName, ['cost.bieu-do-gia']) ? "class=active" : "" }}>
         <a href="{{ route('cost.bieu-do-gia') }}">
           <i class="fa fa-line-chart"></i> <span>{{ __('BIỂU ĐỒ GIÁ') }}</span>
