@@ -18,6 +18,7 @@
         $roleGroups = [];
         foreach (config('permissions.menu') as $mi) {
           if (!\App\Services\Perm::can($mi[1]) || !Route::has($mi[0])) continue;
+          if ($mi[0] == 'booking.orders' && !\App\Http\Controllers\BookingController::canUseKitchen()) continue; // bếp chỉ Night Market
           $roleGroups[$mi[4] ?? $mi[3]][] = $mi;
         }
         $curRoute = $routeName ?? '';

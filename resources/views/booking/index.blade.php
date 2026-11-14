@@ -29,9 +29,11 @@
   
       @if($time_type == 3)
       <a href="{{ route('booking.create') }}?use_date={{ $arrSearch['use_date_from'] }}" class="btn btn-info btn-sm" style="margin-bottom:5px">{{ __('TẠO BILL') }}</a>
+      @if(\App\Http\Controllers\BookingController::canUseKitchen())
       <a href="{{ route('booking.orders') }}" class="btn btn-warning btn-sm" style="margin-bottom:5px">{{ __('BẾP') }}</a>
       <a href="{{ route('booking.curry') }}" class="btn btn-success btn-sm" style="margin-bottom:5px">{{ __('CURRY') }}</a>
       <a href="{{ route('booking.tandoor') }}" class="btn btn-info btn-sm" style="margin-bottom:5px">{{ __('BÁNH') }}</a>
+      @endif
      
       @else
       <a href="{{ route('booking.create') }}" class="btn btn-info btn-sm" style="margin-bottom:5px">{{ __('Thêm mới') }}</a>

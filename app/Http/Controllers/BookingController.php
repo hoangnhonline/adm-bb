@@ -1529,6 +1529,7 @@ class BookingController extends Controller
     * @return Response
     */
     public function orders(Request $request){
+        if ($deny = $this->kitchenDenied()) return $deny; // màn hình bếp chỉ dùng cho Night Market
         // TODO: tùy hệ thống bạn lọc "order hiện tại" theo điều kiện nào:
         // - branch_id hiện tại
         // - da_thu = 0 (chưa thu tiền)
@@ -1538,7 +1539,7 @@ class BookingController extends Controller
         // Mình để filter cơ bản:
         DB::table('booking')
     ->where('status', '!=', 2)
-    ->where('branch_id', Auth::user()->branch_id)
+    ->where('branch_id', self::kitchenBranchId())
     ->whereNotExists(function ($q) {
         $q->select(DB::raw(1))
           ->from('booking_detail')
@@ -1558,7 +1559,7 @@ class BookingController extends Controller
             ->with(['details.dish'])
              ->where('status', '!=', 2)   // ❗ booking đã xong sẽ không hiện
             ->orderBy('created_at', 'asc')
-            ->where('branch_id', Auth::user()->branch_id)
+            ->where('branch_id', self::kitchenBranchId())
             ->get();
 
         // Gom theo table_no (mỗi table 1 block)
@@ -1628,6 +1629,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
 
     }
     public function curry(Request $request){
+        if ($deny = $this->kitchenDenied()) return $deny; // màn hình bếp chỉ dùng cho Night Market
         // TODO: tùy hệ thống bạn lọc "order hiện tại" theo điều kiện nào:
         // - branch_id hiện tại
         // - da_thu = 0 (chưa thu tiền)
@@ -1637,7 +1639,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
         // Mình để filter cơ bản:
         DB::table('booking')
     ->where('status', '!=', 2)
-    ->where('branch_id', Auth::user()->branch_id)
+    ->where('branch_id', self::kitchenBranchId())
     ->whereNotExists(function ($q) {
         $q->select(DB::raw(1))
           ->from('booking_detail')
@@ -1653,7 +1655,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
     ]);
         $bookings = Booking::query()
             ->whereNotNull('table_no')
-            ->where('branch_id', Auth::user()->branch_id)
+            ->where('branch_id', self::kitchenBranchId())
             //->where('da_thu', 0) // nếu bạn dùng cột này để biết chưa thanh toán
             ->with([
                 'details' => function ($q) {
@@ -1733,6 +1735,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
 
     }
     public function tandoor(Request $request){
+        if ($deny = $this->kitchenDenied()) return $deny; // màn hình bếp chỉ dùng cho Night Market
         // TODO: tùy hệ thống bạn lọc "order hiện tại" theo điều kiện nào:
         // - branch_id hiện tại
         // - da_thu = 0 (chưa thu tiền)
@@ -1742,7 +1745,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
         // Mình để filter cơ bản:
         DB::table('booking')
     ->where('status', '!=', 2)
-    ->where('branch_id', Auth::user()->branch_id)
+    ->where('branch_id', self::kitchenBranchId())
     ->whereNotExists(function ($q) {
         $q->select(DB::raw(1))
           ->from('booking_detail')
@@ -1758,7 +1761,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
     ]);
         $bookings = Booking::query()
             ->whereNotNull('table_no')
-            ->where('branch_id', Auth::user()->branch_id)
+            ->where('branch_id', self::kitchenBranchId())
             //->where('da_thu', 0) // nếu bạn dùng cột này để biết chưa thanh toán
             ->with([
                 'details' => function ($q) {
@@ -1837,6 +1840,39 @@ $pendingSummary = $pendingSummary->map(function ($r) {
         return view('booking.tandoor', compact('blocks', 'pendingSummary'));
 
     }
+    /** Chi nhánh dùng màn hình bếp (Night Market) */
+    public static function kitchenBranchId()
+    {
+        return (int) config('bombay.kitchen_branch_id', 1);
+    }
+
+    /** Chỉ tài khoản Night Market (hoặc admin / tài khoản có quyền chi nhánh Night Market mà không gắn chi nhánh) được vào màn hình bếp */
+    public static function canUseKitchen($user = null)
+    {
+        $user = $user ?: Auth::user();
+        if (!$user) return false;
+        $kb = self::kitchenBranchId();
+        if ((int) $user->branch_id > 0) return (int) $user->branch_id === $kb;
+        if ((int) $user->id === 1 || (!\App\Services\Perm::active($user) && (int) $user->role === 1)) return true;
+        return \App\Services\Perm::active($user) && \App\Services\Perm::branchAllowed($kb, $user);
+    }
+
+    protected function kitchenDenied()
+    {
+        if (self::canUseKitchen()) return null;
+        Session::flash('message', __('Màn hình bếp chỉ dùng cho chi nhánh Night Market'));
+        return redirect()->route('booking.index');
+    }
+
+    /** Bill của chi nhánh không dùng màn hình bếp: lưu xong là hoàn tất (status 1 -> 2) */
+    protected function autoCompleteNonKitchen($bookingId)
+    {
+        $b = Booking::find($bookingId);
+        if ($b && (int) $b->branch_id !== self::kitchenBranchId() && (int) $b->status === 1) {
+            $b->update(['status' => 2]);
+        }
+    }
+
     public function markDone(Request $request, BookingDetail $detail)
 {
     DB::transaction(function () use ($detail) {
@@ -2009,6 +2045,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
 
         // Đối tác: tính loại bill / số khách buffet / hoa hồng
         PartnerDebtService::applyToBooking($booking_id);
+        $this->autoCompleteNonKitchen($booking_id);
 
         unset($dataArr['_token']);
         //store log
@@ -2245,6 +2282,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
         $model->update($dataArr);
         // Đối tác: tính lại loại bill / số khách buffet / hoa hồng
         PartnerDebtService::applyToBooking($model->id);
+        $this->autoCompleteNonKitchen($model->id);
 
         $contentDiff = array_diff_assoc($dataArr, $oldData);
 
