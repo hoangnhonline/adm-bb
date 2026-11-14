@@ -452,6 +452,7 @@ Route::group([
         Route::get('/', ['as' => 'cost.index', 'uses' => 'CostController@index']);
         Route::get('/nhap-hang', ['as' => 'cost.nhap-hang', 'uses' => 'CostController@nhapHang']);
         Route::get('/bieu-do-gia', ['as' => 'cost.bieu-do-gia', 'uses' => 'CostController@bieuDoGia']);
+        Route::get('/canh-bao-nhap', ['as' => 'cost.canh-bao-nhap', 'uses' => 'PurchaseAlertController@index']); // cảnh báo nhập tăng bất thường
         Route::get('/export', ['as' => 'cost.export', 'uses' => 'CostController@export']);
         Route::get('/ajax-doi-tac', ['as' => 'cost.ajax-doi-tac', 'uses' => 'CostController@ajaxDoiTac']);
         Route::get('/image', ['as' => 'cost.image', 'uses' => 'CostController@image']);
