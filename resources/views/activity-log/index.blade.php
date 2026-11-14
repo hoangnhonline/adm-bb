@@ -10,6 +10,8 @@
   };
   $q = function($extra) use ($f, $tab){ return route('activity-log.index', array_filter(array_merge(['tab' => $tab] + $f, $extra), function($v){ return $v !== null && $v !== ''; })); };
   $actColor = ['created' => 'success', 'updated' => 'warning', 'deleted' => 'danger'];
+  $pr = $tab == 'data' ? (new \App\Helpers\ActivityLogPresenter)->prepare($items) : null;
+  $skipOnCreate = ['id', 'created_user', 'city_id'];
 @endphp
 <div class="content-wrapper">
 <section class="content-header">
@@ -55,14 +57,18 @@
         @forelse($items as $it)
         @php
           $old = $dec($it->old_values); $new = $dec($it->new_values);
-          $keys = array_unique(array_merge(array_keys($old), array_keys($new)));
+          $keys = array_values(array_unique(array_merge(array_keys($old), array_keys($new))));
+          if($it->action != 'updated') $keys = array_values(array_diff($keys, $skipOnCreate));
+          $keys = $pr->sortKeys($it->model, $keys);
           $link = \App\Http\Controllers\ActivityLogController::objectUrl($it->model, $it->model_id);
+          $subject = $pr->subject($it, $old, $new);
         @endphp
         <tr>
           <td>{{ date('d/m/Y H:i:s', strtotime($it->created_at)) }}<br><small class="text-muted">{{ $it->ip }}</small></td>
           <td>{{ $userArr[$it->user_id] ?? ($it->user_id ? '#'.$it->user_id : 'Hệ thống') }}</td>
           <td>{{ $modelNames[$it->model] ?? $it->model }}
             @if($link)<a href="{{ $link }}" target="_blank">#{{ $it->model_id }}</a>@else #{{ $it->model_id }}@endif
+            @if($subject)<br>{!! $subject !!}@endif
             <br><a href="{{ $q(['model' => $it->model, 'model_id' => $it->model_id, 'from' => null, 'action' => null, 'user_id' => null, 'keyword' => null]) }}"><small>toàn bộ lịch sử</small></a>
           </td>
           <td><span class="label label-{{ $actColor[$it->action] ?? 'default' }}">{{ $actionNames[$it->action] ?? $it->action }}</span></td>
@@ -70,13 +76,13 @@
             <table class="table table-condensed" style="margin:0;background:transparent">
               @foreach($keys as $k)
               <tr>
-                <td style="width:160px;border:0;padding:1px 4px"><code>{{ $k }}</code></td>
+                <td style="width:190px;border:0;padding:1px 4px;font-weight:600" title="{{ $k }}">{{ $pr->label($it->model, $k) }}</td>
                 @if($it->action == 'updated')
-                <td style="border:0;padding:1px 4px;color:#c0392b">{!! $show($old[$k] ?? null) !!}</td>
+                <td style="border:0;padding:1px 4px;color:#c0392b">{!! $pr->value($it->model, $k, $old[$k] ?? null) !!}</td>
                 <td style="border:0;padding:1px 4px;width:20px">→</td>
-                <td style="border:0;padding:1px 4px;color:#1e8449">{!! $show($new[$k] ?? null) !!}</td>
+                <td style="border:0;padding:1px 4px;color:#1e8449">{!! $pr->value($it->model, $k, $new[$k] ?? null) !!}</td>
                 @else
-                <td colspan="3" style="border:0;padding:1px 4px">{!! $show($it->action == 'deleted' ? ($old[$k] ?? null) : ($new[$k] ?? null)) !!}</td>
+                <td colspan="3" style="border:0;padding:1px 4px">{!! $pr->value($it->model, $k, $it->action == 'deleted' ? ($old[$k] ?? null) : ($new[$k] ?? null)) !!}</td>
                 @endif
               </tr>
               @endforeach
