@@ -275,6 +275,7 @@
 
         @yield('js')
         @include('partials.filter-picker')
+        @include('partials.sticky-table-header')
         <script type="text/javascript">
             $(document).ready(function () {
                 $(".datepicker").datepicker({
