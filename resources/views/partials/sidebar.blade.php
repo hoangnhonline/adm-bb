@@ -105,6 +105,13 @@
           <i class="fa fa-line-chart"></i> <span>BÁO CÁO CÔNG NỢ ĐỐI TÁC</span>
         </a>
       </li>
+      @if(Auth::user()->id == 1)
+      <li {{ in_array($routeName, ['activity-log.index']) ? "class=active" : "" }}>
+        <a href="{{ route('activity-log.index') }}">
+          <i class="fa fa-history"></i> <span>LỊCH SỬ THAO TÁC</span>
+        </a>
+      </li>
+      @endif
       @endif
       @if(Auth::user()->id != 3 && Auth::user()->role == 1)
 

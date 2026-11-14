@@ -5,6 +5,8 @@ use Illuminate\Database\Eloquent\Model;
 
 
 class BookingPayment extends Model  {
+    use \App\Traits\LogsActivity;
+
 
 	/**
 	 * The database table used by the model.

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
  * aliases: tên gọi khác (Việt/Anh), phân cách dấu phẩy – dùng cho ô tìm kiếm trên form.
  */
 class Ingredient extends Model  {
+    use \App\Traits\LogsActivity;
+
 
     protected $table = 'ingredient';
 

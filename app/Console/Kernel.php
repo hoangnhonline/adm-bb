@@ -26,6 +26,8 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+        // Xóa nhật ký thao tác (request_log) cũ hơn 12 tháng
+        $schedule->command('logs:cleanup')->dailyAt('03:15');
     }
 
     /**

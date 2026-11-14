@@ -174,6 +174,9 @@
             
             <div class="box-footer">
               <button type="submit" class="btn btn-primary btn-sm">Save</button>
+              @if(Auth::user()->id == 1)
+              <a class="btn btn-default btn-sm pull-right" target="_blank" href="{{ route('activity-log.index', ['tab' => 'data', 'model' => 'cost', 'model_id' => $detail->id]) }}"><i class="fa fa-history"></i> Lịch sử</a>
+              @endif
               <a class="btn btn-default btn-sm" class="btn btn-primary btn-sm" href="{{ route('cost.index')}}">Cancel</a>
             </div>            
         </div>

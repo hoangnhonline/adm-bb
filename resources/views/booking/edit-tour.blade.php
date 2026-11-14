@@ -232,6 +232,9 @@
               <button type="button" class="btn btn-default btn-sm" id="btnLoading" style="display:none"><i class="fa fa-spin fa-spinner"></i> Processing...</button>
               <button type="submit" id="btnSave" class="btn btn-primary btn-sm">Save</button>
               <a class="btn btn-default btn-sm" class="btn btn-primary btn-sm" href="{{ route('booking.index') }}">Cancel</a>
+              @if(Auth::user()->id == 1)
+              <a class="btn btn-default btn-sm pull-right" target="_blank" href="{{ route('activity-log.index', ['tab' => 'data', 'model' => 'booking', 'model_id' => $detail->id]) }}"><i class="fa fa-history"></i> Lịch sử</a>
+              @endif
             </div>
 
         </div>

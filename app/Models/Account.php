@@ -5,6 +5,9 @@ use Illuminate\Database\Eloquent\Model;
 
 
 class Account extends Model  {
+    use \App\Traits\LogsActivity;
+    protected static $logIgnore = ['last_login', 'last_login_at'];
+
 
 	/**
 	 * The database table used by the model.

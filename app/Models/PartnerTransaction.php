@@ -5,6 +5,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PartnerTransaction extends Model
 {
+    use \App\Traits\LogsActivity;
+
     protected $table = 'partner_transactions';
 
     const TYPE_THU = 1;     // đối tác thanh toán cho nhà hàng

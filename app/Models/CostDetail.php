@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
  * need_review: 1 = cần người kiểm tra lại
  */
 class CostDetail extends Model  {
+    use \App\Traits\LogsActivity;
+
 
     protected $table = 'cost_detail';
 
