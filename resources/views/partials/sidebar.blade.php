@@ -100,6 +100,11 @@
           <i class="fa fa-dashboard"></i> <span>{{ __('TỔNG QUAN') }}</span>
         </a>
       </li>
+      <li {{ in_array($routeName, ['report.thu-tien-nguoi']) ? "class=active" : "" }}>
+        <a href="{{ route('report.thu-tien-nguoi') }}">
+          <i class="fa fa-user-circle"></i> <span>{{ __('THU TIỀN THEO NGƯỜI') }}</span>
+        </a>
+      </li>
       <li {{ in_array($routeName, ['report.vat']) ? "class=active" : "" }}>
         <a href="{{ route('report.vat') }}">
           <i class="fa fa-percent"></i> <span>{{ __('VAT & HOA HỒNG') }}</span>

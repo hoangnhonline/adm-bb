@@ -759,5 +759,17 @@
     "Đổi mức hoa hồng cho tất cả đối tác và tính lại hoa hồng các bill cũ?": "Change the commission rate for all partners and recalculate old bills?",
     "đã áp dụng cho :n đối tác": "applied to :n partners",
     "Tài xế": "Driver",
-    "Tick chọn bill bên dưới để đổi trạng thái VAT. Chi nhánh Vui Fest (bill Sapo) luôn KHÔNG VAT.": "Tick bills below to change VAT status. Vui Fest branch (Sapo bills) is always NO VAT."
+    "Tick chọn bill bên dưới để đổi trạng thái VAT. Chi nhánh Vui Fest (bill Sapo) luôn KHÔNG VAT.": "Tick bills below to change VAT status. Vui Fest branch (Sapo bills) is always NO VAT.",
+    "Thu tiền theo người nhận": "Collections by receiver",
+    "THU TIỀN THEO NGƯỜI": "COLLECTIONS BY RECEIVER",
+    "Gồm VAT": "Incl. VAT",
+    "Hôm nay": "Today",
+    "Tháng trước": "Last month",
+    "Tiền bill (còn lại) tính cho người thu tiền, tiền cọc tính cho người thu cọc.": "Bill amount (remaining) goes to the payment receiver; deposits go to the deposit receiver.",
+    "Đã cộng VAT của bill vào người thu tiền.": "Bill VAT is added to the payment receiver.",
+    "Tổng tiền theo từng người": "Total by receiver",
+    "Người nhận tiền": "Receiver",
+    "Theo từng ngày": "By day",
+    "Chưa chọn người thu": "No receiver selected",
+    "CN": "Sun"
 }
