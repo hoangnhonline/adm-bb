@@ -30,8 +30,32 @@ class Partner extends Model  {
                             'phone',  
                             'status',
                             'cost_type_id', 
-                            'description',                            
+                            'description',
+                            'phone_2',
+                            'email',
+                            'doi_tac',
+                            'type',
+                            'contact_name',
+                            'tax_code',
+                            'address',
+                            'bank_info',
+                            'pay_term_days',
+                            'com_buffet_per_pax',
+                            'com_alacarte_pct',
+                            'branch_id',
                             ];
+    // Loại đối tác bán hàng (doi_tac = 1)
+    public static $doiTacTypes = [
+        'tour'  => 'Công ty tour',
+        'hotel' => 'Khách sạn',
+        'hdv'   => 'HDV',
+        'ptt'   => 'Plan To Travel',
+        'cano'  => 'Cty cano',
+    ];
+    public static function doiTacList()
+    {
+        return self::where('doi_tac', 1)->where('status', 1)->orderBy('type')->orderBy('name')->get();
+    }
     public static function getList($params = []){
         $query = self::where('status', 1);
         if( isset($params['cate_id']) && $params['cate_id'] ){

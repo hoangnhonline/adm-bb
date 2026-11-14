@@ -180,6 +180,7 @@
                 </div>
 
 
+                @include('booking.partials.doi-tac')
                 <div class="form-group" style="display: none;">
                      <label>Status <span class="red-star">*</span></label>
                       <select class="form-control" name="status" id="status">

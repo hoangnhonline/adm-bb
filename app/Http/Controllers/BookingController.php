@@ -16,6 +16,8 @@ use App\Models\Account;
 use App\Models\Cost;
 use App\Models\Branch;
 use App\Models\Dish;
+use App\Models\Partner;
+use App\Services\PartnerDebtService;
 use App\User;
 use App\Models\Settings;
 use Helper, File, Session, Auth, Image, Hash;
@@ -605,6 +607,7 @@ class BookingController extends Controller
         $arrSearch['branch_ids'] = $branch_ids = $request->branch_ids ? $request->branch_ids : [];      
         $arrSearch['nguoi_tu_van'] = $nguoi_tu_van = $request->nguoi_tu_van ?? null;
         $arrSearch['partner_id'] = $partner_id = $request->partner_id ?? null;
+        $arrSearch['doi_tac'] = $doi_tac = $request->doi_tac ?? null; // '' tất cả | 'le' khách lẻ | 'all' mọi đối tác | id
         $arrSearch['hdv_id'] = $hdv_id = $request->hdv_id ?? null;
         $arrSearch['phone'] = $phone = $request->phone ? $request->phone : null;
         $arrSearch['not_john'] = $not_john = $request->not_john ?? null;
@@ -701,6 +704,13 @@ class BookingController extends Controller
             // }
             if($partner_id){
                 $query->where('partner_id', $partner_id);
+            }
+            if($doi_tac === 'le'){
+                $query->whereNull('doi_tac_id');
+            }elseif($doi_tac === 'all'){
+                $query->whereNotNull('doi_tac_id');
+            }elseif($doi_tac > 0){
+                $query->where('doi_tac_id', (int) $doi_tac);
             }
             $isView = Auth::user()->is_view == 1 ? true: false;
             if($isView){
@@ -899,6 +909,7 @@ class BookingController extends Controller
         $cateList = Dish::orderBy('display_order')->get();                
         $branchList = Branch::where('status', 1)->orderBy('display_order')->get();
         $partners = Account::where('is_partner', 1)->get();        
+        $doiTacList = Partner::doiTacList();
         
         $beachArr = [];
         foreach($branchList as $beach){
@@ -910,7 +921,7 @@ class BookingController extends Controller
         }
         
       
-        return view($view, compact( 'items', 'arrSearch', 'keyword', 'time_type', 'month', 'year', 'month_do', 'arrData', 'chietkhauList', 'branch_id', 'cateList', 'use_date_from_format', 'use_date_to_format', 'branchList', 'beachArr', 'partners', 'partner_id', 'cateArr', 'totalRevenue', 'totalRupees', 'totalDrinks', 'isView', 'totalRevenueKoGiam'));
+        return view($view, compact( 'items', 'arrSearch', 'keyword', 'time_type', 'month', 'year', 'month_do', 'arrData', 'chietkhauList', 'branch_id', 'cateList', 'use_date_from_format', 'use_date_to_format', 'branchList', 'beachArr', 'partners', 'partner_id', 'cateArr', 'totalRevenue', 'totalRupees', 'totalDrinks', 'isView', 'totalRevenueKoGiam', 'doiTacList'));
 
     }
 
@@ -1906,8 +1917,9 @@ $pendingSummary = $pendingSummary->map(function ($r) {
 
         $branchList = Branch::where('status', 1)->orderBy('display_order')->get();
         $partners = Account::where('is_partner', 1)->get();
+        $doiTacList = Partner::doiTacList();
                
-        return view($view, compact('cateList', 'use_date', 'bill', 'chietkhauList', 'partners', 'branchList'));
+        return view($view, compact('cateList', 'use_date', 'bill', 'chietkhauList', 'partners', 'branchList', 'doiTacList'));
     }
     /**
     * Store a newly created resource in storage.
@@ -1947,6 +1959,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
 
         $dataArr['take_away'] = isset($dataArr['take_away']) ? 1 : 0;
         $dataArr['indian'] = isset($dataArr['indian']) ? 2 : 1;
+        $dataArr = $this->normalizeDoiTac($dataArr);
 
         $tmpDate = explode('/', $dataArr['use_date']);
 
@@ -1984,6 +1997,9 @@ $pendingSummary = $pendingSummary->map(function ($r) {
             }
         }
 
+        // Đối tác: tính loại bill / số khách buffet / hoa hồng
+        PartnerDebtService::applyToBooking($booking_id);
+
         unset($dataArr['_token']);
         //store log
         $rsLog = BookingLogs::create([
@@ -2018,12 +2034,13 @@ $pendingSummary = $pendingSummary->map(function ($r) {
             $cateList = Dish::orderBy('display_order')->where('branch_id', $detail->branch_id)->get();                
             $branchList = Branch::where('status', 1)->orderBy('display_order')->get();
             $partners = Account::where('is_partner', 1)->get();
+            $doiTacList = Partner::doiTacList();
         
         $view = 'booking.edit-tour';
       
         
         
-        return view($view , compact( 'detail', 'cateList','chietkhauList', 'partners', 'branchList'));
+        return view($view , compact( 'detail', 'cateList','chietkhauList', 'partners', 'branchList', 'doiTacList'));
 
     }
     public function detail($id, Request $request)
@@ -2092,6 +2109,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
         $dataArr['xe_4t'] = isset($dataArr['xe_4t']) ? 1 : 0;
          $dataArr['take_away'] = isset($dataArr['take_away']) ? 1 : 0;
         $dataArr['indian'] = isset($dataArr['indian']) ? 2 : 1;
+        $dataArr = $this->normalizeDoiTac($dataArr);
         $tmpDate = explode('/', $dataArr['use_date']);
 
         $dataArr['use_date'] = $tmpDate[2].'-'.$tmpDate[1].'-'.$tmpDate[0];
@@ -2215,6 +2233,8 @@ $pendingSummary = $pendingSummary->map(function ($r) {
         unset($dataArr['notes_dish']);
         
         $model->update($dataArr);
+        // Đối tác: tính lại loại bill / số khách buffet / hoa hồng
+        PartnerDebtService::applyToBooking($model->id);
 
         $contentDiff = array_diff_assoc($dataArr, $oldData);
 
@@ -2245,6 +2265,23 @@ $pendingSummary = $pendingSummary->map(function ($r) {
     * @param  int  $id
     * @return Response
     */
+    /** Chuẩn hóa các trường đối tác trên form bill. */
+    private function normalizeDoiTac($dataArr)
+    {
+        // Form cũ không có khối đối tác => không đụng tới các trường này
+        if(!isset($dataArr['doi_tac_form'])){
+            unset($dataArr['doi_tac_id'], $dataArr['co_chiet_khau'], $dataArr['ghi_no'], $dataArr['bill_type'], $dataArr['pax'], $dataArr['com_amount']);
+            return $dataArr;
+        }
+        unset($dataArr['doi_tac_form']);
+        $dataArr['doi_tac_id'] = !empty($dataArr['doi_tac_id']) ? (int) $dataArr['doi_tac_id'] : null;
+        $dataArr['co_chiet_khau'] = ($dataArr['doi_tac_id'] && isset($dataArr['co_chiet_khau'])) ? 1 : 0;
+        $dataArr['ghi_no'] = ($dataArr['doi_tac_id'] && isset($dataArr['ghi_no'])) ? 1 : 0;
+        // các trường do hệ thống tính, không nhận từ form
+        unset($dataArr['bill_type'], $dataArr['pax'], $dataArr['com_amount']);
+        return $dataArr;
+    }
+
     public function destroy($id)
     {
         // delete

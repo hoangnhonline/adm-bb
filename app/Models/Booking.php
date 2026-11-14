@@ -62,7 +62,13 @@ class Booking extends Model  {
                             'indian', 
                             'take_away',
                             'no_vat',
-                            'chiet_khau'
+                            'chiet_khau',
+                            'doi_tac_id',
+                            'co_chiet_khau',
+                            'ghi_no',
+                            'bill_type',
+                            'pax',
+                            'com_amount'
                             ];
     public static function getList($params = []){
         $query = self::where('status', 1);
@@ -183,5 +189,9 @@ class Booking extends Model  {
     public function branch()
     {
         return $this->belongsTo('App\Models\Branch', 'branch_id');
+    }
+    public function doiTac()
+    {
+        return $this->belongsTo('App\Models\Partner', 'doi_tac_id');
     }
 }

@@ -95,6 +95,16 @@
           <i class="fa fa-pie-chart"></i> <span>CHI PHÍ / DOANH THU</span>
         </a>
       </li>
+      <li {{ in_array($routeName, ['doi-tac.index', 'doi-tac.show', 'doi-tac.create', 'doi-tac.edit']) ? "class=active" : "" }}>
+        <a href="{{ route('doi-tac.index') }}">
+          <i class="fa fa-handshake-o"></i> <span>ĐỐI TÁC &amp; CÔNG NỢ</span>
+        </a>
+      </li>
+      <li {{ in_array($routeName, ['doi-tac.report']) ? "class=active" : "" }}>
+        <a href="{{ route('doi-tac.report') }}">
+          <i class="fa fa-line-chart"></i> <span>BÁO CÁO CÔNG NỢ ĐỐI TÁC</span>
+        </a>
+      </li>
       @endif
       @if(Auth::user()->id != 3 && Auth::user()->role == 1)
 

@@ -211,6 +211,7 @@
                 </div>
 
 
+                @include('booking.partials.doi-tac')
                 <div class="form-group">
                   <label>Notes</label>
                   <textarea class="form-control" rows="6" name="notes" id="notes">{{ old('notes', $detail->notes) }}</textarea>

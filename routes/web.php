@@ -84,6 +84,21 @@ Route::group([
         Route::get('{id}/destroy', ['as' => 'partner.destroy', 'uses' => 'PartnerController@destroy']);
         Route::get('/change-value', ['as' => 'partner.change-value-by-column', 'uses' => 'PartnerController@changeValueByColumn']);  
     });
+    // Đối tác bán hàng & công nợ (14/11/2026)
+    Route::group(['prefix' => 'doi-tac'], function () {
+        Route::get('/', ['as' => 'doi-tac.index', 'uses' => 'DoiTacController@index']);
+        Route::get('/report', ['as' => 'doi-tac.report', 'uses' => 'DoiTacController@report']);
+        Route::get('/create', ['as' => 'doi-tac.create', 'uses' => 'DoiTacController@create']);
+        Route::post('/store', ['as' => 'doi-tac.store', 'uses' => 'DoiTacController@store']);
+        Route::post('/update', ['as' => 'doi-tac.update', 'uses' => 'DoiTacController@update']);
+        Route::get('/transaction/{tid}/cancel', ['as' => 'doi-tac.transaction.cancel', 'uses' => 'DoiTacController@cancelTransaction'])->where('tid', '[0-9]+');
+        Route::get('/{id}', ['as' => 'doi-tac.show', 'uses' => 'DoiTacController@show'])->where('id', '[0-9]+');
+        Route::get('/{id}/edit', ['as' => 'doi-tac.edit', 'uses' => 'DoiTacController@edit'])->where('id', '[0-9]+');
+        Route::get('/{id}/destroy', ['as' => 'doi-tac.destroy', 'uses' => 'DoiTacController@destroy'])->where('id', '[0-9]+');
+        Route::get('/{id}/recalc', ['as' => 'doi-tac.recalc', 'uses' => 'DoiTacController@recalc'])->where('id', '[0-9]+');
+        Route::get('/{id}/export', ['as' => 'doi-tac.export', 'uses' => 'DoiTacController@export'])->where('id', '[0-9]+');
+        Route::post('/{id}/transaction', ['as' => 'doi-tac.transaction.store', 'uses' => 'DoiTacController@storeTransaction'])->where('id', '[0-9]+');
+    });
     Route::group(['prefix' => 'revenue'], function () {        
         Route::get('/', ['as' => 'revenue.index', 'uses' => 'RevenueController@index']);      
         Route::get('/create', ['as' => 'revenue.create', 'uses' => 'RevenueController@create']);

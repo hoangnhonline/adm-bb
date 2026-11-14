@@ -94,7 +94,16 @@
                 @endforeach
               </select>
             </div> 
-         
+            <div class="form-group">
+              <select class="form-control select2" name="doi_tac" style="width: 170px;">
+                <option value="">--Đối tác / Khách lẻ--</option>
+                <option value="le" {{ ($arrSearch['doi_tac'] ?? '') === 'le' ? "selected" : "" }}>Khách lẻ</option>
+                <option value="all" {{ ($arrSearch['doi_tac'] ?? '') === 'all' ? "selected" : "" }}>Tất cả đối tác</option>
+                @foreach(($doiTacList ?? []) as $dt)
+                <option value="{{ $dt->id }}" {{ ($arrSearch['doi_tac'] ?? '') == $dt->id ? "selected" : "" }}>{{ $dt->name }}</option>
+                @endforeach
+              </select>
+            </div>
              
             <button type="submit" class="btn btn-info btn-sm" style="margin-top: -5px">Search</button>
             <div class="form-group">
@@ -192,6 +201,11 @@
                     @endif
                     @if($item->branch_id)
                     <br><p style="color: blue">{{ $item->branch->name }}</p>
+                    @endif
+                    @if($item->doi_tac_id && $item->doiTac)
+                    <span class="label label-warning">{{ $item->doiTac->name }}</span>
+                    @if($item->ghi_no)<span class="label label-danger">Ghi nợ</span>@endif
+                    @if($item->com_amount > 0)<br><small>HH: {{ number_format($item->com_amount) }}</small>@endif
                     @endif
                 </td>
                 <td>
