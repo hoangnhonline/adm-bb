@@ -143,7 +143,7 @@
                     <span style="color: red">{{ __('KHÔNG PHẢI KHÁCH ẤN') }}</span>
                     @endif                    
                     @if($item->branch_id)
-                    <br><p style="color: blue">{{ $item->branch->name }}</p>
+                    <br><p style="color: blue">{{ optional($item->branch)->name ?? ('#' . $item->branch_id) }}</p>
                     @endif
                  <table class="table" style="margin-top:5px;margin-bottom: 10px;">
                    @foreach($item->details as $service)

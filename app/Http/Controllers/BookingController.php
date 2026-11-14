@@ -633,7 +633,9 @@ class BookingController extends Controller
         $arrSearch['created_at'] = $created_at = $request->created_at ? $request->created_at :  null;
         
         
-        $query = Booking::where('city_id', 1);             
+        $query = Booking::where('city_id', 1);
+        // giới hạn chi nhánh theo phân quyền cho mọi kiểu tìm (cả tìm theo mã bill / SĐT)
+        if (($permBranchIds = \App\Services\Perm::branchIds()) !== null) $query->whereIn('branch_id', $permBranchIds ?: [0]);             
 
         if($keyword){
             if(strlen($keyword) <= 8){
@@ -972,7 +974,9 @@ class BookingController extends Controller
         $arrSearch['created_at'] = $created_at = $request->created_at ? $request->created_at :  null;
         
         
-        $query = Booking::where('city_id', 1);             
+        $query = Booking::where('city_id', 1);
+        // giới hạn chi nhánh theo phân quyền cho mọi kiểu tìm (cả tìm theo mã bill / SĐT)
+        if (($permBranchIds = \App\Services\Perm::branchIds()) !== null) $query->whereIn('branch_id', $permBranchIds ?: [0]);             
 
         if($keyword){
             if(strlen($keyword) <= 8){
@@ -1275,7 +1279,9 @@ class BookingController extends Controller
         $arrSearch['created_at'] = $created_at = $request->created_at ? $request->created_at :  null;
         
         
-        $query = Booking::where('city_id', 1);             
+        $query = Booking::where('city_id', 1);
+        // giới hạn chi nhánh theo phân quyền cho mọi kiểu tìm (cả tìm theo mã bill / SĐT)
+        if (($permBranchIds = \App\Services\Perm::branchIds()) !== null) $query->whereIn('branch_id', $permBranchIds ?: [0]);             
 
         if($keyword){
             if(strlen($keyword) <= 8){

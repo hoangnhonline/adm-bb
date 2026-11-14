@@ -206,7 +206,7 @@
                     <br><span style="color: red">{{ __('KHÔNG PHẢI KHÁCH ẤN') }}</span>
                     @endif
                     @if($item->branch_id)
-                    <br><p style="color: blue">{{ $item->branch->name }}</p>
+                    <br><p style="color: blue">{{ optional($item->branch)->name ?? ('#' . $item->branch_id) }}</p>
                     @endif
                     @if($item->doi_tac_id && $item->doiTac)
                     <span class="label label-warning">{{ $item->doiTac->name }}</span>
