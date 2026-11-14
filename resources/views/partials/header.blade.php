@@ -28,7 +28,16 @@
               <button type="button" id="btnQuickSearch" class="btn btn-danger btn-flat btn-preview">{{ __('Tìm') }}</button>
           </span>
       </div>
-      <h3 style="color: blue; position: absolute;top: -10px; left: 200px;">{{ $branchDetail->name }}</h3>
+      <h3 class="header-branch-name" style="color: blue; position: absolute;top: -10px; left: 200px;">{{ $branchDetail->name }}</h3>
+      <style>/* màn hình nhỏ: tên chi nhánh không đè lên nút VI/EN và nút cài đặt (14/11/2026) */
+        @media (max-width: 767px) {
+          .main-header #div_search_fast { width: 130px !important; }
+          .main-header .header-branch-name { top: 0 !important; left: 180px !important; margin: 0; height: 50px; display: flex; align-items: center;
+            font-size: 13px; line-height: 1.15; font-weight: bold; max-width: calc(100% - 180px - 118px); overflow: hidden; word-break: break-word; }
+          .main-header .locale-switch { padding: 13px 2px 0 2px !important; }
+          .main-header .locale-switch a { padding: 4px 5px !important; }
+        }
+      </style>
       @endif
    
     <div class="navbar-custom-menu">
