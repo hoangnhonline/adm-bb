@@ -36,7 +36,7 @@ class ActivityLogController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            if (!Auth::check() || !in_array(Auth::user()->id, self::VIEWER_IDS)) abort(403, 'Không có quyền');
+            if (!Auth::check() || !in_array(Auth::user()->id, self::VIEWER_IDS)) abort(403, __('Không có quyền'));
             return $next($request);
         });
     }
@@ -84,8 +84,8 @@ class ActivityLogController extends Controller
         $userIds = DB::table('activity_log')->whereNotNull('user_id')->distinct()->pluck('user_id')
             ->merge(DB::table('request_log')->whereNotNull('user_id')->distinct()->pluck('user_id'))->unique();
         $userArr = DB::table('users')->whereIn('id', $userIds->all() ?: [0])->orderBy('name')->pluck('name', 'id');
-        $modelNames = self::$modelNames;
-        $actionNames = self::$actionNames;
+        $modelNames = array_map('__', self::$modelNames);
+        $actionNames = array_map('__', self::$actionNames);
         return view('activity-log.index', compact('tab', 'f', 'items', 'userArr', 'modelNames', 'actionNames'));
     }
 

@@ -2,7 +2,7 @@
 <html >
   <head>
     <meta charset="UTF-8">
-    <title>BOMBAY Indian Restaurant - Đăng nhập hệ thống</title>
+    <title>{{ __('BOMBAY Indian Restaurant - Đăng nhập hệ thống') }}</title>
     <meta property="og:type" content="website" />
     <meta property="og:image" content="images/logo.jpg" />
     <meta name="robots" content="noindex">
@@ -194,7 +194,7 @@ body {
         </div>
 
         <div class="form-group row">
-            <label for="password" class="col-md-12 col-form-label text-md-left">Mật khẩu</label>
+            <label for="password" class="col-md-12 col-form-label text-md-left">{{ __('Mật khẩu') }}</label>
 
             <div class="col-md-12">
                 <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
@@ -222,7 +222,7 @@ body {
         <div class="form-group row mb-0">
             <div class="col-md-12 offset-md-12">
                 <button type="submit" class="btn btn-primary">
-                    Đăng nhập
+                    {{ __('Đăng nhập') }}
                 </button>
 
                 @if (Route::has('password.request'))

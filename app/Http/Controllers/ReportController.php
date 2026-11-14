@@ -54,7 +54,7 @@ class ReportController extends Controller
                 $to = date('Y-m-d', strtotime($from.' +6 days'));
                 $prevFrom = date('Y-m-d', strtotime($from.' -7 days'));
                 $prevTo = date('Y-m-d', strtotime($from.' -1 day'));
-                $label = 'Tuần '.date('d/m', strtotime($from)).' - '.date('d/m/Y', strtotime($to));
+                $label = __('Tuần').' '.date('d/m', strtotime($from)).' - '.date('d/m/Y', strtotime($to));
                 $prevAnchor = $prevFrom;
                 $nextAnchor = date('Y-m-d', strtotime($from.' +7 days'));
             }elseif($period == 'month'){
@@ -62,7 +62,7 @@ class ReportController extends Controller
                 $to = date('Y-m-t', $anchor);
                 $prevFrom = date('Y-m-01', strtotime($from.' -1 month'));
                 $prevTo = date('Y-m-t', strtotime($prevFrom));
-                $label = 'Tháng '.date('m/Y', $anchor);
+                $label = __('Tháng').' '.date('m/Y', $anchor);
                 $prevAnchor = $prevFrom;
                 $nextAnchor = date('Y-m-01', strtotime($from.' +1 month'));
             }else{
@@ -70,7 +70,7 @@ class ReportController extends Controller
                 $to = date('Y-12-31', $anchor);
                 $prevFrom = date('Y-01-01', strtotime($from.' -1 year'));
                 $prevTo = date('Y-12-31', strtotime($prevFrom));
-                $label = 'Năm '.date('Y', $anchor);
+                $label = __('Năm').' '.date('Y', $anchor);
                 $prevAnchor = $prevFrom;
                 $nextAnchor = date('Y-01-01', strtotime($from.' +1 year'));
             }
@@ -184,21 +184,21 @@ class ReportController extends Controller
                 $to = date('Y-m-d', strtotime($from.' +6 days'));
                 $prevFrom = date('Y-m-d', strtotime($from.' -7 days'));
                 $prevTo = date('Y-m-d', strtotime($from.' -1 day'));
-                $label = 'Tuần '.date('d/m', strtotime($from)).' - '.date('d/m/Y', strtotime($to));
+                $label = __('Tuần').' '.date('d/m', strtotime($from)).' - '.date('d/m/Y', strtotime($to));
                 $nextAnchor = date('Y-m-d', strtotime($from.' +7 days'));
             }elseif($period == 'month'){
                 $from = date('Y-m-01', $anchor);
                 $to = date('Y-m-t', $anchor);
                 $prevFrom = date('Y-m-01', strtotime($from.' -1 month'));
                 $prevTo = date('Y-m-t', strtotime($prevFrom));
-                $label = 'Tháng '.date('m/Y', $anchor);
+                $label = __('Tháng').' '.date('m/Y', $anchor);
                 $nextAnchor = date('Y-m-01', strtotime($from.' +1 month'));
             }else{
                 $from = date('Y-01-01', $anchor);
                 $to = date('Y-12-31', $anchor);
                 $prevFrom = date('Y-01-01', strtotime($from.' -1 year'));
                 $prevTo = date('Y-12-31', strtotime($prevFrom));
-                $label = 'Năm '.date('Y', $anchor);
+                $label = __('Năm').' '.date('Y', $anchor);
                 $nextAnchor = date('Y-01-01', strtotime($from.' +1 year'));
             }
             $prevAnchor = $prevFrom;

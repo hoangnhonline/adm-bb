@@ -27,17 +27,17 @@
 @endphp
 <div class="form-group col-xs-12" id="cost-details-box">
   <input type="hidden" name="details_submitted" value="1">
-  <label>Chi tiết hàng <small style="font-weight:normal;color:#888">(không bắt buộc – nhập để thống kê theo từng nguyên liệu)</small></label>
+  <label>{{ __('Chi tiết hàng') }} <small style="font-weight:normal;color:#888">{{ __('(không bắt buộc – nhập để thống kê theo từng nguyên liệu)') }}</small></label>
   <div class="table-responsive">
     <table class="table table-bordered table-condensed" id="tblCostDetail" style="margin-bottom:5px;min-width:760px">
       <thead>
         <tr style="background:#f4f4f4">
-          <th style="width:28%">Nguyên liệu</th>
-          <th style="width:9%">SL</th>
-          <th style="width:9%">ĐVT</th>
-          <th style="width:13%" class="text-right">Đơn giá</th>
-          <th style="width:14%" class="text-right">Thành tiền</th>
-          <th>Ghi chú</th>
+          <th style="width:28%">{{ __('Nguyên liệu') }}</th>
+          <th style="width:9%">{{ __('SL') }}</th>
+          <th style="width:9%">{{ __('ĐVT') }}</th>
+          <th style="width:13%" class="text-right">{{ __('Đơn giá') }}</th>
+          <th style="width:14%" class="text-right">{{ __('Thành tiền') }}</th>
+          <th>{{ __('Ghi chú') }}</th>
           <th style="width:1%"></th>
         </tr>
       </thead>
@@ -49,11 +49,11 @@
       <tfoot>
         <tr>
           <td colspan="7">
-            <button type="button" class="btn btn-default btn-sm" id="btnAddCostDetail"><i class="fa fa-plus"></i> Thêm dòng</button>
-            <span style="margin-left:15px">Tổng chi tiết: <b id="cdSum">0</b></span>
-            <span style="margin-left:15px">Total bill: <b id="cdBill">0</b></span>
+            <button type="button" class="btn btn-default btn-sm" id="btnAddCostDetail"><i class="fa fa-plus"></i> {{ __('Thêm dòng') }}</button>
+            <span style="margin-left:15px">{{ __('Tổng chi tiết:') }} <b id="cdSum">0</b></span>
+            <span style="margin-left:15px">{{ __('Tổng bill:') }} <b id="cdBill">0</b></span>
             <span style="margin-left:15px" id="cdDiff"></span>
-            <button type="button" class="btn btn-warning btn-xs" id="btnUseDetailTotal" style="margin-left:10px;display:none">Lấy tổng chi tiết làm Total</button>
+            <button type="button" class="btn btn-warning btn-xs" id="btnUseDetailTotal" style="margin-left:10px;display:none">{{ __('Lấy tổng chi tiết làm Total') }}</button>
           </td>
         </tr>
       </tfoot>

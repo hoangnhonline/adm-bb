@@ -8,11 +8,11 @@
 @endphp
 <div class="content-wrapper">
 <section class="content-header">
-  <h1>Biểu đồ giá nguyên liệu</h1>
+  <h1>{{ __('Biểu đồ giá nguyên liệu') }}</h1>
   <ol class="breadcrumb">
-    <li><a href="#"><i class="fa fa-dashboard"></i> Dashboard</a></li>
-    <li><a href="{{ route('cost.nhap-hang') }}">Nhập hàng</a></li>
-    <li class="active">Biểu đồ giá</li>
+    <li><a href="#"><i class="fa fa-dashboard"></i> {{ __('Trang chủ') }}</a></li>
+    <li><a href="{{ route('cost.nhap-hang') }}">{{ __('Nhập hàng') }}</a></li>
+    <li class="active">{{ __('Biểu đồ giá') }}</li>
   </ol>
 </section>
 
@@ -20,7 +20,7 @@
   <div class="row">
     <div class="col-md-12">
       <div class="panel panel-default">
-        <div class="panel-heading"><h3 class="panel-title">Bộ lọc</h3></div>
+        <div class="panel-heading"><h3 class="panel-title">{{ __('Bộ lọc') }}</h3></div>
         <div class="panel-body">
           <form class="form-inline" role="form" method="GET" action="{{ route('cost.bieu-do-gia') }}" id="searchForm">
             <div class="form-group" style="width:100%;max-width:440px">
@@ -31,37 +31,37 @@
               </select>
             </div>
             <div class="form-group">
-              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_from" placeholder="Từ ngày" value="{{ $arrSearch['use_date_from'] }}" style="width:110px">
+              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_from" placeholder="{{ __('Từ ngày') }}" value="{{ $arrSearch['use_date_from'] }}" style="width:110px">
             </div>
             <div class="form-group">
-              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_to" placeholder="Đến ngày" value="{{ $arrSearch['use_date_to'] }}" style="width:110px">
+              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_to" placeholder="{{ __('Đến ngày') }}" value="{{ $arrSearch['use_date_to'] }}" style="width:110px">
             </div>
             <div class="form-group">
               <select class="form-control" name="ncc_id" id="ncc_id" style="min-width:160px">
-                <option value="">--Nhà cung cấp--</option>
+                <option value="">{{ __('--Nhà cung cấp--') }}</option>
                 @foreach($nccList as $ncc)
                   <option value="{{ $ncc->id }}" {{ $arrSearch['ncc_id'] == $ncc->id ? "selected" : "" }}>{{ $ncc->name }}</option>
                 @endforeach
               </select>
             </div>
-            <button type="submit" class="btn btn-info btn-sm" style="margin-top:-5px">Xem</button>
+            <button type="submit" class="btn btn-info btn-sm" style="margin-top:-5px">{{ __('Xem') }}</button>
             <div style="margin-top:8px">
               <div class="btn-group btn-group-sm" style="margin-right:12px">
                 <label class="btn btn-default {{ $arrSearch['mode'] == 'lan' ? 'active btn-primary' : '' }}">
-                  <input type="radio" name="mode" value="lan" style="display:none" {{ $arrSearch['mode'] == 'lan' ? 'checked' : '' }}> Theo từng lần nhập
+                  <input type="radio" name="mode" value="lan" style="display:none" {{ $arrSearch['mode'] == 'lan' ? 'checked' : '' }}> {{ __('Theo từng lần nhập') }}
                 </label>
                 <label class="btn btn-default {{ $arrSearch['mode'] == 'ngay' ? 'active btn-primary' : '' }}">
-                  <input type="radio" name="mode" value="ngay" style="display:none" {{ $arrSearch['mode'] == 'ngay' ? 'checked' : '' }}> Bình quân theo ngày
+                  <input type="radio" name="mode" value="ngay" style="display:none" {{ $arrSearch['mode'] == 'ngay' ? 'checked' : '' }}> {{ __('Bình quân theo ngày') }}
                 </label>
               </div>
-              <div class="form-group" title="Chỉ dùng khi chọn 1 nguyên liệu">
+              <div class="form-group" title="{{ __('Chỉ dùng khi chọn 1 nguyên liệu') }}">
                 <input type="checkbox" name="by_ncc" id="by_ncc" value="1" {{ $arrSearch['by_ncc'] ? "checked" : "" }} {{ count($arrSearch['ingredient_ids']) == 1 ? '' : 'disabled' }}>
-                <label for="by_ncc">Tách theo nhà cung cấp</label>
+                <label for="by_ncc">{{ __('Tách theo nhà cung cấp') }}</label>
               </div>
               &nbsp;&nbsp;
               <div class="form-group">
                 <input type="checkbox" name="include_review" id="include_review" value="1" {{ $arrSearch['include_review'] ? "checked" : "" }}>
-                <label for="include_review">Gồm dòng cần kiểm tra</label>
+                <label for="include_review">{{ __('Gồm dòng cần kiểm tra') }}</label>
               </div>
             </div>
             <div style="margin-top:4px">
@@ -78,7 +78,7 @@
 
       @if(!$arrSearch['ingredient_ids'])
         <div class="callout callout-info">
-          <p>Chọn 1–5 nguyên liệu ở ô trên (gõ không dấu cũng tìm được, ví dụ "ca chua") rồi bấm <b>Xem</b>.</p>
+          <p>{{ __('Chọn 1–5 nguyên liệu ở ô trên (gõ không dấu cũng tìm được, ví dụ "ca chua") rồi bấm') }} <b>{{ __('Xem') }}</b>.</p>
         </div>
       @else
 
@@ -86,23 +86,23 @@
       <div class="box">
         <div class="box-header with-border">
           <h3 class="box-title">
-            {{ $arrSearch['mode'] == 'lan' ? 'Giá theo từng lần nhập' : 'Giá bình quân theo ngày' }}
+            {{ $arrSearch['mode'] == 'lan' ? __('Giá theo từng lần nhập') : __('Giá bình quân theo ngày') }}
             ({{ $arrSearch['use_date_from'] }} – {{ $arrSearch['use_date_to'] }})
           </h3>
         </div>
         <div class="box-body">
           @if(count($series))
             <div id="price_chart" style="height:460px"></div>
-            <p class="text-muted" style="margin:6px 0 0"><i>Rê chuột vào điểm để xem chi tiết, bấm vào điểm để mở bill.</i></p>
+            <p class="text-muted" style="margin:6px 0 0"><i>{{ __('Rê chuột vào điểm để xem chi tiết, bấm vào điểm để mở bill.') }}</i></p>
           @else
-            <p class="text-center">Không có lần nhập nào khớp bộ lọc.</p>
+            <p class="text-center">{{ __('Không có lần nhập nào khớp bộ lọc.') }}</p>
           @endif
           @if($skipped['unit'] || $skipped['zero'] || $skipped['review'])
             <p class="text-muted" style="margin:4px 0 0"><i>
-              Không đưa vào biểu đồ:
-              @if($skipped['unit']) {{ $skipped['unit'] }} dòng khác đơn vị chuẩn; @endif
-              @if($skipped['zero']) {{ $skipped['zero'] }} dòng không có số lượng/tiền (hàng tặng, bù…); @endif
-              @if($skipped['review']) {{ $skipped['review'] }} dòng cần kiểm tra (tick "Gồm dòng cần kiểm tra" để xem). @endif
+              {{ __('Không đưa vào biểu đồ') }}:
+              @if($skipped['unit']) {{ $skipped['unit'] }} {{ __('dòng khác đơn vị chuẩn') }}; @endif
+              @if($skipped['zero']) {{ $skipped['zero'] }} {{ __('dòng không có số lượng/tiền (hàng tặng, bù…)') }}; @endif
+              @if($skipped['review']) {{ $skipped['review'] }} {{ __('dòng cần kiểm tra (tick "Gồm dòng cần kiểm tra" để xem).') }} @endif
             </i></p>
           @endif
         </div>
@@ -110,20 +110,20 @@
 
       {{-- Tóm tắt --}}
       <div class="box">
-        <div class="box-header with-border"><h3 class="box-title">Tóm tắt</h3></div>
+        <div class="box-header with-border"><h3 class="box-title">{{ __('Tóm tắt') }}</h3></div>
         <div class="box-body table-responsive">
           <table class="table table-bordered table-condensed">
             <thead>
               <tr style="background:#f4f4f4">
-                <th>Nguyên liệu</th>
-                <th class="text-center">Số lần nhập</th>
-                <th class="text-right">Tổng SL</th>
-                <th class="text-right">Giá thấp nhất</th>
-                <th class="text-right">Giá cao nhất</th>
-                <th class="text-right">Giá TB</th>
-                <th class="text-right">Lần đầu kỳ</th>
-                <th class="text-right">Lần gần nhất</th>
-                <th class="text-right">Thay đổi</th>
+                <th>{{ __('Nguyên liệu') }}</th>
+                <th class="text-center">{{ __('Số lần nhập') }}</th>
+                <th class="text-right">{{ __('Tổng SL') }}</th>
+                <th class="text-right">{{ __('Giá thấp nhất') }}</th>
+                <th class="text-right">{{ __('Giá cao nhất') }}</th>
+                <th class="text-right">{{ __('Giá TB') }}</th>
+                <th class="text-right">{{ __('Lần đầu kỳ') }}</th>
+                <th class="text-right">{{ __('Lần gần nhất') }}</th>
+                <th class="text-right">{{ __('Thay đổi') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -147,23 +147,23 @@
                       @endif
                     </td>
                   @else
-                    <td colspan="8" class="text-center text-muted">Không có lần nhập trong kỳ</td>
+                    <td colspan="8" class="text-center text-muted">{{ __('Không có lần nhập trong kỳ') }}</td>
                   @endif
                 </tr>
               @endforeach
             </tbody>
           </table>
-          <p class="text-muted" style="margin:0"><i>Giá TB = tổng tiền ÷ tổng số lượng. "Thay đổi" = lần gần nhất so với lần đầu kỳ.</i></p>
+          <p class="text-muted" style="margin:0"><i>{{ __('Giá TB = tổng tiền ÷ tổng số lượng. "Thay đổi" = lần gần nhất so với lần đầu kỳ.') }}</i></p>
         </div>
       </div>
 
       {{-- Lịch sử từng lần nhập --}}
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title">Lịch sử từng lần nhập ({{ count($history) }})</h3>
+          <h3 class="box-title">{{ __('Lịch sử từng lần nhập') }} ({{ count($history) }})</h3>
           <div class="box-tools" style="top:8px">
             <select id="historyNcc" class="form-control input-sm" style="width:200px">
-              <option value="">Tất cả nhà cung cấp</option>
+              <option value="">{{ __('Tất cả nhà cung cấp') }}</option>
               @foreach($nccInHistory as $nid => $nname)
                 <option value="{{ $nid }}">{{ $nname }}</option>
               @endforeach
@@ -174,17 +174,17 @@
           <table class="table table-bordered table-condensed table-hover" id="historyTable">
             <thead>
               <tr style="background:#f4f4f4">
-                <th class="sortable" data-type="num" style="cursor:pointer">Ngày <i class="fa fa-sort"></i></th>
+                <th class="sortable" data-type="num" style="cursor:pointer">{{ __('Ngày') }} <i class="fa fa-sort"></i></th>
                 @if(count($arrSearch['ingredient_ids']) > 1)
-                  <th class="sortable" data-type="text" style="cursor:pointer">Nguyên liệu <i class="fa fa-sort"></i></th>
+                  <th class="sortable" data-type="text" style="cursor:pointer">{{ __('Nguyên liệu') }} <i class="fa fa-sort"></i></th>
                 @endif
-                <th>Bill</th>
-                <th class="sortable" data-type="text" style="cursor:pointer">Nhà cung cấp <i class="fa fa-sort"></i></th>
-                <th>Chi nhánh</th>
-                <th class="text-right sortable" data-type="num" style="cursor:pointer">SL <i class="fa fa-sort"></i></th>
-                <th class="text-right sortable" data-type="num" style="cursor:pointer">Đơn giá <i class="fa fa-sort"></i></th>
-                <th class="text-right sortable" data-type="num" style="cursor:pointer">Thành tiền <i class="fa fa-sort"></i></th>
-                <th class="text-right sortable" data-type="num" style="cursor:pointer">So lần trước <i class="fa fa-sort"></i></th>
+                <th>{{ __('Bill') }}</th>
+                <th class="sortable" data-type="text" style="cursor:pointer">{{ __('Nhà cung cấp') }} <i class="fa fa-sort"></i></th>
+                <th>{{ __('Chi nhánh') }}</th>
+                <th class="text-right sortable" data-type="num" style="cursor:pointer">{{ __('SL') }} <i class="fa fa-sort"></i></th>
+                <th class="text-right sortable" data-type="num" style="cursor:pointer">{{ __('Đơn giá') }} <i class="fa fa-sort"></i></th>
+                <th class="text-right sortable" data-type="num" style="cursor:pointer">{{ __('Thành tiền') }} <i class="fa fa-sort"></i></th>
+                <th class="text-right sortable" data-type="num" style="cursor:pointer">{{ __('So lần trước') }} <i class="fa fa-sort"></i></th>
               </tr>
             </thead>
             <tbody>
@@ -196,7 +196,7 @@
                     <td>{{ optional($ing)->name }}</td>
                   @endif
                   <td><a href="{{ route('cost.edit', $h['cost_id']) }}" target="_blank">CP{{ $h['cost_id'] }}</a>
-                    @if($h['need_review']) <span class="label label-warning">Cần KT</span> @endif
+                    @if($h['need_review']) <span class="label label-warning">{{ __('Cần KT') }}</span> @endif
                   </td>
                   <td>{{ $h['ncc'] }}</td>
                   <td>{{ $h['branch'] }}</td>
@@ -217,7 +217,7 @@
               @endforeach
             </tbody>
           </table>
-          <p class="text-muted" style="margin:0"><i>Nhiều dòng cùng nguyên liệu trong 1 bill được gộp thành 1 lần nhập. "So lần trước" so với lần nhập ngay trước của cùng nguyên liệu (mọi nhà cung cấp).</i></p>
+          <p class="text-muted" style="margin:0"><i>{{ __('Nhiều dòng cùng nguyên liệu trong 1 bill được gộp thành 1 lần nhập. "So lần trước" so với lần nhập ngay trước của cùng nguyên liệu (mọi nhà cung cấp).') }}</i></p>
         </div>
       </div>
       @endif
@@ -241,7 +241,7 @@
       var hay = norm(data.text + ' ' + ($(data.element).data('aliases') || ''));
       return hay.indexOf(norm(params.term)) > -1 ? data : null;
     }
-    $('#ingredient_ids').select2({ matcher: matcher, maximumSelectionLength: 5, placeholder: 'Chọn nguyên liệu (tối đa 5)', width: '100%' });
+    $('#ingredient_ids').select2({ matcher: matcher, maximumSelectionLength: 5, placeholder: {!! json_encode(__('Chọn nguyên liệu (tối đa 5)')) !!}, width: '100%' });
     $('#ncc_id').select2();
     $('#ingredient_ids').on('change', function () {
       var one = ($(this).val() || []).length === 1;
@@ -281,14 +281,14 @@
     var series = @json($series);
     var editUrl = "{{ route('cost.edit', '__ID__') }}";
     function fmt(n) { return Highcharts.numberFormat(n, 0, ',', '.'); }
-    Highcharts.setOptions({ lang: { months: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'],
+    Highcharts.setOptions({ lang: { months: {!! json_encode(app()->getLocale() == 'en' ? ['January','February','March','April','May','June','July','August','September','October','November','December'] : ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12']) !!},
       shortMonths: ['Th1','Th2','Th3','Th4','Th5','Th6','Th7','Th8','Th9','Th10','Th11','Th12'], thousandsSep: '.' } });
     Highcharts.chart('price_chart', {
       chart: { type: 'line', zoomType: 'x' },
       title: { text: null },
       credits: { enabled: false },
       xAxis: { type: 'datetime', dateTimeLabelFormats: { day: '%d/%m', week: '%d/%m', month: '%m/%Y' } },
-      yAxis: { title: { text: 'Đơn giá (đ)' }, labels: { formatter: function () { return fmt(this.value); } } },
+      yAxis: { title: { text: {!! json_encode(__('Đơn giá (đ)')) !!} }, labels: { formatter: function () { return fmt(this.value); } } },
       legend: { enabled: true },
       tooltip: {
         useHTML: true,
@@ -297,10 +297,10 @@
           var unit = s.userOptions.unit || '';
           return '<b>' + s.name + '</b><br>' +
             Highcharts.dateFormat('%d/%m/%Y', p.x) + (p.bill ? ' · ' + p.bill : '') + '<br>' +
-            'Đơn giá: <b>' + fmt(p.y) + 'đ/' + unit + '</b><br>' +
-            'SL: ' + p.qty + ' ' + unit + ' · Tiền: ' + fmt(p.amount) + 'đ<br>' +
+            {!! json_encode(__('Đơn giá')) !!} + ': <b>' + fmt(p.y) + 'đ/' + unit + '</b><br>' +
+            {!! json_encode(__('SL')) !!} + ': ' + p.qty + ' ' + unit + ' · ' + {!! json_encode(__('Tiền')) !!} + ': ' + fmt(p.amount) + 'đ<br>' +
             (p.ncc ? 'NCC: ' + p.ncc + '<br>' : '') +
-            (p.branch ? 'Chi nhánh: ' + p.branch : '');
+            (p.branch ? {!! json_encode(__('Chi nhánh')) !!} + ': ' + p.branch : '');
         }
       },
       plotOptions: {

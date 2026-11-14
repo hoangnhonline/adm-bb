@@ -464,7 +464,7 @@ class CostController extends Controller
             return $cost;
         });
 
-        Session::flash('message', 'Tạo mới thành công');
+        Session::flash('message', __('Tạo mới thành công'));
         $use_date_from = date('d/m/Y', strtotime($dataArr['date_use']));
         return redirect()->route('cost.index', ['use_date_from' => $use_date_from, 'time_type' => 3]);
     }
@@ -523,7 +523,7 @@ class CostController extends Controller
             $this->saveDetails($model, $details);
         });
 
-        Session::flash('message', 'Cập nhật thành công');
+        Session::flash('message', __('Cập nhật thành công'));
 
         return redirect()->route('cost.index', ['use_date_from' => $date_use, 'time_type' => 3]);
     }
@@ -623,7 +623,7 @@ class CostController extends Controller
             $toDate = date('Y-m-d', strtotime($fromDate.' +6 days'));
             $prevFrom = date('Y-m-d', strtotime($fromDate.' -7 days'));
             $prevTo = date('Y-m-d', strtotime($fromDate.' -1 day'));
-            $periodLabel = 'Tuần '.date('d/m', strtotime($fromDate)).' - '.date('d/m/Y', strtotime($toDate));
+            $periodLabel = __('Tuần').' '.date('d/m', strtotime($fromDate)).' - '.date('d/m/Y', strtotime($toDate));
             $prevAnchor = $prevFrom;
             $nextAnchor = date('Y-m-d', strtotime($fromDate.' +7 days'));
         }elseif($period == 'month'){
@@ -631,7 +631,7 @@ class CostController extends Controller
             $toDate = date('Y-m-t', $anchor);
             $prevFrom = date('Y-m-01', strtotime($fromDate.' -1 month'));
             $prevTo = date('Y-m-t', strtotime($prevFrom));
-            $periodLabel = 'Tháng '.date('m/Y', $anchor);
+            $periodLabel = __('Tháng').' '.date('m/Y', $anchor);
             $prevAnchor = $prevFrom;
             $nextAnchor = date('Y-m-01', strtotime($fromDate.' +1 month'));
         }elseif($period == 'year'){
@@ -639,7 +639,7 @@ class CostController extends Controller
             $toDate = date('Y-12-31', $anchor);
             $prevFrom = date('Y-01-01', strtotime($fromDate.' -1 year'));
             $prevTo = date('Y-12-31', strtotime($prevFrom));
-            $periodLabel = 'Năm '.date('Y', $anchor);
+            $periodLabel = __('Năm').' '.date('Y', $anchor);
             $prevAnchor = $prevFrom;
             $nextAnchor = date('Y-01-01', strtotime($fromDate.' +1 year'));
         }else{
@@ -983,7 +983,7 @@ class CostController extends Controller
         $oldStatus = $model->status;
         $model->update(['status'=>0]);
         // redirect
-        Session::flash('message', 'Xóa thành công');
+        Session::flash('message', __('Xóa thành công'));
         return redirect()->route('cost.index');
     }
 }

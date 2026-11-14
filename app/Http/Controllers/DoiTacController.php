@@ -23,7 +23,7 @@ class DoiTacController extends Controller
     {
         // Chỉ quản trị (role 1) xem/sửa công nợ đối tác. Nhân viên chỉ chọn đối tác trên bill.
         $this->middleware(function ($request, $next) {
-            if (!Auth::check() || Auth::user()->role != 1) abort(403, 'Không có quyền');
+            if (!Auth::check() || Auth::user()->role != 1) abort(403, __('Không có quyền'));
             return $next($request);
         });
     }
@@ -43,7 +43,7 @@ class DoiTacController extends Controller
         foreach ($balances as $b) {
             foreach ($tong as $k => $v) $tong[$k] += $b[$k];
         }
-        $types = Partner::$doiTacTypes;
+        $types = array_map('__', Partner::$doiTacTypes);
         return view('doi-tac.index', compact('items', 'balances', 'tong', 'types', 'type', 'name'));
     }
 
@@ -51,14 +51,14 @@ class DoiTacController extends Controller
     public function create()
     {
         $detail = new Partner(['com_buffet_per_pax' => 20000, 'com_alacarte_pct' => 10, 'pay_term_days' => 0, 'type' => 'cano']);
-        return view('doi-tac.form', ['detail' => $detail, 'types' => Partner::$doiTacTypes,
+        return view('doi-tac.form', ['detail' => $detail, 'types' => array_map('__', Partner::$doiTacTypes),
             'branchList' => Branch::where('status', 1)->orderBy('display_order')->get()]);
     }
 
     public function edit($id)
     {
         $detail = Partner::where('doi_tac', 1)->findOrFail($id);
-        return view('doi-tac.form', ['detail' => $detail, 'types' => Partner::$doiTacTypes,
+        return view('doi-tac.form', ['detail' => $detail, 'types' => array_map('__', Partner::$doiTacTypes),
             'branchList' => Branch::where('status', 1)->orderBy('display_order')->get()]);
     }
 
@@ -69,7 +69,7 @@ class DoiTacController extends Controller
         $data['status'] = 1;
         $data['cost_type_id'] = null;
         $p = Partner::create($data);
-        Session::flash('message', 'Đã thêm đối tác ' . $p->name);
+        Session::flash('message', __('Đã thêm đối tác :name', ['name' => $p->name]));
         return redirect()->route('doi-tac.index');
     }
 
@@ -80,10 +80,10 @@ class DoiTacController extends Controller
         $rateChanged = (int) $p->com_buffet_per_pax != (int) $data['com_buffet_per_pax']
             || (float) $p->com_alacarte_pct != (float) $data['com_alacarte_pct'];
         $p->update($data);
-        $msg = 'Cập nhật thành công';
+        $msg = __('Cập nhật thành công');
         if ($rateChanged && $request->recalc_old) {
             $n = PartnerDebtService::recalcPartner($p->id);
-            $msg .= " – đã tính lại hoa hồng $n bill cũ theo mức mới";
+            $msg .= ' – ' . __('đã tính lại hoa hồng :n bill cũ theo mức mới', ['n' => $n]);
         }
         Session::flash('message', $msg);
         return redirect()->route('doi-tac.show', $p->id);
@@ -93,7 +93,7 @@ class DoiTacController extends Controller
     {
         $p = Partner::where('doi_tac', 1)->findOrFail($id);
         $p->update(['status' => 0]); // ẩn, không xóa dữ liệu
-        Session::flash('message', 'Đã ẩn đối tác ' . $p->name);
+        Session::flash('message', __('Đã ẩn đối tác :name', ['name' => $p->name]));
         return redirect()->route('doi-tac.index');
     }
 
@@ -150,8 +150,8 @@ class DoiTacController extends Controller
             ->orderBy('date', 'desc')->orderBy('id', 'desc')->get();
 
         $branchArr = Branch::pluck('name', 'id');
-        $types = Partner::$doiTacTypes;
-        $transTypes = PartnerTransaction::$typeNames;
+        $types = array_map('__', Partner::$doiTacTypes);
+        $transTypes = array_map('__', PartnerTransaction::$typeNames);
         return view('doi-tac.show', compact('detail', 'bal', 'aging', 'bills', 'ky', 'trans', 'fromStr', 'toStr',
             'branchArr', 'types', 'transTypes'));
     }
@@ -165,17 +165,17 @@ class DoiTacController extends Controller
             ['date.required' => 'Bạn chưa nhập ngày']);
         $date = $this->toYmd($request->date);
         if ($amount <= 0 || !$date) {
-            return back()->withInput()->withErrors(['amount' => 'Số tiền / ngày không hợp lệ']);
+            return back()->withInput()->withErrors(['amount' => __('Số tiền / ngày không hợp lệ')]);
         }
         $bal = PartnerDebtService::balances([$id])[$id];
         if ($type == 1 && $amount > $bal['phai_thu']) {
-            return back()->withInput()->withErrors(['amount' => 'Số tiền thu (' . number_format($amount) . ') lớn hơn số đối tác đang nợ (' . number_format($bal['phai_thu']) . ')']);
+            return back()->withInput()->withErrors(['amount' => __('Số tiền thu (:a) lớn hơn số đối tác đang nợ (:b)', ['a' => number_format($amount), 'b' => number_format($bal['phai_thu'])])]);
         }
         if ($type == 2 && $amount > $bal['phai_tra']) {
-            return back()->withInput()->withErrors(['amount' => 'Số tiền chi (' . number_format($amount) . ') lớn hơn hoa hồng còn phải trả (' . number_format($bal['phai_tra']) . ')']);
+            return back()->withInput()->withErrors(['amount' => __('Số tiền chi (:a) lớn hơn hoa hồng còn phải trả (:b)', ['a' => number_format($amount), 'b' => number_format($bal['phai_tra'])])]);
         }
         if ($type == 3 && $amount > min($bal['phai_thu'], $bal['phai_tra'])) {
-            return back()->withInput()->withErrors(['amount' => 'Bù trừ tối đa ' . number_format(max(0, min($bal['phai_thu'], $bal['phai_tra']))) . ' (= số nhỏ hơn giữa phải thu và phải trả)']);
+            return back()->withInput()->withErrors(['amount' => __('Bù trừ tối đa :a (= số nhỏ hơn giữa phải thu và phải trả)', ['a' => number_format(max(0, min($bal['phai_thu'], $bal['phai_tra'])))])]);
         }
 
         $userId = Auth::user()->id;
@@ -221,7 +221,7 @@ class DoiTacController extends Controller
                 'updated_user' => $userId,
             ]);
         });
-        Session::flash('message', 'Đã ghi: ' . PartnerTransaction::$typeNames[$type] . ' ' . number_format($amount) . ' đ');
+        Session::flash('message', __('Đã ghi') . ': ' . __(PartnerTransaction::$typeNames[$type]) . ' ' . number_format($amount) . ' đ');
         return redirect()->route('doi-tac.show', $p->id);
     }
 
@@ -234,7 +234,7 @@ class DoiTacController extends Controller
                 Cost::where('id', $t->cost_id)->update(['status' => 0]); // giống xóa chi phí thường
             }
         });
-        Session::flash('message', 'Đã hủy giao dịch #' . $t->id);
+        Session::flash('message', __('Đã hủy giao dịch #:id', ['id' => $t->id]));
         return redirect()->route('doi-tac.show', $t->partner_id);
     }
 
@@ -242,7 +242,7 @@ class DoiTacController extends Controller
     {
         $p = Partner::where('doi_tac', 1)->findOrFail($id);
         $n = PartnerDebtService::recalcPartner($id);
-        Session::flash('message', "Đã tính lại hoa hồng $n bill của " . $p->name);
+        Session::flash('message', __('Đã tính lại hoa hồng :n bill của :name', ['n' => $n, 'name' => $p->name]));
         return redirect()->route('doi-tac.show', $id);
     }
 
@@ -329,7 +329,7 @@ class DoiTacController extends Controller
             $rows[] = $r;
         }
         usort($rows, function ($a, $b) { return $b['doanh_thu'] <=> $a['doanh_thu']; });
-        $types = Partner::$doiTacTypes;
+        $types = array_map('__', Partner::$doiTacTypes);
         return view('doi-tac.report', compact('rows', 'tong', 'khachLe', 'types', 'type', 'fromStr', 'toStr',
             'period', 'prevAnchor', 'nextAnchor', 'label'));
     }
@@ -361,20 +361,20 @@ class DoiTacController extends Controller
             $to = date('Y-m-d', strtotime($from . ' +6 days'));
             $prev = date('Y-m-d', strtotime($from . ' -7 days'));
             $next = date('Y-m-d', strtotime($from . ' +7 days'));
-            $label = 'Tuần ' . date('d/m', strtotime($from)) . ' – ' . date('d/m/Y', strtotime($to));
+            $label = __('Tuần').' '.date('d/m', strtotime($from)) . ' – ' . date('d/m/Y', strtotime($to));
         } elseif ($period == 'year') {
             $from = date('Y-01-01', $ts);
             $to = date('Y-12-31', $ts);
             $prev = date('Y-01-01', strtotime($from . ' -1 year'));
             $next = date('Y-01-01', strtotime($from . ' +1 year'));
-            $label = 'Năm ' . date('Y', $ts);
+            $label = __('Năm').' '.date('Y', $ts);
         } else {
             $period = $period == 'custom' ? 'month' : $period;
             $from = date('Y-m-01', $ts);
             $to = date('Y-m-t', $ts);
             $prev = date('Y-m-d', strtotime($from . ' -1 month'));
             $next = date('Y-m-d', strtotime($from . ' +1 month'));
-            $label = 'Tháng ' . date('m/Y', $ts);
+            $label = __('Tháng').' '.date('m/Y', $ts);
         }
         $fromStr = date('d/m/Y', strtotime($from));
         $toStr = date('d/m/Y', strtotime($to));

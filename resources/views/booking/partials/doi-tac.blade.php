@@ -3,14 +3,14 @@
   $dtId = old('doi_tac_id', $bk->doi_tac_id ?? '');
   $dtCk = old('co_chiet_khau', $bk->co_chiet_khau ?? 0);
   $dtNo = old('ghi_no', $bk->ghi_no ?? 0);
-  $dtTypes = \App\Models\Partner::$doiTacTypes;
+  $dtTypes = array_map('__', \App\Models\Partner::$doiTacTypes);
 @endphp
 <input type="hidden" name="doi_tac_form" value="1">
 <div class="row" id="doi-tac-box" style="background:#f4f8fb;border:1px solid #d6e4f0;margin:5px 0 12px;padding-top:10px">
   <div class="form-group col-md-5 col-xs-12">
-    <label>Đối tác</label>
+    <label>{{ __('Đối tác') }}</label>
     <select class="form-control select2" name="doi_tac_id" id="doi_tac_id" style="width:100%">
-      <option value="">— Khách lẻ —</option>
+      <option value="">{{ __('— Khách lẻ —') }}</option>
       @foreach(($doiTacList ?? []) as $dt)
       <option value="{{ $dt->id }}" {{ $dtId == $dt->id ? 'selected' : '' }}
         data-buffet="{{ (int) $dt->com_buffet_per_pax }}" data-pct="{{ (float) $dt->com_alacarte_pct }}">
@@ -20,10 +20,10 @@
     </select>
   </div>
   <div class="form-group col-md-3 col-xs-6 dt-opt" style="padding-top:25px">
-    <label style="font-weight:normal;cursor:pointer"><input type="checkbox" name="co_chiet_khau" id="co_chiet_khau" value="1" {{ $dtCk ? 'checked' : '' }}> Có chiết khấu (tính hoa hồng)</label>
+    <label style="font-weight:normal;cursor:pointer"><input type="checkbox" name="co_chiet_khau" id="co_chiet_khau" value="1" {{ $dtCk ? 'checked' : '' }}> {{ __('Có chiết khấu (tính hoa hồng)') }}</label>
   </div>
   <div class="form-group col-md-4 col-xs-6 dt-opt" style="padding-top:25px">
-    <label style="font-weight:normal;cursor:pointer"><input type="checkbox" name="ghi_no" id="ghi_no" value="1" {{ $dtNo ? 'checked' : '' }}> Ghi nợ (đối tác trả sau)</label>
+    <label style="font-weight:normal;cursor:pointer"><input type="checkbox" name="ghi_no" id="ghi_no" value="1" {{ $dtNo ? 'checked' : '' }}> {{ __('Ghi nợ (đối tác trả sau)') }}</label>
   </div>
   <div class="col-xs-12 dt-opt" style="padding-bottom:8px">
     <span id="dt-preview" style="color:#31708f"></span>
@@ -48,13 +48,13 @@
     var net = Math.max(0, num($('#total_price').val()) - num($('#discount').val()));
     var txt = '';
     if(!$('#co_chiet_khau').is(':checked')){
-      txt = 'Không tính hoa hồng (chưa tick "Có chiết khấu").';
+      txt = {!! json_encode(__('Không tính hoa hồng (chưa tick "Có chiết khấu").')) !!};
     }else if(pax > 0){
-      txt = 'Bill BUFFET – hoa hồng dự kiến: ' + pax + ' khách × ' + fmt(opt.data('buffet')) + ' = ' + fmt(pax*opt.data('buffet')) + ' đ';
+      txt = {!! json_encode(__('Bill BUFFET – hoa hồng dự kiến')) !!} + ': ' + pax + ' ' + {!! json_encode(__('khách')) !!} + ' × ' + fmt(opt.data('buffet')) + ' = ' + fmt(pax*opt.data('buffet')) + ' đ';
     }else{
-      txt = 'Bill ALACARTE – hoa hồng dự kiến: ' + opt.data('pct') + '% × ' + fmt(net) + ' = ' + fmt(net*opt.data('pct')/100) + ' đ';
+      txt = {!! json_encode(__('Bill ALACARTE – hoa hồng dự kiến')) !!} + ': ' + opt.data('pct') + '% × ' + fmt(net) + ' = ' + fmt(net*opt.data('pct')/100) + ' đ';
     }
-    if($('#ghi_no').is(':checked')) txt += ' | Ghi nợ: ' + fmt(net) + ' đ';
+    if($('#ghi_no').is(':checked')) txt += ' | ' + {!! json_encode(__('Ghi nợ')) !!} + ': ' + fmt(net) + ' đ';
     $('#dt-preview').text(txt);
   };
   function bind(){

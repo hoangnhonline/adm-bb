@@ -175,7 +175,8 @@ class ActivityLogPresenter
 
     public function label($model, $key)
     {
-        return self::$labels[$model][$key] ?? self::$common[$key] ?? $key;
+        $l = self::$labels[$model][$key] ?? self::$common[$key] ?? null;
+        return $l === null ? $key : __($l);
     }
 
     /** Thứ tự hiển thị: theo thứ tự khai báo nhãn trên form, cột lạ để cuối. */
@@ -191,7 +192,7 @@ class ActivityLogPresenter
     /** Giá trị đã định dạng (đã escape HTML). */
     public function value($model, $key, $v)
     {
-        if ($v === null || $v === '') return '<i class="text-muted">trống</i>';
+        if ($v === null || $v === '') return '<i class="text-muted">' . e(__('trống')) . '</i>';
         if (is_array($v)) return e(json_encode($v, JSON_UNESCAPED_UNICODE));
 
         $money = array_merge(self::$money['*'], self::$money[$model] ?? []);
@@ -207,7 +208,7 @@ class ActivityLogPresenter
             try { $url = $key == 'booking_id' ? route('booking.edit', $v) : route('cost.edit', $v); } catch (\Throwable $e) {}
             return $url ? '<a href="' . e($url) . '" target="_blank">#' . e($v) . '</a>' : '#' . e($v);
         }
-        if (in_array($key, self::$bool)) return ((int) $v) ? 'Có' : 'Không';
+        if (in_array($key, self::$bool)) return ((int) $v) ? e(__('Có')) : e(__('Không'));
         if (in_array($key, self::$qty) && is_numeric($v)) return e(rtrim(rtrim(number_format((float) $v, 2), '0'), '.'));
 
         $enum = $this->enumValue($model, $key, $v);
@@ -241,7 +242,8 @@ class ActivityLogPresenter
             $map = [1 => 'Có', 2 => 'Không (Not Indian)'];
         }
         if ($map === null) return null;
-        return $map[$v] ?? $map[(int) $v] ?? null;
+        $r = $map[$v] ?? $map[(int) $v] ?? null;
+        return $r === null ? null : __($r);
     }
 
     /** Mô tả đối tượng: vd "Món: Butter Chicken – bill #123". Trả về HTML đã escape. */
@@ -250,17 +252,17 @@ class ActivityLogPresenter
         $row = $new + $old;
         if ($it->model == 'booking_detail') {
             $dishId = $row['dish_id'] ?? ($this->bookingDetailDish[$it->model_id] ?? null);
-            $dish = $dishId ? ($this->names['dish'][(int) $dishId] ?? 'Món #' . $dishId) : 'Món';
+            $dish = $dishId ? ($this->names['dish'][(int) $dishId] ?? __('Món') . ' #' . $dishId) : __('Món');
             $bill = $row['booking_id'] ?? null;
-            return '<b>' . e($dish) . '</b>' . ($bill ? ' – <a href="' . e(route('booking.edit', $bill)) . '" target="_blank">bill #' . e($bill) . '</a>' : '');
+            return '<b>' . e($dish) . '</b>' . ($bill ? ' – <a href="' . e(route('booking.edit', $bill)) . '" target="_blank">' . e(__('bill')) . ' #' . e($bill) . '</a>' : '');
         }
         if ($it->model == 'cost_detail') {
             $ingId = $row['ingredient_id'] ?? ($this->costDetailIng[$it->model_id] ?? null);
-            $ing = $ingId ? ($this->names['ingredient'][(int) $ingId] ?? 'Nguyên liệu #' . $ingId) : 'Hàng';
+            $ing = $ingId ? ($this->names['ingredient'][(int) $ingId] ?? __('Nguyên liệu') . ' #' . $ingId) : __('Hàng');
             $cost = $row['cost_id'] ?? null;
-            return '<b>' . e($ing) . '</b>' . ($cost ? ' – <a href="' . e(route('cost.edit', $cost)) . '" target="_blank">chi phí #' . e($cost) . '</a>' : '');
+            return '<b>' . e($ing) . '</b>' . ($cost ? ' – <a href="' . e(route('cost.edit', $cost)) . '" target="_blank">' . e(__('chi phí')) . ' #' . e($cost) . '</a>' : '');
         }
-        if ($it->model == 'booking' && !empty($row['table_no'])) return 'Bàn ' . e($row['table_no']);
+        if ($it->model == 'booking' && !empty($row['table_no'])) return e(__('Bàn')) . ' ' . e($row['table_no']);
         if ($it->model == 'cost' && !empty($row['content'])) return e(mb_substr($row['content'], 0, 60));
         if (!empty($row['name'])) return '<b>' . e($row['name']) . '</b>';
         return '';

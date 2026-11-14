@@ -8,7 +8,7 @@
       </div>
       <div class="pull-left info">
         <p>{{ Auth::user()->display_name }}</p>
-        <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+        <a href="#"><i class="fa fa-circle text-success"></i> {{ __('Online') }}</a>
       </div>
     </div>
    
@@ -16,12 +16,12 @@
      
       <li {{ in_array($routeName, ['booking.index', 'booking.create', 'booking.edit']) ? "class=active" : "" }}>
         <a href="{{ route('booking.index') }}">
-          <i class="fa fa-ship" aria-hidden="true"></i><span>QUẢN LÍ BILL</span>
+          <i class="fa fa-ship" aria-hidden="true"></i><span>{{ __('QUẢN LÍ BILL') }}</span>
         </a>
       </li>       
       <li {{ in_array($routeName, ['report.doanh-thu']) ? "class=active" : "" }}>
         <a href="{{ route('report.doanh-thu') }}">
-          <i class="fa fa-bar-chart" aria-hidden="true"></i><span>THỐNG KÊ DOANH THU</span>
+          <i class="fa fa-bar-chart" aria-hidden="true"></i><span>{{ __('THỐNG KÊ DOANH THU') }}</span>
         </a>
       </li>    
       

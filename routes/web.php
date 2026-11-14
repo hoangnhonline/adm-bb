@@ -85,6 +85,7 @@ Route::group([
         Route::get('/change-value', ['as' => 'partner.change-value-by-column', 'uses' => 'PartnerController@changeValueByColumn']);  
     });
     Route::post('/filter-prefs/save', ['as' => 'filter-prefs.save', 'uses' => 'FilterPrefController@save']); // bộ lọc tùy chọn theo user
+    Route::get('/locale/{lang}', ['as' => 'locale.change', 'uses' => 'LocaleController@change']); // đa ngôn ngữ VI/EN
     Route::get('/activity-log', ['as' => 'activity-log.index', 'uses' => 'ActivityLogController@index']); // lịch sử thao tác (chỉ id 1)
     // Đối tác bán hàng & công nợ (14/11/2026)
     Route::group(['prefix' => 'doi-tac'], function () {

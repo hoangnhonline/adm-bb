@@ -5,14 +5,14 @@
   <!-- Content Header (Page header) -->
   <section class="content-header">
   <h1 style="text-transform: uppercase;">
-      MAKE A BILL
+      {{ __('TẠO BILL') }}
     </span></h1>
   </section>
 
   <!-- Main content -->
   <section class="content">
-    <a class="btn btn-default btn-sm" href="{{ route('booking.index') }}" style="margin-bottom:5px">Back</a>
-    <a class="btn btn-success btn-sm" href="{{ route('booking.index') }}" style="margin-bottom:5px">Bill List</a>
+    <a class="btn btn-default btn-sm" href="{{ route('booking.index') }}" style="margin-bottom:5px">{{ __('Quay lại') }}</a>
+    <a class="btn btn-success btn-sm" href="{{ route('booking.index') }}" style="margin-bottom:5px">{{ __('Danh sách bill') }}</a>
     <form role="form" method="POST" action="{{ route('booking.store') }}" id="dataForm">
     <div class="row">
       <!-- left column -->
@@ -40,7 +40,7 @@
                   <div class="checkbox">
                     <label>
                       <input type="checkbox" name="take_away" value="1" {{ old('take_away') == 1 ? "checked" : "" }}>
-                      <span style="color:blue">TAKE AWAY</span>
+                      <span style="color:blue">{{ __('MANG ĐI') }}</span>
                     </label>
                   </div>               
                 </div> 
@@ -48,19 +48,19 @@
                   <div class="checkbox">
                     <label>
                       <input type="checkbox" name="indian" value="2" {{ old('indian') == 2 ? "checked" : "" }}>
-                      <span style="color:red">NOT INDIAN</span>
+                      <span style="color:red">{{ __('KHÔNG PHẢI KHÁCH ẤN') }}</span>
                     </label>
                   </div>               
                 </div>    
                 <div class="form-group col-md-4 col-xs-4">
-                  <label>TABLE NO</label>
+                  <label>{{ __('SỐ BÀN') }}</label>
                   <input type="text" class="form-control" name="table_no" id="table_no" value="{{ old('table_no') }}" autocomplete="off">
                 </div>
                   <div class="form-group col-md-4 col-xs-4">
                   @php
                   $branch_id = old('branch_id', Auth::user()->branch_id);
                   @endphp
-                   <label>Branch</label>
+                   <label>{{ __('Chi nhánh') }}</label>
                       <select name="branch_id" id="branch_id" class="form-control select2">
                         @foreach($branchList as $beach)
                         <option value="{{ $beach->id }}" {{ $branch_id == $beach->id ? "selected" : "" }}>{{ $beach->name }}</option>
@@ -68,19 +68,19 @@
                       </select>
                  </div>
                 <div class="form-group col-md-4 col-xs-4">
-                  <label>Dining date <span class="red-star">*</span></label>
+                  <label>{{ __('Ngày ăn') }} <span class="red-star">*</span></label>
                   <input type="text" class="form-control datepicker" name="use_date" id="use_date" value="{{ old('use_date', $use_date) }}" autocomplete="off">
                 </div>
                    <div class="form-group col-md-4 col-xs-4" style="display: none;">
-                  <label>Bill No</label>
+                  <label>{{ __('Số bill') }}</label>
                   <input type="text" class="form-control" name="bill_no" id="bill_no" value="{{ old('bill_no', $bill) }}" autocomplete="off">
                 </div>
                  <div class="form-group col-md-6 col-xs-6" style="display: none" >
-                    <label>Customer name</label>
+                    <label>{{ __('Tên khách') }}</label>
                     <input type="text" class="form-control" name="name" id="name" value="{{ old('name') }}" autocomplete="off">
                   </div>
                   <div class="form-group col-md-6 col-xs-6" style="display: none"  >
-                    <label>Phone number <span class="red-star">*</span></label>
+                    <label>{{ __('Số điện thoại') }} <span class="red-star">*</span></label>
                     <input type="text" maxlength="20" class="form-control" name="phone" id="phone" value="{{ old('phone') }}" autocomplete="off">
                   </div>
                   
@@ -91,7 +91,7 @@
 
                   <div class="form-group col-xs-5 col-md-3" style="padding-right: 0px">
                       <select name="dish_id[]" class="form-control select2 cate">
-                          <option value="">-Dish name-</option>
+                          <option value="">{{ __('-Tên món-') }}</option>
                           @foreach($cateList as $cate)
                               <option value="{{ $cate->id }}"
                                       data-price="{{ $cate->price }}"
@@ -118,7 +118,7 @@
                              name="total[]"
                              class="form-control number total"
                              value="{{ old('total.'.$k) }}"
-                             placeholder="Amount">
+                             placeholder="{{ __('Thành tiền') }}">
                   </div>
 
                   <div class="form-group col-xs-12 col-md-3">
@@ -126,28 +126,28 @@
                              name="notes_dish[]"
                              class="form-control notes"
                              value="{{ old('notes_dish.'.$k) }}"
-                             placeholder="Notes">
+                             placeholder="{{ __('Ghi chú') }}">
                   </div>
 
               </div>
                 @endfor
                 <!-- <div class="col-md-12" style="padding-right: 0px; text-align: right;">
-                  <button type="button" id="btnAdd" class="btn btn-info btn-sm"><i class="fa fa-plus" aria-hidden="true"></i> Thêm</button>
+                  <button type="button" id="btnAdd" class="btn btn-info btn-sm"><i class="fa fa-plus" aria-hidden="true"></i> {{ __('Thêm') }}</button>
                 </div> -->
 
                 <div class="row">
                   <div class="form-group col-xs-6" >
-                      <label>Total</label>
+                      <label>{{ __('Tổng tiền') }}</label>
                     <input type="text" class="form-control number" autocomplete="off" name="total_price" id="total_price" value="{{ old('total_price') }}">
                   </div>
                   <div class="form-group col-xs-6" >
-                      <label>Discount</label>
+                      <label>{{ __('Giảm giá') }}</label>
                     <input type="text" class="form-control number" autocomplete="off" name="discount" id="discount" value="{{ old('discount') }}">
                   </div>
                 </div>
                 <div class="row" style="display: none;">
                   <div class="form-group col-xs-6">
-                      <label>Discount rate / Discount (%)</label>
+                      <label>{{ __('Tỷ lệ giảm giá (%)') }}</label>
                       <select name="per_com" id="per_com" class="form-control select2">
                         <option value="">--%--</option>
                         @foreach($chietkhauList as $ck)
@@ -156,17 +156,17 @@
                       </select>
                   </div>
                   <div class="form-group col-xs-6">
-                      <label>Discount amount</label>
+                      <label>{{ __('Tiền giảm giá') }}</label>
                       <input type="text" class="form-control number" name="commision" id="commision" value="{{ old('commision') }}">
                   </div>
                 </div>
                 <div class="row">  
                 <div class="form-group col-xs-4">
-                      <label>Revenue</label>
+                      <label>{{ __('Doanh thu') }}</label>
                       <input type="text" class="form-control number" name="con_lai" id="con_lai" value="{{ old('con_lai') }}">
                   </div>               
                   <div class="form-group col-xs-4" >
-                      <label>Receiver <span class="red-star">*</span></label>
+                      <label>{{ __('Người thu') }} <span class="red-star">*</span></label>
                       <select class="form-control select2" name="nguoi_thu_tien" id="nguoi_thu_tien">
                         @foreach($collecterList as $payer)
                         <option value="{{ $payer->id }}" {{ old('nguoi_thu_tien') == $payer->id ? "selected" : "" }}>{{ $payer->name }}</option>
@@ -174,7 +174,7 @@
                       </select>
                   </div>
                   <div class="form-group col-xs-4" >
-                      <label>Rupees</label>
+                      <label>{{ __('Rupees') }}</label>
                       <input type="text" class="form-control number" name="rupees" id="rupees" value="{{ old('rupees') }}">
                   </div>
                 </div>
@@ -182,25 +182,25 @@
 
                 @include('booking.partials.doi-tac')
                 <div class="form-group" style="display: none;">
-                     <label>Status <span class="red-star">*</span></label>
+                     <label>{{ __('Trạng thái') }} <span class="red-star">*</span></label>
                       <select class="form-control" name="status" id="status">
-                        <option value="1" {{ old('status') == 1 ? "selected" : "" }}>Mới</option>
-                        <option value="2" {{ old('status') == 2 ? "selected" : "" }}>Hoàn tất</option>
-                        <option value="3" {{ old('status') == 3 ? "selected" : "" }}>Cancel</option>
+                        <option value="1" {{ old('status') == 1 ? "selected" : "" }}>{{ __('Mới') }}</option>
+                        <option value="2" {{ old('status') == 2 ? "selected" : "" }}>{{ __('Hoàn tất') }}</option>
+                        <option value="3" {{ old('status') == 3 ? "selected" : "" }}>{{ __('Hủy') }}</option>
                       </select>
                 </div>
 
                 <div class="form-group">
-                  <label>Notes</label>
+                  <label>{{ __('Ghi chú') }}</label>
                   <textarea class="form-control" rows="6" name="notes" id="notes">{{ old('notes') }}</textarea>
                 </div>
                
             </div>
 
             <div class="box-footer">
-              <button type="button" class="btn btn-default btn-sm" id="btnLoading" style="display:none"><i class="fa fa-spin fa-spinner"></i> Đang xử lý...</button>
-              <button type="submit" id="btnSave" class="btn btn-primary btn-sm">Save</button>
-              <a class="btn btn-default btn-sm" class="btn btn-primary btn-sm" href="{{ route('booking.index') }}">Cancel</a>
+              <button type="button" class="btn btn-default btn-sm" id="btnLoading" style="display:none"><i class="fa fa-spin fa-spinner"></i> {{ __('Đang xử lý...') }}</button>
+              <button type="submit" id="btnSave" class="btn btn-primary btn-sm">{{ __('Lưu') }}</button>
+              <a class="btn btn-default btn-sm" class="btn btn-primary btn-sm" href="{{ route('booking.index') }}">{{ __('Hủy') }}</a>
               <input type="hidden" name="count_services" id="count_services" value="">
             </div>
 
@@ -279,7 +279,7 @@
   $(document).on('click','#btnSave', function(){
 
     if(parseInt($('#tien_coc').val()) > 0 && $('#nguoi_thu_coc').val() == ''){
-      alert('Bạn chưa chọn người thu cọc');
+      alert({!! json_encode(__('Bạn chưa chọn người thu cọc')) !!});
       return false;
     }
   });
@@ -333,7 +333,7 @@
       var tableNo = ($('#table_no').val() || '').trim();
       if (tableNo.length === 0) {
         e.preventDefault();
-        alert('Bạn chưa nhập TABLE NO');
+        alert({!! json_encode(__('Bạn chưa nhập TABLE NO')) !!});
         $('#table_no').focus();
 
         // đảm bảo nút save không bị ẩn khi bị chặn submit

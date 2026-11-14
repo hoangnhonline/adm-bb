@@ -2,23 +2,23 @@
 @section('content')
 <div class="content-wrapper">
   <section class="content-header">
-    <h1>Upload bill</h1>
+    <h1>{{ __('Upload bill') }}</h1>
     <ol class="breadcrumb">
-      <li><a href="{{ route('cost.index') }}">Cost</a></li>
-      <li class="active">Upload bill</li>
+      <li><a href="{{ route('cost.index') }}">{{ __('Chi phí') }}</a></li>
+      <li class="active">{{ __('Upload bill') }}</li>
     </ol>
   </section>
   <section class="content">
     <div class="box box-primary">
       <div class="box-body">
         <div id="drop-zone" style="border:2px dashed #3c8dbc;border-radius:6px;padding:40px;text-align:center;cursor:pointer;background:#f7fbff">
-          <p style="font-size:16px;margin:0">Kéo thả ảnh bill vào đây hoặc bấm để chọn (nhiều ảnh cùng lúc)</p>
-          <p style="color:#888;margin:5px 0 0">jpg / png / webp, tối đa 8MB mỗi ảnh</p>
+          <p style="font-size:16px;margin:0">{{ __('Kéo thả ảnh bill vào đây hoặc bấm để chọn (nhiều ảnh cùng lúc)') }}</p>
+          <p style="color:#888;margin:5px 0 0">{{ __('jpg / png / webp, tối đa 8MB mỗi ảnh') }}</p>
           <input type="file" id="bill-files" accept="image/jpeg,image/png,image/webp" multiple style="display:none">
         </div>
         <div id="upload-status" style="margin-top:10px"></div>
-        <h4 style="margin-top:20px">Ảnh đang chờ nhập (<span id="inbox-count">0</span>)
-          <button type="button" id="btn-del-all" class="btn btn-danger btn-sm pull-right" style="display:none"><i class="fa fa-trash"></i> Xóa tất cả</button>
+        <h4 style="margin-top:20px">{{ __('Ảnh đang chờ nhập (') }}<span id="inbox-count">0</span>)
+          <button type="button" id="btn-del-all" class="btn btn-danger btn-sm pull-right" style="display:none"><i class="fa fa-trash"></i> {{ __('Xóa tất cả') }}</button>
         </h4>
         <div id="inbox-list" class="row"></div>
       </div>
@@ -46,17 +46,17 @@
     var fd = new FormData();
     for(var i=0;i<files.length;i++){ fd.append('files[]', files[i]); }
     var st = document.getElementById('upload-status');
-    st.innerHTML = '<span class="text-info">Đang upload '+files.length+' ảnh...</span>';
+    st.innerHTML = '<span class="text-info">'+{!! json_encode(__('Đang upload')) !!}+' '+files.length+' '+{!! json_encode(__('ảnh')) !!}+'...</span>';
     fetch('{{ route('cost.api.upload-bill') }}', {method:'POST', body:fd, credentials:'same-origin', headers:{'X-CSRF-TOKEN':token,'Accept':'application/json'}})
       .then(function(r){ return r.json(); }).then(function(d){
-        st.innerHTML = '<span class="text-success">Đã upload '+d.saved.length+' ảnh.</span>' + (d.errors.length ? '<br><span class="text-danger">'+d.errors.join('<br>')+'</span>' : '');
+        st.innerHTML = '<span class="text-success">'+{!! json_encode(__('Đã upload')) !!}+' '+d.saved.length+' '+{!! json_encode(__('ảnh')) !!}+'.</span>' + (d.errors.length ? '<br><span class="text-danger">'+d.errors.join('<br>')+'</span>' : '');
         loadInbox();
-      }).catch(function(){ st.innerHTML = '<span class="text-danger">Upload lỗi, thử lại.</span>'; });
+      }).catch(function(){ st.innerHTML = '<span class="text-danger">'+{!! json_encode(__('Upload lỗi, thử lại.')) !!}+'</span>'; });
   }
   document.getElementById('inbox-list').addEventListener('click', function(e){
     var btn = e.target.closest('.btn-del-bill');
     if(!btn) return;
-    if(!confirm('Xóa ảnh này khỏi danh sách chờ?')) return;
+    if(!confirm({!! json_encode(__('Xóa ảnh này khỏi danh sách chờ?')) !!})) return;
     btn.disabled = true;
     fetch('{{ route('cost.api.inbox-delete') }}', {method:'POST', credentials:'same-origin',
       headers:{'X-CSRF-TOKEN':token,'Accept':'application/json','Content-Type':'application/json'},
@@ -64,18 +64,18 @@
       .then(function(r){ return r.json(); }).then(function(d){
         if(!d.ok){ alert(d.errors.join('\n')); btn.disabled = false; }
         loadInbox();
-      }).catch(function(){ alert('Xóa lỗi, thử lại.'); btn.disabled = false; });
+      }).catch(function(){ alert({!! json_encode(__('Xóa lỗi, thử lại.')) !!}); btn.disabled = false; });
   });
   document.getElementById('btn-del-all').addEventListener('click', function(){
     var btn = this, n = document.getElementById('inbox-count').textContent;
-    if(!confirm('Xóa toàn bộ '+n+' ảnh đang chờ nhập?')) return;
+    if(!confirm({!! json_encode(__('Xóa toàn bộ :n ảnh đang chờ nhập?')) !!}.replace(':n', n))) return;
     btn.disabled = true;
     fetch('{{ route('cost.api.inbox-delete-all') }}', {method:'POST', credentials:'same-origin',
       headers:{'X-CSRF-TOKEN':token,'Accept':'application/json'}})
       .then(function(r){ return r.json(); }).then(function(d){
-        document.getElementById('upload-status').innerHTML = '<span class="text-success">Đã xóa '+d.deleted+' ảnh.</span>' + (d.errors.length ? '<br><span class="text-danger">'+d.errors.join('<br>')+'</span>' : '');
+        document.getElementById('upload-status').innerHTML = '<span class="text-success">'+{!! json_encode(__('Đã xóa')) !!}+' '+d.deleted+' '+{!! json_encode(__('ảnh')) !!}+'.</span>' + (d.errors.length ? '<br><span class="text-danger">'+d.errors.join('<br>')+'</span>' : '');
         btn.disabled = false; loadInbox();
-      }).catch(function(){ alert('Xóa lỗi, thử lại.'); btn.disabled = false; });
+      }).catch(function(){ alert({!! json_encode(__('Xóa lỗi, thử lại.')) !!}); btn.disabled = false; });
   });
   zone.addEventListener('click', function(){ input.click(); });
   input.addEventListener('change', function(){ upload(input.files); input.value=''; });

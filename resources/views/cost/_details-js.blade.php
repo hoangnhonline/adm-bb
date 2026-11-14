@@ -64,11 +64,11 @@
       $diff.html('');
       $('#btnUseDetailTotal').hide();
     } else if (sum === bill) {
-      $diff.html('<span class="text-green"><i class="fa fa-check"></i> Khớp</span>');
+      $diff.html('<span class="text-green"><i class="fa fa-check"></i> ' + {!! json_encode(__('Khớp')) !!} + '</span>');
       $('#btnUseDetailTotal').hide();
     } else {
-      $diff.html('<span class="text-red"><i class="fa fa-warning"></i> Lệch ' + fmt(sum - bill) +
-        ' – vẫn lưu được, bill sẽ được đánh dấu "cần kiểm tra"</span>');
+      $diff.html('<span class="text-red"><i class="fa fa-warning"></i> ' + {!! json_encode(__('Lệch')) !!} + ' ' + fmt(sum - bill) +
+        ' – ' + {!! json_encode(__('vẫn lưu được, bill sẽ được đánh dấu "cần kiểm tra"')) !!} + '</span>');
       $('#btnUseDetailTotal').show();
     }
   }

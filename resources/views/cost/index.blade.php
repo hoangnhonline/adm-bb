@@ -4,12 +4,12 @@
 <!-- Content Header (Page header) -->
 <section class="content-header">
   <h1>
-    Cost
+    {{ __('Chi phí') }}
   </h1>
   <ol class="breadcrumb">
-    <li><a href="#"><i class="fa fa-dashboard"></i> Dashboard</a></li>
-    <li><a href="{{ route( 'cost.index' ) }}">Cost</a></li>
-    <li class="active">List</li>
+    <li><a href="#"><i class="fa fa-dashboard"></i> {{ __('Trang chủ') }}</a></li>
+    <li><a href="{{ route( 'cost.index' ) }}">{{ __('Chi phí') }}</a></li>
+    <li class="active">{{ __('Danh sách') }}</li>
   </ol>
 </section>
 
@@ -21,13 +21,13 @@
       <p class="alert alert-info" >{{ Session::get('message') }}</p>
       @endif
       @if($notNH)
-      <a href="{{ route('cost.create',['month' => $month, 'cate_id' => $cate_id]) }}" class="btn btn-info btn-sm" style="margin-bottom:5px">Add new</a>
-      <a href="{{ route('cost.bill-upload') }}" class="btn btn-success btn-sm" style="margin-bottom:5px">Upload bill</a>
-      <a href="{{ route('cost.nhap-hang') }}" class="btn btn-success btn-sm" style="margin-bottom:5px"><i class="fa fa-bar-chart"></i> Thống kê nhập hàng</a>
+      <a href="{{ route('cost.create',['month' => $month, 'cate_id' => $cate_id]) }}" class="btn btn-info btn-sm" style="margin-bottom:5px">{{ __('Thêm mới') }}</a>
+      <a href="{{ route('cost.bill-upload') }}" class="btn btn-success btn-sm" style="margin-bottom:5px">{{ __('Upload bill') }}</a>
+      <a href="{{ route('cost.nhap-hang') }}" class="btn btn-success btn-sm" style="margin-bottom:5px"><i class="fa fa-bar-chart"></i> {{ __('Thống kê nhập hàng') }}</a>
       @endif
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">Filter</h3>
+          <h3 class="panel-title">{{ __('Bộ lọc') }}</h3>
         </div>
         <div class="panel-body">
           <form class="form-inline" role="form" method="GET" action="{{ route('cost.index') }}" id="searchForm">
@@ -38,17 +38,17 @@
                
             <div class="form-group">
                <select class="form-control select2" name="status" id="status">
-                    <option value="">--Status--</option>
-                    <option value="1" {{ $arrSearch['status'] == 1 ? "selected" : "" }}>Not yet paid</option>
-                    <option value="2" {{ $arrSearch['status'] == 2 ? "selected" : "" }}>Đã thanh toán</option>
-                    <option value="3" {{ $arrSearch['status'] == 3 ? "selected" : "" }}>Thanh toán sau</option>
+                    <option value="">{{ __('--Trạng thái--') }}</option>
+                    <option value="1" {{ $arrSearch['status'] == 1 ? "selected" : "" }}>{{ __('Chưa thanh toán') }}</option>
+                    <option value="2" {{ $arrSearch['status'] == 2 ? "selected" : "" }}>{{ __('Đã thanh toán') }}</option>
+                    <option value="3" {{ $arrSearch['status'] == 3 ? "selected" : "" }}>{{ __('Thanh toán sau') }}</option>
                 </select>
             </div>
             @endif    
             
             <div class="form-group">              
               <select class="form-control select2" name="cate_id" id="cate_id">
-                <option value="">--Cost category--</option>
+                <option value="">{{ __('--Loại chi phí--') }}</option>
                 @foreach($cateList as $cate)
                 <option value="{{ $cate->id }}" {{ $arrSearch['cate_id'] == $cate->id ? "selected" : "" }}>{{ $cate->name }}</option>
                 @endforeach
@@ -56,7 +56,7 @@
             </div>
             <div class="form-group">             
               <select class="form-control select2" name="ncc_id" id="ncc_id">
-                <option value="">--Nhà cung cấp--</option>
+                <option value="">{{ __('--Nhà cung cấp--') }}</option>
                 @foreach($nccList as $ncc)
                   <option value="{{ $ncc->id }}" {{ $arrSearch['ncc_id'] == $ncc->id ? "selected" : "" }}>
                     {{ $ncc->name }}
@@ -66,14 +66,14 @@
             </div>  
             <div class="form-group">
               <select class="form-control select2" name="detail_check" id="detail_check">
-                <option value="">--Chi tiết hàng--</option>
-                <option value="1" {{ ($arrSearch['detail_check'] ?? null) == 1 ? "selected" : "" }}>Lệch tiền – cần kiểm tra</option>
+                <option value="">{{ __('--Chi tiết hàng--') }}</option>
+                <option value="1" {{ ($arrSearch['detail_check'] ?? null) == 1 ? "selected" : "" }}>{{ __('Lệch tiền – cần kiểm tra') }}</option>
               </select>
             </div>
                
             <div class="form-group">              
               <select class="form-control select2" name="nguoi_chi" id="nguoi_chi">
-                <option value="">--Payer--</option>
+                <option value="">{{ __('--Người chi--') }}</option>
                 @foreach($collecterList as $payer)
                 <option value="{{ $payer->id }}" {{ $nguoi_chi == $payer->id ? "selected" : "" }}>{{ $payer->name }}</option>
                 @endforeach                
@@ -82,15 +82,15 @@
            
             <div class="form-group">              
               <select class="form-control select2" name="time_type" id="time_type">                
-                <option value="1" {{ $time_type == 1 ? "selected" : "" }}>By month</option>
-                <option value="2" {{ $time_type == 2 ? "selected" : "" }}>Date range</option>
-                <option value="3" {{ $time_type == 3 ? "selected" : "" }}>By date</option>
+                <option value="1" {{ $time_type == 1 ? "selected" : "" }}>{{ __('Theo tháng') }}</option>
+                <option value="2" {{ $time_type == 2 ? "selected" : "" }}>{{ __('Khoảng ngày') }}</option>
+                <option value="3" {{ $time_type == 3 ? "selected" : "" }}>{{ __('Theo ngày') }}</option>
               </select>
             </div> 
             @if($time_type == 1)
             <div class="form-group  chon-thang">                
                 <select class="form-control select2" id="month_change" name="month">
-                  <option value="">--Month--</option>
+                  <option value="">{{ __('--Tháng--') }}</option>
                   @for($i = 1; $i <=12; $i++)
                   <option value="{{ str_pad($i, 2, "0", STR_PAD_LEFT) }}" {{ $month == $i ? "selected" : "" }}>{{ str_pad($i, 2, "0", STR_PAD_LEFT) }}</option>
                   @endfor
@@ -98,7 +98,7 @@
               </div>
               <div class="form-group  chon-thang">                
                 <select class="form-control select2" id="year_change" name="year">
-                  <option value="">--Year--</option>                  
+                  <option value="">{{ __('--Năm--') }}</option>                  
                  
                   <option value="2025" {{ $year == 2025 ? "selected" : "" }}>2025</option>
                   <option value="2026" {{ $year == 2026 ? "selected" : "" }}>2026</option>
@@ -109,19 +109,19 @@
             @if($time_type == 2 || $time_type == 3)
             
             <div class="form-group chon-ngay">              
-              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_from" placeholder="@if($time_type == 2) From date @else Ngày @endif" value="{{ $arrSearch['use_date_from'] }}" style="width: 100px">
+              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_from" placeholder="{{ $time_type == 2 ? __('Từ ngày') : __('Ngày') }}" value="{{ $arrSearch['use_date_from'] }}" style="width: 100px">
             </div>
            
             @if($time_type == 2)
             <div class="form-group chon-ngay den-ngay">              
-              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_to" placeholder="To date" value="{{ $arrSearch['use_date_to'] }}" style="width: 100px">
+              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_to" placeholder="{{ __('Đến ngày') }}" value="{{ $arrSearch['use_date_to'] }}" style="width: 100px">
             </div>
              @endif
             @endif
            
            
-            <button type="submit" class="btn btn-info btn-sm" style="margin-top: -5px">Search</button> 
-            <button type="reset" class="btn btn-default btn-sm" style="margin-top: -5px">Reset</button>
+            <button type="submit" class="btn btn-info btn-sm" style="margin-top: -5px">{{ __('Tìm') }}</button> 
+            <button type="reset" class="btn btn-default btn-sm" style="margin-top: -5px">{{ __('Đặt lại') }}</button>
              <div>
               @foreach($branchList as $beach)
                 <div class="form-group">
@@ -138,10 +138,10 @@
           <div class="table-responsive">
           <table class="table table-bordered" id="table_report" style="margin-bottom:0px;font-size: 14px;">
               <tr style="background-color: #f4f4f4">
-                <th class="text-left">Total items</th>
-                <th class="text-right">Total</th>
+                <th class="text-left">{{ __('Tổng số lượng') }}</th>
+                <th class="text-right">{{ __('Tổng tiền') }}</th>
                 @foreach($arrReport as $cate_id => $amountByCate)
-                <th class="text-right">{!! isset($cateArr[$cate_id]) ? $cateArr[$cate_id] : "<span style=color:red>Không xác định</span>" !!}</th>
+                <th class="text-right">{!! isset($cateArr[$cate_id]) ? $cateArr[$cate_id] : '<span style=color:red>'.e(__('Không xác định')).'</span>' !!}</th>
                 @endforeach
               </tr>
               <tr>
@@ -157,18 +157,18 @@
         </div>
       </div>
       @if($notNH)
-      <p style="text-align: right;"><a href="javascript:;" class="btn btn-primary btn-sm" id="btnExport">Export Excel</a>
+      <p style="text-align: right;"><a href="javascript:;" class="btn btn-primary btn-sm" id="btnExport">{{ __('Xuất Excel') }}</a>
       @endif
       <div class="box">
 
         <div class="box-header with-border">
-          <h3 class="box-title">List ( <span class="value">{{ $items->total() }} mục )</span> - Tổng tiền: <span style="color:red">{{ number_format($total_actual_amount) }} </span>- Số lượng: <span style="color:red">{{ $total_quantity }} </span></h3>
+          <h3 class="box-title">{{ __('Danh sách') }} ( <span class="value">{{ $items->total() }} {{ __('mục') }} )</span> {{ __('- Tổng tiền:') }} <span style="color:red">{{ number_format($total_actual_amount) }} </span>{{ __('- Số lượng:') }} <span style="color:red">{{ $total_quantity }} </span></h3>
         </div>
         @if(Auth::user()->role == 1 && $notNH)
         <div class="form-inline" style="padding: 5px">
           <div class="form-group">              
               <select class="form-control select2 multi-change-column-value" data-column="branch_id">                  
-                <option value="">--SET BRANCH--</option>
+                <option value="">{{ __('--ĐỔI CHI NHÁNH--') }}</option>
                 @foreach($branchList as $beach)
                 <option value="{{ $beach->id }}">{{ $beach->name }}</option>
                 @endforeach 
@@ -177,7 +177,7 @@
   
           <div class="form-group">            
             <select class="form-control select2 multi-change-column-value" data-column="nguoi_chi">
-                <option value="">--SET PAYER--</option>
+                <option value="">{{ __('--ĐỔI NGƯỜI CHI--') }}</option>
                  @foreach($collecterList as $payer)
                 <option value="{{ $payer->id }}">{{ $payer->name }}</option>
                 @endforeach
@@ -185,7 +185,7 @@
           </div>           
           <div class="form-group">        
               <select class="form-control select2 multi-change-column-value" data-column="cate_id">
-                <option value="">--SET CATEGORY--</option>
+                <option value="">{{ __('--ĐỔI LOẠI CHI PHÍ--') }}</option>
                 @foreach($cateList as $cate)
                 <option value="{{ $cate->id }}">{{ $cate->name }}</option>
                 @endforeach
@@ -193,11 +193,11 @@
             </div>
           <div class="form-group">            
             <select class="form-control select2 multi-change-column-value" data-column="status">
-                <option value="">--SET STATUS--</option>                 
-                <option value="1">Not yet paid</option>
-                <option value="2">Paid</option>
-                <option value="3">Pay later</option>
-                <option value="0">Deleted</option>
+                <option value="">{{ __('--ĐỔI TRẠNG THÁI--') }}</option>                 
+                <option value="1">{{ __('Chưa thanh toán') }}</option>
+                <option value="2">{{ __('Đã thanh toán') }}</option>
+                <option value="3">{{ __('Thanh toán sau') }}</option>
+                <option value="0">{{ __('Đã xóa') }}</option>
               </select>
           </div>        
         </div>
@@ -213,18 +213,18 @@
               <th style="width: 1%"><input type="checkbox" id="check_all" value="1"></th>
               @endif
               <th style="width: 1%">#</th>
-              <th class="text-left">Created at</th>
-              <th class="text-left">Date</th>
-              <th class="text-center" style="width: 120px">Branch</th>
-              <th class="text-left">Content</th>
-              <th class="text-center">UNC</th>
-              <th class="text-center">Amount</th>
-              <th class="text-right">Price</th>
-              <th class="text-right">Total</th>
-              <th width="1%" style="white-space: nowrap;" class="text-center">Payer</th> 
-              <th>NCC</th>
+              <th class="text-left">{{ __('Ngày tạo') }}</th>
+              <th class="text-left">{{ __('Ngày') }}</th>
+              <th class="text-center" style="width: 120px">{{ __('Chi nhánh') }}</th>
+              <th class="text-left">{{ __('Nội dung') }}</th>
+              <th class="text-center">{{ __('UNC') }}</th>
+              <th class="text-center">{{ __('Số lượng') }}</th>
+              <th class="text-right">{{ __('Đơn giá') }}</th>
+              <th class="text-right">{{ __('Tổng tiền') }}</th>
+              <th width="1%" style="white-space: nowrap;" class="text-center">{{ __('Người chi') }}</th> 
+              <th>{{ __('NCC') }}</th>
               @if($notNH)             
-              <th width="1%;white-space:nowrap">Action</th>
+              <th width="1%;white-space:nowrap">{{ __('Thao tác') }}</th>
               @endif
             </tr>
             <tbody>
@@ -247,11 +247,11 @@
                     {{ date('d/m/y', strtotime($item->date_use)) }} 
                     @if($notNH)
                     @if($item->status == 1)
-                        <label class="label label-danger label-sm">Not yet paid</label>                        
+                        <label class="label label-danger label-sm">{{ __('Chưa thanh toán') }}</label>                        
                     @elseif($item->status == 2)
-                        <label class="label label-success label-sm">Paid</label>
+                        <label class="label label-success label-sm">{{ __('Đã thanh toán') }}</label>
                     @else
-                      <label class="label label-warning label-sm">Pay later</label>
+                      <label class="label label-warning label-sm">{{ __('Thanh toán sau') }}</label>
                     @endif
                     @endif
                     @if($item->user)
@@ -280,11 +280,11 @@
                 </td>
                 <td class="text-center">
                   @if($item->image_url && $item->unc_type == 1)
-                  <span style="color: blue; cursor: pointer;" class="img-unc" data-src="{{ config('plantotravel.upload_url').$item->image_url }}">View Images</span>               
+                  <span style="color: blue; cursor: pointer;" class="img-unc" data-src="{{ config('plantotravel.upload_url').$item->image_url }}">{{ __('Xem ảnh') }}</span>               
                   @endif
                   @if($notNH)
                     <select class="form-control select2 change-column-value" data-id="{{ $item->id }}" data-column="cate_id" style="width: 100%" data-table="cost">
-                      <option value="">--Cost category--</option>
+                      <option value="">{{ __('--Loại chi phí--') }}</option>
                       @foreach($cateList as $cate)
                       <option value="{{ $cate->id }}" {{ $cate->id == $item->cate_id ? "selected" : "" }}>{{ $cate->name }}</option>
                       @endforeach
@@ -330,7 +330,7 @@
               @endforeach
             @else
             <tr>
-              <td colspan="4">No data!</td>
+              <td colspan="4">{{ __('Không có dữ liệu!') }}</td>
             </tr>
             @endif
 
@@ -361,7 +361,7 @@
         <img src="" id="unc_img" style="width: 100%">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Đóng') }}</button>
       </div>
     </div>
   </div>
@@ -374,13 +374,13 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4>QR CODE</h4>
+                    <h4>{{ __('MÃ QR') }}</h4>
                 </div>
                 <div class="modal-body">
                     <img src=""/>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">ĐÓNG</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('ĐÓNG') }}</button>
                 </div>
             </div>
         </div>

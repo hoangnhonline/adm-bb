@@ -6,14 +6,14 @@
 <!-- Content Header (Page header) -->
 <section class="content-header">
   <h1 style="text-transform: uppercase;">
-    Bill management
+    {{ __('Quản lý bill') }}
   </h1>
   <ol class="breadcrumb">
-    <li><a href="#"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+    <li><a href="#"><i class="fa fa-dashboard"></i> {{ __('Trang chủ') }}</a></li>
     <li><a href="{{ route( 'booking.index') }}">
-    List
+    {{ __('Danh sách') }}
     </a></li>
-    <li class="active">List</li>
+    <li class="active">{{ __('Danh sách') }}</li>
   </ol>
 </section>
 
@@ -28,13 +28,13 @@
       @endif
   
       @if($time_type == 3)
-      <a href="{{ route('booking.create') }}?use_date={{ $arrSearch['use_date_from'] }}" class="btn btn-info btn-sm" style="margin-bottom:5px">MAKE A BILL</a>
-      <a href="{{ route('booking.orders') }}" class="btn btn-warning btn-sm" style="margin-bottom:5px">KITCHEN</a>
-      <a href="{{ route('booking.curry') }}" class="btn btn-success btn-sm" style="margin-bottom:5px">CURRY</a>
-      <a href="{{ route('booking.tandoor') }}" class="btn btn-info btn-sm" style="margin-bottom:5px">BREAD</a>
+      <a href="{{ route('booking.create') }}?use_date={{ $arrSearch['use_date_from'] }}" class="btn btn-info btn-sm" style="margin-bottom:5px">{{ __('TẠO BILL') }}</a>
+      <a href="{{ route('booking.orders') }}" class="btn btn-warning btn-sm" style="margin-bottom:5px">{{ __('BẾP') }}</a>
+      <a href="{{ route('booking.curry') }}" class="btn btn-success btn-sm" style="margin-bottom:5px">{{ __('CURRY') }}</a>
+      <a href="{{ route('booking.tandoor') }}" class="btn btn-info btn-sm" style="margin-bottom:5px">{{ __('BÁNH') }}</a>
      
       @else
-      <a href="{{ route('booking.create') }}" class="btn btn-info btn-sm" style="margin-bottom:5px">Add new</a>
+      <a href="{{ route('booking.create') }}" class="btn btn-info btn-sm" style="margin-bottom:5px">{{ __('Thêm mới') }}</a>
       @endif
 
 
@@ -44,22 +44,22 @@
           <form class="form-inline" role="form" method="GET" action="{{ route('booking.index') }}" id="searchForm" style="margin-bottom: 0px;">
          
             <div class="form-group">
-              <input type="text" class="form-control" autocomplete="off" name="table_no" placeholder="TABLE" value="{{ $arrSearch['table_no'] }}" style="width: 100px">
+              <input type="text" class="form-control" autocomplete="off" name="table_no" placeholder="{{ __('BÀN') }}" value="{{ $arrSearch['table_no'] }}" style="width: 100px">
             </div>
             
             
             <div class="form-group">
               <select class="form-control select2" name="time_type" id="time_type" style="width: 150px;">
-                <option value="">--Time--</option>
-                <option value="1" {{ $time_type == 1 ? "selected" : "" }}>Month</option>
-                <option value="2" {{ $time_type == 2 ? "selected" : "" }}>Date range</option>
-                <option value="3" {{ $time_type == 3 ? "selected" : "" }}>Specific date </option>
+                <option value="">{{ __('--Thời gian--') }}</option>
+                <option value="1" {{ $time_type == 1 ? "selected" : "" }}>{{ __('Theo tháng') }}</option>
+                <option value="2" {{ $time_type == 2 ? "selected" : "" }}>{{ __('Khoảng ngày') }}</option>
+                <option value="3" {{ $time_type == 3 ? "selected" : "" }}>{{ __('Theo ngày') }} </option>
               </select>
             </div>
             @if($time_type == 1)
             <div class="form-group  chon-thang">
                 <select class="form-control select2" id="month_change" name="month">
-                  <option value="">--MONTH--</option>
+                  <option value="">{{ __('--THÁNG--') }}</option>
                   @for($i = 1; $i <=12; $i++)
                   <option value="{{ str_pad($i, 2, "0", STR_PAD_LEFT) }}" {{ $month == $i ? "selected" : "" }}>{{ str_pad($i, 2, "0", STR_PAD_LEFT) }}</option>
                   @endfor
@@ -67,7 +67,7 @@
               </div>
               <div class="form-group  chon-thang">
                 <select class="form-control select2" id="year_change" name="year">
-                  <option value="">--YEAR--</option>                 
+                  <option value="">{{ __('--NĂM--') }}</option>                 
                   <option value="2025" {{ $year == 2025 ? "selected" : "" }}>2025</option>
                   <option value="2026" {{ $year == 2026 ? "selected" : "" }}>2026</option>
                   <option value="2027" {{ $year == 2027 ? "selected" : "" }}>2027</option>
@@ -76,11 +76,11 @@
             @endif
             @if($time_type == 2 || $time_type == 3)
             <div class="form-group chon-ngay">
-              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_from" placeholder="@if($time_type == 2) From date @else Ngày @endif " value="{{ $arrSearch['use_date_from'] }}" style="width: 110px">
+              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_from" placeholder="{{ $time_type == 2 ? __('Từ ngày') : __('Ngày') }}" value="{{ $arrSearch['use_date_from'] }}" style="width: 110px">
             </div>
             @if($time_type == 2)
             <div class="form-group chon-ngay den-ngay">
-              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_to" placeholder="To date" value="{{ $arrSearch['use_date_to'] }}" style="width: 110px">
+              <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_to" placeholder="{{ __('Đến ngày') }}" value="{{ $arrSearch['use_date_to'] }}" style="width: 110px">
             </div>
              @endif
             @endif       
@@ -88,7 +88,7 @@
             
             <div class="form-group">
               <select class="form-control select2" name="nguoi_thu_tien" id="nguoi_thu_tien" style="width: 120px;">
-                <option value="">--Receiver--</option>
+                <option value="">{{ __('--Người thu--') }}</option>
                 @foreach($collecterList as $payer)
                 <option value="{{ $payer->id }}" {{ $arrSearch['nguoi_thu_tien'] == $payer->id ? "selected" : "" }}>{{ $payer->name }}</option>
                 @endforeach
@@ -96,18 +96,18 @@
             </div> 
             <div class="form-group">
               <select class="form-control select2" name="doi_tac" style="width: 170px;">
-                <option value="">--Đối tác / Khách lẻ--</option>
-                <option value="le" {{ ($arrSearch['doi_tac'] ?? '') === 'le' ? "selected" : "" }}>Khách lẻ</option>
-                <option value="all" {{ ($arrSearch['doi_tac'] ?? '') === 'all' ? "selected" : "" }}>Tất cả đối tác</option>
+                <option value="">{{ __('--Đối tác / Khách lẻ--') }}</option>
+                <option value="le" {{ ($arrSearch['doi_tac'] ?? '') === 'le' ? "selected" : "" }}>{{ __('Khách lẻ') }}</option>
+                <option value="all" {{ ($arrSearch['doi_tac'] ?? '') === 'all' ? "selected" : "" }}>{{ __('Tất cả đối tác') }}</option>
                 @foreach(($doiTacList ?? []) as $dt)
                 <option value="{{ $dt->id }}" {{ ($arrSearch['doi_tac'] ?? '') == $dt->id ? "selected" : "" }}>{{ $dt->name }}</option>
                 @endforeach
               </select>
             </div>
              
-            <button type="submit" class="btn btn-info btn-sm" style="margin-top: -5px">Search</button>
+            <button type="submit" class="btn btn-info btn-sm" style="margin-top: -5px">{{ __('Tìm') }}</button>
             <div class="form-group">
-              <button type="button" id="btnReset" class="btn btn-default btn-sm">Reset</button>
+              <button type="button" id="btnReset" class="btn btn-default btn-sm">{{ __('Đặt lại') }}</button>
             </div>
 
             <div>
@@ -126,14 +126,14 @@
       <div class="box">
         @if($isView == false)
         <div class="form-group">          
-          <a href="javascript:;" class="btn btn-primary btn-sm" id="btnExcel">Excel</a>
+          <a href="javascript:;" class="btn btn-primary btn-sm" id="btnExcel">{{ __('Excel') }}</a>
         </div>
         @endif
          <!-- /.box-header -->
           <div class="box-header with-border">
-              <h3 class="box-title">List ( <span class="value">{{ $items->total() }} bills )</span>
+              <h3 class="box-title">{{ __('Danh sách') }} ( <span class="value">{{ $items->total() }} {{ __('bill') }} )</span>
                 @if($isView)
-                Tổng doanh thu: <span style="color: blue">{{ number_format($totalRevenue) }}</span>
+                {{ __('Tổng doanh thu') }}: <span style="color: blue">{{ number_format($totalRevenue) }}</span>
                 @endif
 
               
@@ -144,7 +144,7 @@
 
 
                 @if($totalDrinks > 0)
-                - Total amount for drinks: <span style="color: red">{{ number_format($totalDrinks) }}</span>
+                - {{ __('Tổng tiền đồ uống') }}: <span style="color: red">{{ number_format($totalDrinks) }}</span>
                 @endif
               @endif
               
@@ -164,14 +164,14 @@
               @if($notNH)
               <th style="width: 1%" class="text-center" ><input type="checkbox" id="check_all" value="1"></th>
               @endif
-              <th width="1%">No.</th>
+              <th width="1%">{{ __('STT') }}</th>
 
-              <th style="width: 200px">Guest</th>
-              <th width="30%">Dish</th>
-              <th class="text-center" width="120">Dining date</th>
-              <th class="text-right" width="100">Total</th>
-              <th class="text-center"  width="100">Receiver</th>
-              <th width="1%" style="white-space:nowrap; text-align: right">Action</th>
+              <th style="width: 200px">{{ __('Khách') }}</th>
+              <th width="30%">{{ __('Món') }}</th>
+              <th class="text-center" width="120">{{ __('Ngày ăn') }}</th>
+              <th class="text-right" width="100">{{ __('Tổng tiền') }}</th>
+              <th class="text-center"  width="100">{{ __('Người thu') }}</th>
+              <th width="1%" style="white-space:nowrap; text-align: right">{{ __('Thao tác') }}</th>
             </tr>
             <tbody>
             @if( $items->count() > 0 )
@@ -191,21 +191,21 @@
                 <td class="text-center"> {{ $l }}</td>
                 <td>
                     @if($item->table_no)
-                    TABLE <span style="color: blue; font-weight: bold">{{ $item->table_no }} - <strong>{{ date('H:i', strtotime($item->created_at)) }}</strong></span>
+                    {{ __('BÀN') }} <span style="color: blue; font-weight: bold">{{ $item->table_no }} - <strong>{{ date('H:i', strtotime($item->created_at)) }}</strong></span>
                     @endif           
                     @if($item->take_away == 1)
-                    <br><span style="color: blue">TAKE AWAY</span>
+                    <br><span style="color: blue">{{ __('MANG ĐI') }}</span>
                     @endif
                     @if($item->indian == 2)
-                    <br><span style="color: red">NOT INDIAN</span>
+                    <br><span style="color: red">{{ __('KHÔNG PHẢI KHÁCH ẤN') }}</span>
                     @endif
                     @if($item->branch_id)
                     <br><p style="color: blue">{{ $item->branch->name }}</p>
                     @endif
                     @if($item->doi_tac_id && $item->doiTac)
                     <span class="label label-warning">{{ $item->doiTac->name }}</span>
-                    @if($item->ghi_no)<span class="label label-danger">Ghi nợ</span>@endif
-                    @if($item->com_amount > 0)<br><small>HH: {{ number_format($item->com_amount) }}</small>@endif
+                    @if($item->ghi_no)<span class="label label-danger">{{ __('Ghi nợ') }}</span>@endif
+                    @if($item->com_amount > 0)<br><small>{{ __('HH') }}: {{ number_format($item->com_amount) }}</small>@endif
                     @endif
                 </td>
                 <td>
@@ -222,7 +222,7 @@
                    <tr>
                      <td width="50%">
                        @if($dishs->done_qty == $dishs->amount)
-                      <label class="label label-sm label-info">Done</label>
+                      <label class="label label-sm label-info">{{ __('Xong') }}</label>
                       @endif
                       @if($dishs->is_drink == 1)
                       <i class="fa fa-coffee" style="color: blue" aria-hidden="true"></i>
@@ -269,7 +269,7 @@
                   @endif
 
                   <br>
-                  Order: <span style="color:blue">{{ $item->id }}</span>
+                  {{ __('Order:') }} <span style="color:blue">{{ $item->id }}</span>
                   @if($item->branch_id == 12)
                   <br> + VAT: {{ number_format($item->con_lai*1.08) }}</td>
                   @endif
@@ -290,13 +290,13 @@
                   <br>
                   @endif           
                   <p style="clear:both; margin-top: 5px;">      
-                  <a class="btn btn-success btn-sm" href="{{ route( 'booking.detail', $item->id ) }}" >HÓA ĐƠN</a>
+                  <a class="btn btn-success btn-sm" href="{{ route( 'booking.detail', $item->id ) }}" >{{ __('HÓA ĐƠN') }}</a>
 
                   <br><input id="hoan_tat_{{ $item->id }}"  data-table="booking" type="checkbox" data-table="booking" data-column="checked" class="change-column-value-booking" {{ $item->checked == 1 ? "checked" : "" }} value="1" data-id="{{ $item->id }}">
-                    <label for="hoan_tat_{{ $item->id }}">CHECKED</label>   
+                    <label for="hoan_tat_{{ $item->id }}">{{ __('ĐÃ KIỂM') }}</label>   
                     
                     <br><input id="no_vat_{{ $item->id }}"  data-table="booking" type="checkbox" data-table="booking" data-column="no_vat" class="change-column-value-booking" {{ $item->no_vat == 1  ? "checked" : "" }} value="1" data-id="{{ $item->id }}">
-                    <label for="no_vat_{{ $item->id }}">NO VAT</label>                   
+                    <label for="no_vat_{{ $item->id }}">{{ __('KHÔNG VAT') }}</label>                   
 
                 </p>
                 </td>
@@ -304,7 +304,7 @@
               @endforeach
             @else
             <tr>
-              <td colspan="9">No data!</td>
+              <td colspan="9">{{ __('Không có dữ liệu!') }}</td>
             </tr>
             @endif
 
@@ -337,7 +337,7 @@
         <img src="" id="unc_img" style="width: 100%">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Đóng') }}</button>
       </div>
     </div>
   </div>
@@ -381,7 +381,7 @@
           <!-- general form elements -->
           <div class="box box-primary">
             <div class="box-header with-border">
-              <h3 class="box-title">UPLOAD UNC PTT<span id="id_load_unc"></span></h3>
+              <h3 class="box-title">{{ __('UPLOAD UNC PTT') }}<span id="id_load_unc"></span></h3>
             </div>
             <!-- /.box-header -->
               {!! csrf_field() !!}
@@ -399,13 +399,13 @@
                 <input type="hidden" name="booking_id" value="" id="booking_id_unc">
 
                   <div class="form-group" style="margin-top:10px;margin-bottom:10px">
-                  <label class="col-md-3 row">Images </label>
+                  <label class="col-md-3 row">{{ __('Hình ảnh') }} </label>
                   <div class="col-md-9">
                     <img id="thumbnail_image" src="{{ old('image_url') ? Helper::showImage(old('image_url')) : URL::asset('admin/dist/img/img.png') }}" class="img-thumbnail" width="145" height="85">
 
                     <input type="file" id="file-image" style="display:none" />
 
-                    <button class="btn btn-default" id="btnUploadImage" type="button"><span class="glyphicon glyphicon-upload" aria-hidden="true"></span> Upload</button>
+                    <button class="btn btn-default" id="btnUploadImage" type="button"><span class="glyphicon glyphicon-upload" aria-hidden="true"></span> {{ __('Tải lên') }}</button>
                   </div>
                   <div style="clear:both"></div>
                   <input type="hidden" name="image_url" id="image_url" value="{{ old('image_url') }}"/>
@@ -415,7 +415,7 @@
                   <div style="clear:both"></div>
 
                   <div class="form-group">
-                    <label>Notes</label>
+                    <label>{{ __('Ghi chú') }}</label>
                     <textarea class="form-control" rows="6" name="notes" id="notes_payment">{{ old('notes') }}</textarea>
                   </div>
 
@@ -423,10 +423,10 @@
               </div>
 
               <div class="box-footer">
-                <button type="button" id="btnSavePayment" class="btn btn-primary btn-sm">Save</button>
+                <button type="button" id="btnSavePayment" class="btn btn-primary btn-sm">{{ __('Lưu') }}</button>
 
-                <button type="button" class="btn btn-default btn-sm" id="btnLoading" style="display:none"><i class="fa fa-spin fa-spinner"></i> Processing...</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-default btn-sm" id="btnLoading" style="display:none"><i class="fa fa-spin fa-spinner"></i> {{ __('Đang xử lý...') }}</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Đóng') }}</button>
               </div>
 
           </div>
@@ -447,13 +447,13 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4>QR CODE</h4>
+                    <h4>{{ __('MÃ QR') }}</h4>
                 </div>
                 <div class="modal-body">
                     <img src="" style="width: 100% !important;" />
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">ĐÓNG</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('ĐÓNG') }}</button>
                 </div>
             </div>
         </div>
@@ -490,7 +490,7 @@
               window.location.reload();
             },
             error: function(response){
-                alert('Có lỗi xảy ra');
+                alert({!! json_encode(__('Có lỗi xảy ra')) !!});
             }
           });
     });

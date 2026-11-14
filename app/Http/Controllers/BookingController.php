@@ -2010,7 +2010,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
         ]);
 
 
-        Session::flash('message', 'Tạo mới thành công');
+        Session::flash('message', __('Tạo mới thành công'));
         $use_date = date('d/m/Y', strtotime($dataArr['use_date']));
 
         return redirect()->route('booking.index', ['use_date_from' => $use_date]);
@@ -2253,7 +2253,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
             ]);
         }
 
-        Session::flash('message', 'Cập nhật thành công');
+        Session::flash('message', __('Cập nhật thành công'));
 
         return redirect()->route('booking.index', ['use_date_from' => $use_date]);
 
@@ -2290,7 +2290,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
         $type = $model->type;
         $model->update(['status' => 0]);
         // redirect
-        Session::flash('message', 'Xóa thành công');
+        Session::flash('message', __('Xóa thành công'));
         return redirect()->route('booking.index', ['type' => $type, 'use_date_from' => $use_date, 'tour_id' => $model->tour_id]);
     }
 

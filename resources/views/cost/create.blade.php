@@ -3,17 +3,17 @@
 <div class="content-wrapper">
   <!-- Content Header (Page header) -->
   <section class="content-header">
-    <h1>Cost</h1>
+    <h1>{{ __('Chi phí') }}</h1>
     <ol class="breadcrumb">
-      <li><a href="#"><i class="fa fa-dashboard"></i> Dashboard</a></li>
-      <li><a href="{{ route('cost.index') }}">Cost</a></li>
-      <li class="active">Add new</li>
+      <li><a href="#"><i class="fa fa-dashboard"></i> {{ __('Trang chủ') }}</a></li>
+      <li><a href="{{ route('cost.index') }}">{{ __('Chi phí') }}</a></li>
+      <li class="active">{{ __('Thêm mới') }}</li>
     </ol>
   </section>
 
   <!-- Main content -->
   <section class="content">
-    <a class="btn btn-default btn-sm" href="{{ route('cost.index') }}" style="margin-bottom:5px">Back</a>
+    <a class="btn btn-default btn-sm" href="{{ route('cost.index') }}" style="margin-bottom:5px">{{ __('Quay lại') }}</a>
 
     <form role="form" method="POST" action="{{ route('cost.store') }}" id="dataForm">
       <div class="row">
@@ -21,7 +21,7 @@
 
           <div class="box box-primary">
             <div class="box-header with-border">
-              <h3 class="box-title">Add new</h3>
+              <h3 class="box-title">{{ __('Thêm mới') }}</h3>
             </div>
 
             {!! csrf_field() !!}
@@ -41,16 +41,16 @@
 
               <div class="row">
                 <div class="form-group col-md-4 col-xs-12">
-                  <label for="status">Status</label>
+                  <label for="status">{{ __('Trạng thái') }}</label>
                   <select class="form-control select2" name="status" id="status">
-                    <option value="2" {{ old('status') == 2 ? "selected" : "" }}>Paid</option>
-                    <option value="1" {{ old('status') == 1 ? "selected" : "" }}>Not yet paid</option>
-                    <option value="3" {{ old('status') == 3 ? "selected" : "" }}>Pay later</option>
+                    <option value="2" {{ old('status') == 2 ? "selected" : "" }}>{{ __('Đã thanh toán') }}</option>
+                    <option value="1" {{ old('status') == 1 ? "selected" : "" }}>{{ __('Chưa thanh toán') }}</option>
+                    <option value="3" {{ old('status') == 3 ? "selected" : "" }}>{{ __('Thanh toán sau') }}</option>
                   </select>
                 </div>
 
                 <div class="form-group col-xs-6 col-md-4">
-                  <label>Branch</label>
+                  <label>{{ __('Chi nhánh') }}</label>
                   <select name="branch_id" id="branch_id" class="form-control select2">
                     @foreach($branchList as $beach)
                       <option value="{{ $beach->id }}" {{ old('branch_id') == $beach->id ? "selected" : "" }}>
@@ -61,7 +61,7 @@
                 </div>
 
                 <div class="form-group col-md-4 col-xs-6">
-                  <label for="date_use">Date</label>
+                  <label for="date_use">{{ __('Ngày') }}</label>
                   <input type="text"
                          name="date_use"
                          class="form-control datepicker"
@@ -75,7 +75,7 @@
                 <input type="hidden" name="type" value="1">
 
                 <div class="form-group col-md-12 col-xs-12">
-                  <label>Cost category<span class="red-star">*</span></label>
+                  <label>{{ __('Loại chi phí') }}<span class="red-star">*</span></label>
 
                   {{-- QUICK LABELS --}}
                   <div id="cate_quick" style="margin:6px 0 10px;">
@@ -93,7 +93,7 @@
                   </div>
 
                   <select class="form-control select2" id="cate_id" name="cate_id">
-                    <option value="">--Chọn--</option>
+                    <option value="">{{ __('--Chọn--') }}</option>
                     @include('cost._cate-options', ['selectedCate' => old('cate_id', $cate_id)])
                   </select>
                 </div>
@@ -104,7 +104,7 @@
 
               <div class="row">
                 <div class="form-group col-md-12">
-                  <label for="notes">Content</label>
+                  <label for="notes">{{ __('Nội dung') }}</label>
                   <textarea class="form-control" name="notes" id="notes" rows="3">{!! old('notes') !!}</textarea>
                 </div>
 
@@ -112,28 +112,28 @@
 
                 <div class="tinh-toan">
                   <div class="form-group col-md-4 col-xs-6">
-                    <label for="price">Price</label>
+                    <label for="price">{{ __('Đơn giá') }}</label>
                     <input type="text" name="price" class="form-control number gia" autocomplete="off"
-                           placeholder="Giá" value="{{ old('price') }}">
+                           placeholder="{{ __('Giá') }}" value="{{ old('price') }}">
                   </div>
 
                   <div class="form-group col-md-4 col-xs-6">
-                    <label for="amount">Amount</label>
+                    <label for="amount">{{ __('Số lượng') }}</label>
                     <input type="text" name="amount" class="form-control amount" autocomplete="off"
-                           placeholder="Số lượng" value="{{ old('amount', 1) }}">
+                           placeholder="{{ __('Số lượng') }}" value="{{ old('amount', 1) }}">
                   </div>
 
                   <div class="form-group col-md-4 col-xs-12">
-                    <label for="total_money">Total</label>
+                    <label for="total_money">{{ __('Tổng tiền') }}</label>
                     <input type="text" name="total_money" class="form-control number total" autocomplete="off"
-                           placeholder="Tổng tiền" value="{{ old('total_money') }}">
+                           placeholder="{{ __('Tổng tiền') }}" value="{{ old('total_money') }}">
                   </div>
                 </div>
 
                 <div class="form-group col-md-12 input-group" style="padding-left: 15px;">
-                  <label for="bank_info_id">Bank account</label>
+                  <label for="bank_info_id">{{ __('Tài khoản ngân hàng') }}</label>
                   <select class="form-control select2" name="bank_info_id" id="bank_info_id">
-                    <option value="">--All--</option>
+                    <option value="">{{ __('--Tất cả--') }}</option>
                     @foreach($bankInfoList as $cate)
                       <option value="{{ $cate->id }}" {{ old('bank_info_id') == $cate->id ? "selected" : "" }}>
                         {{ $cate->name }} - {{ $cate->bank_name }} - {{ $cate->bank_no }}
@@ -143,14 +143,14 @@
 
                   <span class="input-group-btn">
                     <button style="margin-top:24px" class="btn btn-primary btn-sm" id="btnAddBankInfo" type="button" data-value="3">
-                      Add new
+                      {{ __('Thêm mới') }}
                     </button>
                   </span>
                 </div>
                 <div class="form-group col-md-6">
-                  <label>Nhà cung cấp</label>
+                  <label>{{ __('Nhà cung cấp') }}</label>
                   <select class="form-control select2" name="ncc_id" id="ncc_id">
-                    <option value="">--Chọn--</option>
+                    <option value="">{{ __('--Chọn--') }}</option>
                     @foreach($nccList as $ncc)
                       <option value="{{ $ncc->id }}" {{ old('ncc_id') == $ncc->id ? "selected" : "" }}>
                         {{ $ncc->name }}
@@ -159,7 +159,7 @@
                   </select>
                 </div>
                 <div class="form-group col-md-6">
-                  <label>Payer <span class="red-star">*</span></label>
+                  <label>{{ __('Người chi') }} <span class="red-star">*</span></label>
                   <select class="form-control select2" name="nguoi_chi" id="nguoi_chi">
                     @foreach($collecterList as $payer)
                       <option value="{{ $payer->id }}" {{ old('nguoi_chi') == $payer->id ? "selected" : "" }}>
@@ -170,7 +170,7 @@
                 </div>
 
                 <div class="form-group col-md-12" style="margin-top: 15px;">
-                  <label class="col-md-3 row">Images</label>
+                  <label class="col-md-3 row">{{ __('Hình ảnh') }}</label>
                   <div class="col-md-9">
                     <img id="thumbnail_image"
                          src="{{ old('image_url') ? Helper::showImage(old('image_url')) : URL::asset('admin/dist/img/img.png') }}"
@@ -178,7 +178,7 @@
 
                     <input type="file" id="file-image" style="display:none" />
                     <button class="btn btn-default" id="btnUploadImage" type="button">
-                      <span class="glyphicon glyphicon-upload" aria-hidden="true"></span> Upload
+                      <span class="glyphicon glyphicon-upload" aria-hidden="true"></span> {{ __('Tải lên') }}
                     </button>
                   </div>
 
@@ -190,7 +190,7 @@
                 <div class="form-group" style="margin-top:10px;margin-bottom:10px">
                   <div class="col-md-12" style="text-align:left">
                     <button class="btn btn-primary btnMultiUpload" type="button">
-                      <span class="glyphicon glyphicon-upload" aria-hidden="true"></span> Upload multi images
+                      <span class="glyphicon glyphicon-upload" aria-hidden="true"></span> {{ __('Tải nhiều ảnh') }}
                     </button>
                     <div class="clearfix"></div>
                     <div id="div-image" style="margin-top:10px"></div>
@@ -203,8 +203,8 @@
             </div> {{-- /box-body --}}
 
             <div class="box-footer">
-              <button type="submit" class="btn btn-primary btn-sm">Save</button>
-              <a class="btn btn-default btn-sm" href="{{ route('cost.index')}}">Cancel</a>
+              <button type="submit" class="btn btn-primary btn-sm">{{ __('Lưu') }}</button>
+              <a class="btn btn-default btn-sm" href="{{ route('cost.index')}}">{{ __('Hủy') }}</a>
             </div>
 
           </div> {{-- /box --}}
@@ -224,7 +224,7 @@
       <form method="POST" action="{{ route('bank-info.ajax-save')}}" id="formAjaxBankInfo">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">Add new bank account</h4>
+          <h4 class="modal-title">{{ __('Thêm tài khoản ngân hàng') }}</h4>
         </div>
 
         <div class="modal-body" id="contentTag">
@@ -232,14 +232,14 @@
 
           <div class="col-md-12">
             <div class="form-group">
-              <label>Name<span class="red-star">*</span></label>
+              <label>{{ __('Tên') }}<span class="red-star">*</span></label>
               <input type="text" autocomplete="off" class="form-control" id="add_name" value="{{ old('name') }}" name="name">
             </div>
 
             <div class="form-group">
-              <label>Bank name<span class="red-star">*</span></label>
+              <label>{{ __('Tên ngân hàng') }}<span class="red-star">*</span></label>
               <select class="form-control select2" id="add_bank_name" name="bank_name" style="width: 100%">
-                <option value="">--Chọn--</option>
+                <option value="">{{ __('--Chọn--') }}</option>
                 @foreach($vietNameBanks as $bank)
                   <option value="{{$bank['shortName']}}">{{$bank['shortName']}}</option>
                 @endforeach
@@ -247,17 +247,17 @@
             </div>
 
             <div class="form-group">
-              <label>Account name<span class="red-star">*</span></label>
+              <label>{{ __('Chủ tài khoản') }}<span class="red-star">*</span></label>
               <input type="text" autocomplete="off" class="form-control" id="add_account_name" value="{{ old('account_name') }}" name="account_name">
             </div>
 
             <div class="form-group">
-              <label>Account No<span class="red-star">*</span></label>
+              <label>{{ __('Số tài khoản') }}<span class="red-star">*</span></label>
               <input type="text" autocomplete="off" class="form-control" id="add_bank_no" value="{{ old('bank_no') }}" name="bank_no">
             </div>
 
             <div class="form-group">
-              <label>Branch</label>
+              <label>{{ __('Chi nhánh') }}</label>
               <input type="text" autocomplete="off" class="form-control" id="bank_branch" value="{{ old('bank_branch') }}" name="bank_branch">
             </div>
           </div>
@@ -268,8 +268,8 @@
         <div style="clear:both"></div>
 
         <div class="modal-footer" style="text-align:center">
-          <button type="button" class="btn btn-primary btn-sm" id="btnSaveBankAjax"> Save</button>
-          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" id="btnCloseModalTag">Close</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnSaveBankAjax"> {{ __('Lưu') }}</button>
+          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" id="btnCloseModalTag">{{ __('Đóng') }}</button>
         </div>
       </form>
     </div>
@@ -303,7 +303,7 @@
       error: function (error) {
         var errrorMess = jQuery.parseJSON(error.responseText);
         if(errrorMess.message == 'The given data was invalid.'){
-          alert('Nhập đầy đủ thông tin có dấu *');
+          alert({!! json_encode(__('Nhập đầy đủ thông tin có dấu *')) !!});
           $('#btnSaveBankAjax').removeAttr('disabled');
         }
       }

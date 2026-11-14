@@ -2,7 +2,7 @@
 @section('content')
 @php
   $nf = function($v){ return $v ? number_format((int) $v) : ''; };
-  $periodNames = ['week' => 'Tuần', 'month' => 'Tháng', 'year' => 'Năm'];
+  $periodNames = ['week' => __('Tuần'), 'month' => __('Tháng'), 'year' => __('Năm')];
   $base = ['type' => $type];
   $dtDoanhThu = $tong['doanh_thu'];
   $leDoanhThu = (int) ($khachLe->doanh_thu ?? 0);
@@ -10,10 +10,10 @@
 @endphp
 <div class="content-wrapper">
 <section class="content-header">
-  <h1>Báo cáo đối tác &amp; công nợ</h1>
+  <h1>{{ __('Báo cáo đối tác & công nợ') }}</h1>
   <ol class="breadcrumb">
-    <li><a href="{{ route('doi-tac.index') }}">Đối tác</a></li>
-    <li class="active">Báo cáo</li>
+    <li><a href="{{ route('doi-tac.index') }}">{{ __('Đối tác') }}</a></li>
+    <li class="active">{{ __('Báo cáo') }}</li>
   </ol>
 </section>
 <section class="content">
@@ -28,10 +28,10 @@
       <input type="date" name="from" class="form-control input-sm" value="{{ date('Y-m-d', strtotime(str_replace('/', '-', $fromStr))) }}">
       <input type="date" name="to" class="form-control input-sm" value="{{ date('Y-m-d', strtotime(str_replace('/', '-', $toStr))) }}">
       <select name="type" class="form-control input-sm">
-        <option value="">Tất cả loại</option>
+        <option value="">{{ __('Tất cả loại') }}</option>
         @foreach($types as $k => $v)<option value="{{ $k }}" {{ $type == $k ? 'selected' : '' }}>{{ $v }}</option>@endforeach
       </select>
-      <button class="btn btn-sm btn-primary">Xem</button>
+      <button class="btn btn-sm btn-primary">{{ __('Xem') }}</button>
     </form>
     <h3 style="margin:15px 0 5px">
       @if($period != 'custom')<a href="{{ route('doi-tac.report', array_merge($base, ['period' => $period, 'date' => $prevAnchor])) }}" class="btn btn-default btn-sm"><i class="fa fa-chevron-left"></i></a>@endif
@@ -42,38 +42,38 @@
 
   <div class="row">
     <div class="col-md-3 col-xs-6"><div class="info-box"><span class="info-box-icon bg-aqua"><i class="fa fa-handshake-o"></i></span>
-      <div class="info-box-content"><span class="info-box-text">Doanh thu từ đối tác</span><span class="info-box-number">{{ number_format($dtDoanhThu) }}</span>
-      <span class="progress-description">{{ $allDt ? number_format($dtDoanhThu * 100 / $allDt, 1) : 0 }}% tổng · {{ number_format($tong['so_bill']) }} bill</span></div></div></div>
+      <div class="info-box-content"><span class="info-box-text">{{ __('Doanh thu từ đối tác') }}</span><span class="info-box-number">{{ number_format($dtDoanhThu) }}</span>
+      <span class="progress-description">{{ $allDt ? number_format($dtDoanhThu * 100 / $allDt, 1) : 0 }}% {{ __('tổng') }} · {{ number_format($tong['so_bill']) }} {{ __('bill') }}</span></div></div></div>
     <div class="col-md-3 col-xs-6"><div class="info-box"><span class="info-box-icon bg-gray"><i class="fa fa-user"></i></span>
-      <div class="info-box-content"><span class="info-box-text">Doanh thu khách lẻ</span><span class="info-box-number">{{ number_format($leDoanhThu) }}</span>
-      <span class="progress-description">{{ number_format((int) ($khachLe->so_bill ?? 0)) }} bill</span></div></div></div>
+      <div class="info-box-content"><span class="info-box-text">{{ __('Doanh thu khách lẻ') }}</span><span class="info-box-number">{{ number_format($leDoanhThu) }}</span>
+      <span class="progress-description">{{ number_format((int) ($khachLe->so_bill ?? 0)) }} {{ __('bill') }}</span></div></div></div>
     <div class="col-md-3 col-xs-6"><div class="info-box"><span class="info-box-icon bg-yellow"><i class="fa fa-percent"></i></span>
-      <div class="info-box-content"><span class="info-box-text">Hoa hồng phát sinh trong kỳ</span><span class="info-box-number">{{ number_format($tong['hh']) }}</span>
-      <span class="progress-description">{{ $dtDoanhThu ? number_format($tong['hh'] * 100 / $dtDoanhThu, 1) : 0 }}% doanh thu đối tác · {{ number_format($tong['pax']) }} khách buffet</span></div></div></div>
+      <div class="info-box-content"><span class="info-box-text">{{ __('Hoa hồng phát sinh trong kỳ') }}</span><span class="info-box-number">{{ number_format($tong['hh']) }}</span>
+      <span class="progress-description">{{ $dtDoanhThu ? number_format($tong['hh'] * 100 / $dtDoanhThu, 1) : 0 }}% {{ __('doanh thu đối tác') }} · {{ number_format($tong['pax']) }} {{ __('khách buffet') }}</span></div></div></div>
     <div class="col-md-3 col-xs-6"><div class="info-box"><span class="info-box-icon bg-red"><i class="fa fa-exclamation-triangle"></i></span>
-      <div class="info-box-content"><span class="info-box-text">Nợ quá hạn (hiện tại)</span><span class="info-box-number">{{ number_format($tong['qua_han']) }}</span>
-      <span class="progress-description">Tổng phải thu {{ number_format($tong['phai_thu']) }}</span></div></div></div>
+      <div class="info-box-content"><span class="info-box-text">{{ __('Nợ quá hạn (hiện tại)') }}</span><span class="info-box-number">{{ number_format($tong['qua_han']) }}</span>
+      <span class="progress-description">{{ __('Tổng phải thu') }} {{ number_format($tong['phai_thu']) }}</span></div></div></div>
   </div>
 
   <div class="box">
-    <div class="box-header with-border"><h3 class="box-title">Theo đối tác</h3>
-      <small class="text-muted">— cột "Trong kỳ" theo kỳ đang chọn; cột "Số dư" và "Tuổi nợ" tính đến hôm nay</small></div>
+    <div class="box-header with-border"><h3 class="box-title">{{ __('Theo đối tác') }}</h3>
+      <small class="text-muted">{{ __('— cột "Trong kỳ" theo kỳ đang chọn; cột "Số dư" và "Tuổi nợ" tính đến hôm nay') }}</small></div>
     <div class="box-body table-responsive no-padding">
       <table class="table table-bordered table-hover table-condensed">
         <tr style="background:#f4f4f4">
-          <th rowspan="2">Đối tác</th><th rowspan="2">Loại</th>
-          <th colspan="5" class="text-center">Trong kỳ</th>
-          <th colspan="3" class="text-center">Số dư hiện tại</th>
-          <th colspan="5" class="text-center">Tuổi nợ phải thu</th>
+          <th rowspan="2">{{ __('Đối tác') }}</th><th rowspan="2">{{ __('Loại') }}</th>
+          <th colspan="5" class="text-center">{{ __('Trong kỳ') }}</th>
+          <th colspan="3" class="text-center">{{ __('Số dư hiện tại') }}</th>
+          <th colspan="5" class="text-center">{{ __('Tuổi nợ phải thu') }}</th>
         </tr>
         <tr style="background:#f4f4f4">
-          <th class="text-right">Bill</th><th class="text-right">Khách buffet</th><th class="text-right">Doanh thu</th><th class="text-right">Ghi nợ</th><th class="text-right">Hoa hồng</th>
-          <th class="text-right">Phải thu</th><th class="text-right">Phải trả HH</th><th class="text-right">Ròng</th>
-          <th class="text-right">0–30</th><th class="text-right">31–60</th><th class="text-right">61–90</th><th class="text-right">&gt;90</th><th class="text-right">Quá hạn</th>
+          <th class="text-right">{{ __('Bill') }}</th><th class="text-right">{{ __('Khách buffet') }}</th><th class="text-right">{{ __('Doanh thu') }}</th><th class="text-right">{{ __('Ghi nợ') }}</th><th class="text-right">{{ __('Hoa hồng') }}</th>
+          <th class="text-right">{{ __('Phải thu') }}</th><th class="text-right">{{ __('Phải trả HH') }}</th><th class="text-right">{{ __('Ròng') }}</th>
+          <th class="text-right">0–30</th><th class="text-right">31–60</th><th class="text-right">61–90</th><th class="text-right">&gt;90</th><th class="text-right">{{ __('Quá hạn') }}</th>
         </tr>
         @forelse($rows as $r)
         <tr>
-          <td><a href="{{ route('doi-tac.show', $r['p']->id) }}">{{ $r['p']->name }}</a>{!! $r['p']->status != 1 ? ' <small class="text-muted">(đã ẩn)</small>' : '' !!}</td>
+          <td><a href="{{ route('doi-tac.show', $r['p']->id) }}">{{ $r['p']->name }}</a>{!! $r['p']->status != 1 ? ' <small class="text-muted">'.e(__('(đã ẩn)')).'</small>' : '' !!}</td>
           <td>{{ $types[$r['p']->type] ?? $r['p']->type }}</td>
           <td class="text-right">{{ $nf($r['so_bill']) }}</td><td class="text-right">{{ $nf($r['pax']) }}</td>
           <td class="text-right">{{ $nf($r['doanh_thu']) }}</td><td class="text-right">{{ $nf($r['ghi_no']) }}</td><td class="text-right">{{ $nf($r['hh']) }}</td>
@@ -82,10 +82,10 @@
           <td class="text-right" style="color:#c0392b"><b>{{ $nf($r['qua_han']) }}</b></td>
         </tr>
         @empty
-        <tr><td colspan="15" class="text-center text-muted">Chưa có dữ liệu</td></tr>
+        <tr><td colspan="15" class="text-center text-muted">{{ __('Chưa có dữ liệu') }}</td></tr>
         @endforelse
         <tr style="background:#f9f9f9;font-weight:bold">
-          <td colspan="2">TỔNG</td>
+          <td colspan="2">{{ __('TỔNG') }}</td>
           <td class="text-right">{{ $nf($tong['so_bill']) }}</td><td class="text-right">{{ $nf($tong['pax']) }}</td><td class="text-right">{{ $nf($tong['doanh_thu']) }}</td>
           <td class="text-right">{{ $nf($tong['ghi_no']) }}</td><td class="text-right">{{ $nf($tong['hh']) }}</td>
           <td class="text-right">{{ $nf($tong['phai_thu']) }}</td><td class="text-right">{{ $nf($tong['phai_tra']) }}</td><td class="text-right">{{ $nf($tong['rong']) }}</td>
