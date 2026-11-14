@@ -58,6 +58,15 @@
     @if(!$sum)<tr><td colspan="7" class="text-muted">{{ __('Không có dữ liệu') }}</td></tr>@endif
   </table></div></div>
 
+  @if($sum)
+  <div class="row">
+    <div class="col-md-4"><div class="box"><div class="box-header with-border"><h3 class="box-title">{{ __('Tỷ trọng theo người') }}</h3></div>
+      <div class="box-body"><div id="chartShare" style="height:280px"></div></div></div></div>
+    <div class="col-md-8"><div class="box"><div class="box-header with-border"><h3 class="box-title">{{ __('Thu tiền theo ngày') }}</h3></div>
+      <div class="box-body"><div id="chartDays" style="height:280px"></div></div></div></div>
+  </div>
+  @endif
+
   @if(!$f['branch_id'] && count($branchSum) > 1)
   <div class="box"><div class="box-header with-border"><h3 class="box-title">{{ __('Theo chi nhánh') }}</h3></div>
   <div class="box-body table-responsive no-padding"><table class="table table-bordered table-condensed" style="margin:0">
@@ -92,4 +101,40 @@
   </table></div></div>
 </section>
 </div>
+@if($sum)
+@php
+  $cPersons = []; foreach ($persons as $p => $name) if (isset($sum[$p])) $cPersons[$p] = $name;
+  $cDays = array_reverse(array_keys($days));
+  if ((strtotime($f['to']) - strtotime($f['from'])) / 86400 <= 62) { // đủ từng ngày trong kỳ (tối đa ~2 tháng)
+    $cDays = []; for ($d = $f['from']; $d <= min($f['to'], date('Y-m-d')); $d = date('Y-m-d', strtotime($d . ' +1 day'))) $cDays[] = $d;
+  }
+  $cSeries = []; foreach ($cPersons as $p => $name) $cSeries[] = ['name' => $name, 'data' => array_map(function ($d) use ($days, $p) { return (int) ($days[$d][$p] ?? 0); }, $cDays)];
+  $cShare = []; foreach ($cPersons as $p => $name) $cShare[] = ['name' => $name, 'y' => (int) $sum[$p]['total']];
+@endphp
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script>
+(function(){
+  if (!window.Highcharts) return;
+  var colors = ['#3c8dbc', '#00a65a', '#f39c12', '#605ca8', '#d81b60', '#39cccc', '#777777', '#dd4b39'];
+  var money = function(v){ return Highcharts.numberFormat(v, 0, '.', ','); };
+  Highcharts.setOptions({ colors: colors, credits: { enabled: false }, lang: { thousandsSep: ',' } });
+  Highcharts.chart('chartShare', {
+    chart: { type: 'pie' }, title: { text: null },
+    tooltip: { pointFormatter: function(){ return '<b>' + money(this.y) + '</b> (' + Highcharts.numberFormat(this.percentage, 1) + '%)'; } },
+    plotOptions: { pie: { innerSize: '55%', showInLegend: true, dataLabels: { enabled: true, distance: -22, format: '{point.percentage:.0f}%', filter: { property: 'percentage', operator: '>', value: 5 }, style: { fontWeight: 'bold', textOutline: 'none', color: '#fff' } } } },
+    legend: { labelFormatter: function(){ return this.name + ': ' + money(this.y); } },
+    series: [{ name: {!! json_encode(__('Tổng')) !!}, data: {!! json_encode($cShare, JSON_UNESCAPED_UNICODE) !!} }]
+  });
+  Highcharts.chart('chartDays', {
+    chart: { type: 'column' }, title: { text: null },
+    xAxis: { categories: {!! json_encode(array_map(function ($d) { return date('d/m', strtotime($d)); }, $cDays)) !!} },
+    yAxis: { title: { text: null }, stackLabels: { enabled: false }, labels: { formatter: function(){ return Highcharts.numberFormat(this.value / 1000000, 1, ',', '.') + 'tr'; } } },
+    tooltip: { shared: true, pointFormatter: function(){ return this.y ? '<span style="color:' + this.color + '">●</span> ' + this.series.name + ': <b>' + money(this.y) + '</b><br/>' : ''; },
+      footerFormat: {!! json_encode(__('Tổng')) !!} + ': <b>{point.total:,.0f}</b>' },
+    plotOptions: { column: { stacking: 'normal', borderWidth: 0 } },
+    series: {!! json_encode($cSeries, JSON_UNESCAPED_UNICODE) !!}
+  });
+})();
+</script>
+@endif
 @endsection
