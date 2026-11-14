@@ -30,6 +30,8 @@ class ActivityLogController extends Controller
         'ingredient' => 'Nguyên liệu',
         'branch' => 'Chi nhánh',
         'collecter' => 'Người thu / chi',
+        'roles' => 'Nhóm quyền',
+        'user_branches' => 'Chi nhánh của tài khoản',
     ];
     public static $actionNames = ['created' => 'Thêm', 'updated' => 'Sửa', 'deleted' => 'Xóa'];
 

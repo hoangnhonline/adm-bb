@@ -27,5 +27,15 @@ class Branch extends Model  {
      * @var array
      */
     protected $fillable = ['name', 'status', 'display_order'];
+
+    // Phân quyền: tài khoản bị giới hạn chi nhánh chỉ thấy chi nhánh được gán (danh sách, bộ lọc, dropdown)
+    protected static function boot()
+    {
+        parent::boot();
+        static::addGlobalScope('perm_branch', function ($q) {
+            $ids = \App\Services\Perm::branchIds();
+            if ($ids !== null) $q->whereIn('branch.id', $ids ?: [0]);
+        });
+    }
     
 }

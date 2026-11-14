@@ -79,7 +79,9 @@
     <body class="skin-blue sidebar-mini sidebar-collapse">
         <div class="wrapper">
             @include('partials.header') 
-            @if(Auth::user()->is_view == 1)
+            @if(\App\Services\Perm::active())
+                @include('partials.sidebar-role')
+            @elseif(Auth::user()->is_view == 1)
                 @include('partials.sidebar-view')           
             @else
                 @include('partials.sidebar')           
@@ -276,6 +278,7 @@
         @yield('js')
         @include('partials.filter-picker')
         @include('partials.sticky-table-header')
+        @include('partials.perm-hide')
         <script type="text/javascript">
             $(document).ready(function () {
                 $(".datepicker").datepicker({

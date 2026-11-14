@@ -126,7 +126,7 @@
       <div class="box">
         @if($isView == false)
         <div class="form-group">          
-          <a href="javascript:;" class="btn btn-primary btn-sm" id="btnExcel">{{ __('Excel') }}</a>
+          @if(\App\Services\Perm::can('bill.export'))<a href="javascript:;" class="btn btn-primary btn-sm" id="btnExcel">{{ __('Excel') }}</a>@endif
         </div>
         @endif
          <!-- /.box-header -->

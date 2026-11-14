@@ -111,6 +111,13 @@
         </a>
       </li>
       @if(Auth::user()->id == 1)
+      <li {{ in_array($routeName, ['phan-quyen.index', 'phan-quyen.create', 'phan-quyen.edit', 'phan-quyen.users', 'phan-quyen.check']) ? "class=active" : "" }}>
+        <a href="{{ route('phan-quyen.index') }}">
+          <i class="fa fa-lock"></i> <span>{{ __('PHÂN QUYỀN') }}</span>
+        </a>
+      </li>
+      @endif
+      @if(Auth::user()->id == 1)
       <li {{ in_array($routeName, ['activity-log.index']) ? "class=active" : "" }}>
         <a href="{{ route('activity-log.index') }}">
           <i class="fa fa-history"></i> <span>{{ __('LỊCH SỬ THAO TÁC') }}</span>

@@ -86,6 +86,17 @@ Route::group([
     });
     Route::post('/filter-prefs/save', ['as' => 'filter-prefs.save', 'uses' => 'FilterPrefController@save']); // bộ lọc tùy chọn theo user
     Route::get('/locale/{lang}', ['as' => 'locale.change', 'uses' => 'LocaleController@change']); // đa ngôn ngữ VI/EN
+    // Phân quyền (chỉ tài khoản quản trị chính)
+    Route::group(['prefix' => 'phan-quyen'], function () {
+        Route::get('/', ['as' => 'phan-quyen.index', 'uses' => 'RoleController@index']);
+        Route::get('/create', ['as' => 'phan-quyen.create', 'uses' => 'RoleController@create']);
+        Route::get('/{id}/edit', ['as' => 'phan-quyen.edit', 'uses' => 'RoleController@edit'])->where('id', '[0-9]+');
+        Route::post('/save', ['as' => 'phan-quyen.save', 'uses' => 'RoleController@save']);
+        Route::get('/{id}/destroy', ['as' => 'phan-quyen.destroy', 'uses' => 'RoleController@destroy'])->where('id', '[0-9]+');
+        Route::get('/users', ['as' => 'phan-quyen.users', 'uses' => 'RoleController@users']);
+        Route::post('/users/save', ['as' => 'phan-quyen.user-save', 'uses' => 'RoleController@saveUser']);
+        Route::get('/users/{id}/check', ['as' => 'phan-quyen.check', 'uses' => 'RoleController@check'])->where('id', '[0-9]+');
+    });
     Route::get('/activity-log', ['as' => 'activity-log.index', 'uses' => 'ActivityLogController@index']); // lịch sử thao tác (chỉ id 1)
     // Đối tác bán hàng & công nợ (14/11/2026)
     Route::group(['prefix' => 'doi-tac'], function () {

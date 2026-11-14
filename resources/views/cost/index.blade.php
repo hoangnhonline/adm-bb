@@ -157,7 +157,7 @@
         </div>
       </div>
       @if($notNH)
-      <p style="text-align: right;"><a href="javascript:;" class="btn btn-primary btn-sm" id="btnExport">{{ __('Xuất Excel') }}</a>
+      <p style="text-align: right;">@if(\App\Services\Perm::can('cost.export'))<a href="javascript:;" class="btn btn-primary btn-sm" id="btnExport">{{ __('Xuất Excel') }}</a>@endif
       @endif
       <div class="box">
 

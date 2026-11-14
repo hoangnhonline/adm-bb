@@ -75,8 +75,10 @@ class ActivityLogPresenter
         'ingredient' => ['name' => 'Tên nguyên liệu', 'name_en' => 'Tên tiếng Anh', 'aliases' => 'Tên gọi khác', 'cost_type_id' => 'Loại chi phí', 'unit' => 'Đơn vị'],
         'nha_cung_cap' => ['name' => 'Tên nhà cung cấp'],
         'users' => ['name' => 'Họ tên', 'role' => 'Quyền', 'level' => 'Cấp', 'is_partner' => 'Là đối tác', 'is_staff' => 'Là nhân viên',
-            'salary' => 'Lương', 'date_join' => 'Ngày vào làm', 'birthday' => 'Ngày sinh', 'is_view' => 'Chỉ xem', 'changed_password' => 'Đã đổi mật khẩu'],
+            'salary' => 'Lương', 'role_id' => 'Nhóm quyền', 'date_join' => 'Ngày vào làm', 'birthday' => 'Ngày sinh', 'is_view' => 'Chỉ xem', 'changed_password' => 'Đã đổi mật khẩu'],
         'branch' => ['name' => 'Tên chi nhánh'],
+        'roles' => ['name' => 'Tên nhóm', 'all_branches' => 'Thấy tất cả chi nhánh', 'permissions' => 'Quyền'],
+        'user_branches' => ['branch_ids' => 'Chi nhánh được gán'],
         'collecter' => ['name' => 'Tên'],
     ];
 
@@ -98,14 +100,14 @@ class ActivityLogPresenter
 
     // cột Có/Không
     protected static $bool = ['take_away', 'no_vat', 'da_thu', 'co_chiet_khau', 'ghi_no', 'is_drink', 'is_bread', 'done', 'need_review',
-        'doi_tac', 'is_fixed', 'checked', 'xe_4t', 'is_partner', 'is_staff', 'is_view', 'is_show', 'changed_password'];
+        'doi_tac', 'all_branches', 'is_fixed', 'checked', 'xe_4t', 'is_partner', 'is_staff', 'is_view', 'is_show', 'changed_password'];
 
     // cột ID -> bảng tra tên
     protected static $refs = [
         'dish_id' => 'dish', 'branch_id' => 'branch', 'cate_id' => 'cost_type', 'cost_type_id' => 'cost_type',
         'nguoi_chi' => 'collecter', 'nguoi_thu_tien' => 'collecter', 'pay_method' => 'collecter', 'ncc_id' => 'nha_cung_cap',
         'ingredient_id' => 'ingredient', 'doi_tac_id' => 'partners', 'created_user' => 'users', 'updated_user' => 'users',
-        'user_id' => 'users',
+        'user_id' => 'users', 'role_id' => 'roles',
     ];
     // cột partner_id: booking -> users (cũ), còn lại -> partners
     protected static $refsByTable = [

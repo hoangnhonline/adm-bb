@@ -23,7 +23,8 @@ class DoiTacController extends Controller
     {
         // Chỉ quản trị (role 1) xem/sửa công nợ đối tác. Nhân viên chỉ chọn đối tác trên bill.
         $this->middleware(function ($request, $next) {
-            if (!Auth::check() || Auth::user()->role != 1) abort(403, __('Không có quyền'));
+            // Tài khoản có nhóm quyền: middleware CheckPermission đã kiểm tra; tài khoản quyền cũ: chỉ role 1
+            if (!Auth::check() || (!\App\Services\Perm::active() && Auth::user()->role != 1)) abort(403, __('Không có quyền'));
             return $next($request);
         });
     }
