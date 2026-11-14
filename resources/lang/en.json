@@ -771,5 +771,17 @@
     "Người nhận tiền": "Receiver",
     "Theo từng ngày": "By day",
     "Chưa chọn người thu": "No receiver selected",
-    "CN": "Sun"
+    "CN": "Sun",
+    "Thống kê": "Statistics",
+    "BÁO CÁO": "REPORTS",
+    "Thống kê doanh thu": "Revenue statistics",
+    "QUẢN TRỊ": "ADMIN",
+    "VAT & hoa hồng": "VAT & commission",
+    "Cảnh báo nhập hàng": "Purchase alerts",
+    "Chi phí / doanh thu": "Costs / revenue",
+    "Báo cáo công nợ đối tác": "Partner debt report",
+    "CHI PHÍ & NHẬP HÀNG": "COSTS & PURCHASING",
+    "Danh sách đối tác": "Partners",
+    "Thu tiền theo người": "Collections by receiver",
+    "Thêm bill mới": "New bill"
 }

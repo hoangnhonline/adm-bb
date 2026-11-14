@@ -11,10 +11,32 @@
       </div>
     </div>
     <ul class="sidebar-menu">
-      @foreach(config('permissions.menu') as $mi)
-        @if(\App\Services\Perm::can($mi[1]) && Route::has($mi[0]))
-        <li {{ ($routeName ?? '') == $mi[0] ? 'class=active' : '' }}>
-          <a href="{{ route($mi[0]) }}"><i class="fa {{ $mi[2] }}"></i> <span>{{ __($mi[3]) }}</span></a>
+      @php
+        // gom mục menu theo nhóm (phần tử thứ 5), giữ thứ tự xuất hiện đầu tiên của nhóm
+        $grpIcons = ['TỔNG QUAN' => 'fa-dashboard', 'ĐƠN HÀNG' => 'fa-ship', 'BẾP' => 'fa-cutlery', 'CHI PHÍ & NHẬP HÀNG' => 'fa-usd',
+          'BÁO CÁO' => 'fa-bar-chart', 'ĐỐI TÁC & CÔNG NỢ' => 'fa-handshake-o', 'QUẢN TRỊ' => 'fa-cogs'];
+        $roleGroups = [];
+        foreach (config('permissions.menu') as $mi) {
+          if (!\App\Services\Perm::can($mi[1]) || !Route::has($mi[0])) continue;
+          $roleGroups[$mi[4] ?? $mi[3]][] = $mi;
+        }
+        $curRoute = $routeName ?? '';
+      @endphp
+      @foreach($roleGroups as $gName => $items)
+        @if(count($items) == 1)
+        <li {{ $curRoute == $items[0][0] ? 'class=active' : '' }}>
+          <a href="{{ route($items[0][0]) }}"><i class="fa {{ $items[0][2] }}"></i> <span>{{ __($items[0][3]) }}</span></a>
+        </li>
+        @else
+        @php $gActive = in_array($curRoute, array_column($items, 0)); @endphp
+        <li class="treeview {{ $gActive ? 'active menu-open' : '' }}">
+          <a href="#"><i class="fa {{ $grpIcons[$gName] ?? $items[0][2] }}"></i> <span>{{ __($gName) }}</span>
+            <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+          <ul class="treeview-menu">
+            @foreach($items as $mi)
+            <li {{ $curRoute == $mi[0] ? 'class=active' : '' }}><a href="{{ route($mi[0]) }}"><i class="fa {{ $mi[2] }}"></i> {{ __($mi[3]) }}</a></li>
+            @endforeach
+          </ul>
         </li>
         @endif
       @endforeach
