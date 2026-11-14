@@ -232,7 +232,7 @@ Route::group([
         Route::post('/vat/no-vat', ['as' => 'report.vat.no-vat', 'uses' => 'VatReportController@setNoVat']);
         Route::get('/chi-phi-doanh-thu', ['as' => 'report.chi-phi-doanh-thu', 'uses' => 'ReportController@chiPhiDoanhThu']);
         Route::get('/customer-by-level', ['as' => 'report.customer-by-level', 'uses' => 'ReportController@customerByLevel']);
-        Route::get('/doanh-thu-thang', ['as' => 'report.doanh-thu-thang', 'uses' => 'ReportController@doanhthuthang']);
+        Route::get('/doanh-thu-thang', ['as' => 'report.doanh-thu-thang', 'uses' => 'MonthlyReportController@index']);
         Route::get('/doanh-thu', ['as' => 'report.doanh-thu', 'uses' => 'ReportController@doanhthuview']);
         Route::get('/doanh-thu-thang-2', ['as' => 'report.doanh-thu-thang-2', 'uses' => 'ReportController@doanhthuthang2']);
         Route::get('/loi-nhuan', ['as' => 'report.loi-nhuan', 'uses' => 'ReportController@loiNhuan']);
