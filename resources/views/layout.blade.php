@@ -274,6 +274,7 @@
         </style>
 
         @yield('js')
+        @include('partials.filter-picker')
         <script type="text/javascript">
             $(document).ready(function () {
                 $(".datepicker").datepicker({
