@@ -3,6 +3,8 @@
 @php
   $nf = function($v){ return number_format((int) $v); };
   $maxBuTru = max(0, min($bal['phai_thu'], $bal['phai_tra']));
+  // HDV / tài xế: luôn có chiết khấu, không ghi nợ => ẩn phần công nợ (trừ khi còn dữ liệu nợ cũ)
+  $noDebt = \App\Models\Partner::isNoDebtType($detail->type) && (int) $bal['no_phat_sinh'] == 0 && (int) $bal['phai_thu'] == 0;
   $statusNames = [1 => __('Mới'), 2 => __('Hoàn tất'), 4 => __('Đã tiếp nhận'), 5 => __('Đang triển khai')];
 @endphp
 <div class="content-wrapper">
@@ -25,6 +27,7 @@
 
   {{-- Số dư hiện tại: tách riêng phải thu / phải trả / bù trừ --}}
   <div class="row">
+    @if(!$noDebt)
     <div class="col-md-4">
       <div class="box box-danger"><div class="box-header with-border"><h3 class="box-title">{{ __('Đối tác nợ nhà hàng (phải thu)') }}</h3></div>
         <table class="table table-condensed" style="margin:0">
@@ -34,12 +37,13 @@
           <tr style="font-size:16px"><th>{{ __('Còn phải thu') }}</th><th class="text-right" style="color:#c0392b">{{ $nf($bal['phai_thu']) }}</th></tr>
         </table></div>
     </div>
+    @endif
     <div class="col-md-4">
       <div class="box box-warning"><div class="box-header with-border"><h3 class="box-title">{{ __('Nhà hàng nợ hoa hồng (phải trả)') }}</h3></div>
         <table class="table table-condensed" style="margin:0">
           <tr><td>{{ __('Hoa hồng phát sinh') }}</td><td class="text-right">{{ $nf($bal['hh_phat_sinh']) }}</td></tr>
           <tr><td>{{ __('− Đã chi hoa hồng') }}</td><td class="text-right">{{ $nf($bal['da_chi']) }}</td></tr>
-          <tr><td>{{ __('− Đã bù trừ với công nợ') }}</td><td class="text-right">{{ $nf($bal['bu_tru']) }}</td></tr>
+          @if(!$noDebt)<tr><td>{{ __('− Đã bù trừ với công nợ') }}</td><td class="text-right">{{ $nf($bal['bu_tru']) }}</td></tr>@endif
           <tr style="font-size:16px"><th>{{ __('Còn phải trả') }}</th><th class="text-right" style="color:#d68910">{{ $nf($bal['phai_tra']) }}</th></tr>
         </table></div>
     </div>
@@ -48,23 +52,25 @@
         <table class="table table-condensed" style="margin:0">
           <tr><td>{{ __('Tổng số bill / khách buffet') }}</td><td class="text-right">{{ $nf($bal['so_bill']) }} / {{ $nf($bal['pax']) }}</td></tr>
           <tr><td>{{ __('Tổng doanh thu từ đối tác') }}</td><td class="text-right">{{ $nf($bal['doanh_thu']) }}</td></tr>
+          @if(!$noDebt)
           <tr><td>{{ __('Có thể bù trừ tối đa') }}</td><td class="text-right">{{ $nf($maxBuTru) }}</td></tr>
           <tr style="font-size:16px"><th>{{ __('Ròng') }} {{ $bal['rong'] >= 0 ? __('(đối tác nợ mình)') : __('(mình nợ đối tác)') }}</th><th class="text-right">{{ $nf(abs($bal['rong'])) }}</th></tr>
+          @endif
         </table></div>
     </div>
   </div>
 
   {{-- Ghi giao dịch --}}
   <div class="box box-primary">
-    <div class="box-header with-border"><h3 class="box-title">{{ __('Ghi nhận thanh toán / chi hoa hồng / bù trừ') }}</h3></div>
+    <div class="box-header with-border"><h3 class="box-title">{{ $noDebt ? __('Ghi nhận chi hoa hồng') : __('Ghi nhận thanh toán / chi hoa hồng / bù trừ') }}</h3></div>
     <form method="POST" action="{{ route('doi-tac.transaction.store', $detail->id) }}" class="box-body" id="transForm">
       {!! csrf_field() !!}
       <div class="row">
         <div class="form-group col-md-3"><label>{{ __('Loại giao dịch') }}</label>
           <select name="type" id="t_type" class="form-control">
-            <option value="1" {{ old('type') == 1 ? 'selected' : '' }}>{{ __('Đối tác thanh toán cho mình') }}</option>
-            <option value="2" {{ old('type') == 2 ? 'selected' : '' }}>{{ __('Chi hoa hồng cho đối tác') }}</option>
-            <option value="3" {{ old('type') == 3 ? 'selected' : '' }}>{{ __('Bù trừ (trừ HH vào nợ)') }}</option>
+            @if(!$noDebt)<option value="1" {{ old('type') == 1 ? 'selected' : '' }}>{{ __('Đối tác thanh toán cho mình') }}</option>@endif
+            <option value="2" {{ old('type', $noDebt ? 2 : null) == 2 ? 'selected' : '' }}>{{ __('Chi hoa hồng cho đối tác') }}</option>
+            @if(!$noDebt)<option value="3" {{ old('type') == 3 ? 'selected' : '' }}>{{ __('Bù trừ (trừ HH vào nợ)') }}</option>@endif
           </select></div>
         <div class="form-group col-md-2"><label>{{ __('Ngày') }}</label>
           <input type="text" name="date" class="form-control datepicker" autocomplete="off" value="{{ old('date', date('d/m/Y')) }}"></div>
@@ -125,11 +131,11 @@
     </div>
     <div class="box-body">
       <p>{{ __('Trong kỳ:') }} <b>{{ $nf($ky['so_bill']) }}</b> {{ __('bill') }} · <b>{{ $nf($ky['pax']) }}</b> {{ __('khách buffet') }} · {{ __('doanh thu') }} <b>{{ $nf($ky['doanh_thu']) }}</b>
-        · {{ __('ghi nợ') }} <b style="color:#c0392b">{{ $nf($ky['no']) }}</b> · {{ __('hoa hồng') }} <b style="color:#d68910">{{ $nf($ky['hh']) }}</b></p>
+        @if(!$noDebt)· {{ __('ghi nợ') }} <b style="color:#c0392b">{{ $nf($ky['no']) }}</b>@endif · {{ __('hoa hồng') }} <b style="color:#d68910">{{ $nf($ky['hh']) }}</b></p>
       <div class="table-responsive">
       <table class="table table-condensed table-bordered table-hover">
         <tr style="background:#f4f4f4"><th>{{ __('Ngày') }}</th><th>{{ __('Bill') }}</th><th>{{ __('Chi nhánh') }}</th><th>{{ __('Loại') }}</th><th class="text-right">{{ __('Khách') }}</th>
-          <th class="text-right">{{ __('Tổng') }}</th><th class="text-right">{{ __('Giảm') }}</th><th class="text-right">{{ __('Thực thu') }}</th><th class="text-center">{{ __('CK') }}</th><th class="text-center">{{ __('Ghi nợ') }}</th><th class="text-right">{{ __('Hoa hồng') }}</th></tr>
+          <th class="text-right">{{ __('Tổng') }}</th><th class="text-right">{{ __('Giảm') }}</th><th class="text-right">{{ __('Thực thu') }}</th>@if(!$noDebt)<th class="text-center">{{ __('CK') }}</th><th class="text-center">{{ __('Ghi nợ') }}</th>@endif<th class="text-right">{{ __('Hoa hồng') }}</th></tr>
         @forelse($bills as $b)
         <tr>
           <td>{{ date('d/m/Y', strtotime($b->use_date)) }}</td>
@@ -140,12 +146,14 @@
           <td class="text-right">{{ $nf($b->total_price) }}</td>
           <td class="text-right">{{ $b->discount ? $nf($b->discount) : '' }}</td>
           <td class="text-right">{{ $nf($b->total_price - $b->discount) }}</td>
+          @if(!$noDebt)
           <td class="text-center">{!! $b->co_chiet_khau ? '<i class="fa fa-check text-green"></i>' : '' !!}</td>
           <td class="text-center">{!! $b->ghi_no ? '<i class="fa fa-check text-red"></i>' : '' !!}</td>
+          @endif
           <td class="text-right">{{ $b->com_amount ? $nf($b->com_amount) : '' }}</td>
         </tr>
         @empty
-        <tr><td colspan="11" class="text-center text-muted">{{ __('Không có bill trong kỳ') }}</td></tr>
+        <tr><td colspan="{{ $noDebt ? 9 : 11 }}" class="text-center text-muted">{{ __('Không có bill trong kỳ') }}</td></tr>
         @endforelse
       </table>
       </div>

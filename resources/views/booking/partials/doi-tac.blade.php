@@ -17,14 +17,15 @@
       <option value="">{{ __('— Khách lẻ —') }}</option>
       @foreach(($doiTacList ?? []) as $dt)
       <option value="{{ $dt->id }}" {{ $dtId == $dt->id ? 'selected' : '' }}
-        data-buffet="{{ (int) $dt->com_buffet_per_pax }}" data-pct="{{ (float) $dt->com_alacarte_pct }}">
+        data-buffet="{{ (int) $dt->com_buffet_per_pax }}" data-pct="{{ (float) $dt->com_alacarte_pct }}" data-nodebt="{{ \App\Models\Partner::isNoDebtType($dt->type) ? 1 : 0 }}">
         {{ $dt->name }} ({{ $dtTypes[$dt->type] ?? $dt->type }})
       </option>
       @endforeach
     </select>
   </div>
-  <div class="form-group col-md-3 col-xs-6 dt-opt" style="padding-top:25px">
-    <label style="font-weight:normal;cursor:pointer"><input type="checkbox" name="co_chiet_khau" id="co_chiet_khau" value="1" {{ $dtCk ? 'checked' : '' }}> {{ __('Có chiết khấu (tính hoa hồng)') }}</label>
+  <div class="form-group col-md-3 col-xs-6 dt-opt dt-ck-wrap" style="padding-top:25px">
+    <span class="dt-ck-fixed" style="display:none;color:#3c763d;font-weight:bold"><i class="fa fa-check"></i> {{ __('Luôn có chiết khấu (HDV / tài xế)') }}</span>
+    <label class="dt-ck-label" style="font-weight:normal;cursor:pointer"><input type="checkbox" name="co_chiet_khau" id="co_chiet_khau" value="1" {{ $dtCk ? 'checked' : '' }}> {{ __('Có chiết khấu (tính hoa hồng)') }}</label>
   </div>
   <div class="form-group col-md-2 col-xs-6 dt-opt dt-pct">
     <label>{{ __('% hoa hồng alacarte') }}</label>
@@ -39,7 +40,7 @@
     <input type="text" name="com_manual" id="com_manual" class="form-control input-sm number" value="{{ $dtManualFlag ? $dtManual : $dtAuto }}" autocomplete="off">
     <small id="com_manual_hint" class="text-muted">{{ $dtManualFlag ? __('Đã sửa tay') : __('Tự tính') }}</small>
   </div>
-  <div class="form-group col-md-2 col-xs-6 dt-opt" style="padding-top:25px">
+  <div class="form-group col-md-2 col-xs-6 dt-opt dt-ghino" style="padding-top:25px">
     <label style="font-weight:normal;cursor:pointer"><input type="checkbox" name="ghi_no" id="ghi_no" value="1" {{ $dtNo ? 'checked' : '' }}> {{ __('Ghi nợ (đối tác trả sau)') }}</label>
   </div>
   <div class="col-xs-12 dt-opt" style="padding-bottom:8px">
@@ -56,6 +57,10 @@
     var has = !!$('#doi_tac_id').val();
     $('.dt-opt').toggle(has);
     if(!has){ $('#dt-preview').text(''); return; }
+    // HDV / tài xế: luôn có chiết khấu, không ghi nợ => ẩn 2 ô tick
+    var noDebt = opt.data('nodebt') == 1;
+    if(noDebt){ $('#co_chiet_khau').prop('checked', true); $('#ghi_no').prop('checked', false); }
+    $('.dt-ck-label').toggle(!noDebt); $('.dt-ck-fixed').toggle(noDebt); $('.dt-ghino').toggle(!noDebt);
     $('.dt-pct').toggle($('#co_chiet_khau').is(':checked'));
     // ô % để trống = theo % của đối tác
     $('#com_pct').attr('placeholder', opt.data('pct') + '% (' + {!! json_encode(__('theo đối tác')) !!} + ')');

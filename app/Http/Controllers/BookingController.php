@@ -2325,6 +2325,11 @@ $pendingSummary = $pendingSummary->map(function ($r) {
         $dataArr['doi_tac_id'] = !empty($dataArr['doi_tac_id']) ? (int) $dataArr['doi_tac_id'] : null;
         $dataArr['co_chiet_khau'] = ($dataArr['doi_tac_id'] && isset($dataArr['co_chiet_khau'])) ? 1 : 0;
         $dataArr['ghi_no'] = ($dataArr['doi_tac_id'] && isset($dataArr['ghi_no'])) ? 1 : 0;
+        // HDV / tài xế: luôn có chiết khấu, không ghi nợ
+        if ($dataArr['doi_tac_id'] && \App\Models\Partner::isNoDebtType(\App\Models\Partner::where('id', $dataArr['doi_tac_id'])->value('type'))) {
+            $dataArr['co_chiet_khau'] = 1;
+            $dataArr['ghi_no'] = 0;
+        }
         // % hoa hồng alacarte riêng cho bill (để trống = theo đối tác)
         $pct = isset($dataArr['com_pct']) ? str_replace(',', '.', trim((string) $dataArr['com_pct'])) : '';
         $dataArr['com_pct'] = ($dataArr['co_chiet_khau'] && $pct !== '' && is_numeric($pct)) ? max(0, min(100, (float) $pct)) : null;

@@ -55,6 +55,12 @@ class Partner extends Model  {
         'cano'  => 'Cty cano',
         'driver' => 'Tài xế',
     ];
+    // Loại đối tác luôn có chiết khấu và không ghi nợ (16/11/2026)
+    public static $noDebtTypes = ['hdv', 'driver'];
+    public static function isNoDebtType($type)
+    {
+        return in_array((string) $type, self::$noDebtTypes, true);
+    }
     public static function doiTacList()
     {
         return self::where('doi_tac', 1)->where('status', 1)->orderBy('type')->orderBy('name')->get();
