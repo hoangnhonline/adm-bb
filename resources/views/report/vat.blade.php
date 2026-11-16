@@ -128,7 +128,7 @@
           <td class="text-right">{{ $nf($r->net) }}</td>
           <td class="text-right">@if($r->no_vat)<span class="label label-default">{{ __('KHÔNG VAT') }}</span>@else<span style="color:#c0392b">{{ $nf($r->vat) }}</span>@endif</td>
           <td class="text-right"><b>{{ $nf($r->pay) }}</b></td>
-          <td class="text-right">@if($r->com){{ $nf($r->com) }}<br><small class="text-muted">{{ $r->bill_type == 1 ? $r->pax . ' ' . __('khách') : ($r->com_pct !== null ? (float) $r->com_pct . '%' : 'Alacarte') }}</small>@endif</td>
+          <td class="text-right">@if($r->com){{ $nf($r->com) }}<br><small class="text-muted">{{ $r->com_manual !== null ? __('sửa tay') : ($r->bill_type == 1 ? $r->pax . ' ' . __('khách') : ($r->com_pct !== null ? (float) $r->com_pct . '%' : 'Alacarte')) }}</small>@endif</td>
           <td style="max-width:220px"><small>{{ \Illuminate\Support\Str::limit($r->notes, 80) }}</small></td>
         </tr>
         @endforeach

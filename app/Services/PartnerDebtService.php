@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
  *  - Bill chỉ tính hoa hồng khi có đối tác VÀ tick "Có chiết khấu" (co_chiet_khau = 1). Mặc định không.
  *  - Bill có món tên bắt đầu bằng "BUFFET" => bill buffet: hoa hồng = tổng SL món BUFFET × mức/khách của đối tác (mặc định 20.000).
  *  - Ngược lại => alacarte: hoa hồng = (tổng bill − giảm giá) × % (nhập riêng trên bill, hoặc % của đối tác; mặc định 15%).
+ *  - Tiền chiết khấu sửa tay trên bill (com_manual) => dùng đúng số đó thay cho số tự tính.
  *  - Bill "Ghi nợ" => đối tác nợ lại (tổng bill − giảm giá).
  *  - Bill hợp lệ: status khác 0 (xóa) và 3 (hủy).
  *
@@ -56,6 +57,8 @@ class PartnerDebtService
                     ? $pax * (int) $p->com_buffet_per_pax
                     : (int) round($net * $pct / 100);
             }
+            // tiền chiết khấu người dùng sửa tay trên bill: dùng đúng số đã nhập
+            if (isset($b->com_manual) && $b->com_manual !== null) $com = max(0, (int) $b->com_manual);
         }
         $upd = ['bill_type' => $billType, 'pax' => $pax, 'com_amount' => $com];
         if (!$b->doi_tac_id) {
@@ -63,6 +66,7 @@ class PartnerDebtService
             $upd['co_chiet_khau'] = 0;
             $upd['ghi_no'] = 0;
             $upd['com_amount'] = 0;
+            $upd['com_manual'] = null;
         }
         DB::table('booking')->where('id', $bookingId)->update($upd);
         return $upd;

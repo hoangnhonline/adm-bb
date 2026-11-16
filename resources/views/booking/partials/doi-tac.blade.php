@@ -4,6 +4,9 @@
   $dtCk = old('co_chiet_khau', $bk->co_chiet_khau ?? 0);
   $dtNo = old('ghi_no', $bk->ghi_no ?? 0);
   $dtPct = old('com_pct', isset($bk->com_pct) && $bk->com_pct !== null ? rtrim(rtrim(number_format($bk->com_pct, 2, '.', ''), '0'), '.') : '');
+  $dtManual = old('com_manual_flag') ? old('com_manual') : (isset($bk->com_manual) && $bk->com_manual !== null ? number_format($bk->com_manual) : '');
+  $dtManualFlag = old('com_manual_flag', isset($bk->com_manual) && $bk->com_manual !== null ? 1 : 0);
+  $dtAuto = isset($bk->com_amount) ? number_format((int) $bk->com_amount) : '';
   $dtTypes = array_map('__', \App\Models\Partner::$doiTacTypes);
 @endphp
 <input type="hidden" name="doi_tac_form" value="1">
@@ -29,6 +32,12 @@
       <input type="text" name="com_pct" id="com_pct" class="form-control" value="{{ $dtPct }}" placeholder="{{ __('theo đối tác') }}" autocomplete="off">
       <span class="input-group-addon">%</span>
     </div>
+  </div>
+  <div class="form-group col-md-2 col-xs-6 dt-opt dt-pct">
+    <label>{{ __('Tiền chiết khấu') }} <a href="#" id="com_reset" title="{{ __('Tự tính lại') }}" style="font-weight:normal;font-size:12px;{{ $dtManualFlag ? '' : 'display:none' }}"><i class="fa fa-refresh"></i> {{ __('Tự tính lại') }}</a></label>
+    <input type="hidden" name="com_manual_flag" id="com_manual_flag" value="{{ $dtManualFlag ? 1 : 0 }}">
+    <input type="text" name="com_manual" id="com_manual" class="form-control input-sm number" value="{{ $dtManualFlag ? $dtManual : $dtAuto }}" autocomplete="off">
+    <small id="com_manual_hint" class="text-muted">{{ $dtManualFlag ? __('Đã sửa tay') : __('Tự tính') }}</small>
   </div>
   <div class="form-group col-md-2 col-xs-6 dt-opt" style="padding-top:25px">
     <label style="font-weight:normal;cursor:pointer"><input type="checkbox" name="ghi_no" id="ghi_no" value="1" {{ $dtNo ? 'checked' : '' }}> {{ __('Ghi nợ (đối tác trả sau)') }}</label>
@@ -59,7 +68,10 @@
       if(nm.indexOf('BUFFET') === 0 && r.find('.cate').val()){ pax += num(r.find('.amount').val()); }
     });
     var net = Math.max(0, num($('#total_price').val()) - num($('#discount').val()));
-    var txt = '';
+    var txt = '', autoCom = 0;
+    if($('#co_chiet_khau').is(':checked')) autoCom = pax > 0 ? pax*opt.data('buffet') : Math.round(net*pct/100);
+    // ô Tiền chiết khấu: chưa sửa tay thì luôn hiện số tự tính
+    if($('#com_manual_flag').val() != '1') $('#com_manual').val(fmt(autoCom));
     if(!$('#co_chiet_khau').is(':checked')){
       txt = {!! json_encode(__('Không tính hoa hồng (chưa tick "Có chiết khấu").')) !!};
     }else if(pax > 0){
@@ -67,6 +79,7 @@
     }else{
       txt = {!! json_encode(__('Bill ALACARTE – hoa hồng dự kiến')) !!} + ': ' + pct + '% × ' + fmt(net) + ' = ' + fmt(net*pct/100) + ' đ';
     }
+    if($('#co_chiet_khau').is(':checked') && $('#com_manual_flag').val() == '1') txt += ' → ' + {!! json_encode(__('dùng số sửa tay')) !!} + ': ' + $('#com_manual').val() + ' đ';
     if($('#ghi_no').is(':checked')) txt += ' | ' + {!! json_encode(__('Ghi nợ')) !!} + ': ' + fmt(net) + ' đ';
     $('#dt-preview').text(txt);
   };
@@ -74,6 +87,14 @@
     var $ = window.jQuery; if(!$){ return setTimeout(bind, 200); }
     $(document).on('change', '#doi_tac_id, #co_chiet_khau, #ghi_no, .cate, .amount', function(){ setTimeout(dtPreview, 50); });
     $(document).on('keyup change', '#discount, #total_price, #com_pct', function(){ setTimeout(dtPreview, 50); });
+    // người dùng gõ vào ô Tiền chiết khấu => chuyển sang sửa tay
+    $(document).on('input', '#com_manual', function(){
+      $('#com_manual_flag').val('1'); $('#com_reset').show(); $('#com_manual_hint').text({!! json_encode(__('Đã sửa tay')) !!});
+      var v = num($(this).val()); $(this).val(v ? fmt(v) : ''); setTimeout(dtPreview, 50);
+    });
+    $(document).on('click', '#com_reset', function(e){
+      e.preventDefault(); $('#com_manual_flag').val('0'); $(this).hide(); $('#com_manual_hint').text({!! json_encode(__('Tự tính')) !!}); dtPreview();
+    });
     $(dtPreview);
   }
   bind();

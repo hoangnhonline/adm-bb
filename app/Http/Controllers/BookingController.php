@@ -2318,7 +2318,7 @@ $pendingSummary = $pendingSummary->map(function ($r) {
     {
         // Form cũ không có khối đối tác => không đụng tới các trường này
         if(!isset($dataArr['doi_tac_form'])){
-            unset($dataArr['doi_tac_id'], $dataArr['co_chiet_khau'], $dataArr['ghi_no'], $dataArr['bill_type'], $dataArr['pax'], $dataArr['com_amount'], $dataArr['com_pct']);
+            unset($dataArr['doi_tac_id'], $dataArr['co_chiet_khau'], $dataArr['ghi_no'], $dataArr['bill_type'], $dataArr['pax'], $dataArr['com_amount'], $dataArr['com_pct'], $dataArr['com_manual'], $dataArr['com_manual_flag']);
             return $dataArr;
         }
         unset($dataArr['doi_tac_form']);
@@ -2328,6 +2328,10 @@ $pendingSummary = $pendingSummary->map(function ($r) {
         // % hoa hồng alacarte riêng cho bill (để trống = theo đối tác)
         $pct = isset($dataArr['com_pct']) ? str_replace(',', '.', trim((string) $dataArr['com_pct'])) : '';
         $dataArr['com_pct'] = ($dataArr['co_chiet_khau'] && $pct !== '' && is_numeric($pct)) ? max(0, min(100, (float) $pct)) : null;
+        // tiền chiết khấu: hệ thống tự tính, người dùng sửa lại thì lưu số sửa tay (com_manual)
+        $man = isset($dataArr['com_manual']) ? preg_replace('/[^\d]/', '', (string) $dataArr['com_manual']) : '';
+        $dataArr['com_manual'] = ($dataArr['co_chiet_khau'] && !empty($dataArr['com_manual_flag']) && $man !== '') ? (int) $man : null;
+        unset($dataArr['com_manual_flag']);
         // các trường do hệ thống tính, không nhận từ form
         unset($dataArr['bill_type'], $dataArr['pax'], $dataArr['com_amount']);
         return $dataArr;

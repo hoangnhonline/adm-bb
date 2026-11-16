@@ -66,7 +66,7 @@ class VatReportController extends Controller
     {
         $rows = $this->query($f)->orderBy('b.use_date')->orderBy('b.id')
             ->get(['b.id', 'b.use_date', 'b.branch_id', 'b.table_no', 'b.bill_no', 'b.total_price', 'b.discount', 'b.no_vat',
-                'b.doi_tac_id', 'b.co_chiet_khau', 'b.bill_type', 'b.pax', 'b.com_amount', 'b.com_pct', 'b.notes', 'b.status']);
+                'b.doi_tac_id', 'b.co_chiet_khau', 'b.bill_type', 'b.pax', 'b.com_amount', 'b.com_pct', 'b.com_manual', 'b.notes', 'b.status']);
         foreach ($rows as $r) {
             $r->no_vat = AppSetting::isNoVat($r->no_vat, $r->branch_id) ? 1 : 0; // chi nhánh không VAT (Vui Fest) tính như tick KHÔNG VAT
             $r->net = (int) $r->total_price - (int) $r->discount;
