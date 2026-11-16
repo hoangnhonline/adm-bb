@@ -1,225 +1,140 @@
 @extends('layout')
 @section('content')
 <div class="content-wrapper">
-  
-<!-- Content Header (Page header) -->
-<section class="content-header" style="padding-top: 10px;">
-  <h1 style="text-transform: uppercase;">    
-    {{ __('QUẢN LÝ BILL') }} {{$arrSearch['use_date_from']}}
-  </h1>
-  
+<section class="content-header" style="padding-top:10px;">
+  <h1 style="text-transform:uppercase;font-size:20px">{{ __('QUẢN LÝ BILL') }} <small>{{ $arrSearch['use_date_from'] }}</small></h1>
 </section>
 
-<!-- Main content -->
 <section class="content">
-  
   <div class="row">
     <div class="col-md-12">
       <div id="content_alert"></div>
       @if(Session::has('message'))
-      <p class="alert alert-info" >{{ Session::get('message') }}</p>
+      <p class="alert alert-info">{{ Session::get('message') }}</p>
       @endif
-      @if($notNH)
-      @if($time_type == 3)
-      <a href="{{ route('booking.create') }}?use_date={{ $arrSearch['use_date_from'] }}" class="btn btn-info btn-sm" style="margin-bottom:5px">{{ __('TẠO BILL') }}</a>
-      @if(\App\Http\Controllers\BookingController::canUseKitchen())
-       <a href="{{ route('booking.orders') }}" class="btn btn-warning btn-sm" style="margin-bottom:5px">{{ __('BẾP') }}</a>
-       <a href="{{ route('booking.curry') }}" class="btn btn-success btn-sm" style="margin-bottom:5px">{{ __('CURRY') }}</a>
-      <a href="{{ route('booking.tandoor') }}" class="btn btn-info btn-sm" style="margin-bottom:5px">{{ __('BÁNH') }}</a>
-      @endif
-      @else
-      <a href="{{ route('booking.create') }}" class="btn btn-info btn-sm" style="margin-bottom:5px">{{ __('TẠO BILL') }}</a>
-      @endif
-      @endif
-      
-      <div class="panel panel-default">        
-        <div class="panel-body">
-          
-          <form class="form-inline" role="form" method="GET" action="{{ route('booking.index') }}" id="searchForm">
-                        <div class="row">
-              
-              
-              <div class="row">
-                @foreach($branchList as $beach)
-                  <div class="form-group col-xs-4" style="padding:0px; padding-left: 10px;">
-                    &nbsp;&nbsp;&nbsp;<input type="checkbox" name="branch_ids[]" id="branch_ids" {{ in_array($beach->id, $arrSearch['branch_ids']) || empty($arrSearch['branch_ids']) ? "checked" : "" }} value="{{$beach->id}}">
-                    <label for="branch_ids">{{$beach->name}}</label>
-                  </div>
-                @endforeach
-              </div>
-              <div class="form-group @if($time_type == 3) col-xs-6 @else col-xs-4 @endif">              
-                <select class="form-control select2" name="time_type" id="time_type">                  
+
+      @include('booking.partials.list-toolbar', ['showExcel' => false])
+
+      <div class="panel panel-default" style="margin-bottom:10px">
+        <div class="panel-body" style="padding:8px">
+          <form role="form" method="GET" action="{{ route('booking.index') }}" id="searchForm">
+            @if(count($branchList) > 1)
+            <div style="margin-bottom:8px">
+              @foreach($branchList as $beach)
+              <label class="bk-branch"><input type="checkbox" name="branch_ids[]" value="{{ $beach->id }}" {{ in_array($beach->id, $arrSearch['branch_ids']) || empty($arrSearch['branch_ids']) ? "checked" : "" }}><span>{{ $beach->name }}</span></label>
+              @endforeach
+            </div>
+            @endif
+            <div class="row" style="margin:0 -4px">
+              <div class="form-group col-xs-6" style="padding:0 4px">
+                <select class="form-control select2" name="time_type" id="time_type" style="width:100%">
                   <option value="">{{ __('--THỜI GIAN--') }}</option>
                   <option value="1" {{ $time_type == 1 ? "selected" : "" }}>{{ __('Theo tháng') }}</option>
                   <option value="2" {{ $time_type == 2 ? "selected" : "" }}>{{ __('Khoảng ngày') }}</option>
-                  <option value="3" {{ $time_type == 3 ? "selected" : "" }}>{{ __('Theo ngày') }} </option>
+                  <option value="3" {{ $time_type == 3 ? "selected" : "" }}>{{ __('Theo ngày') }}</option>
                 </select>
               </div>
               @if($time_type == 1)
-            <div class="form-group col-xs-4 chon-thang">                
-                <select class="form-control select2 " id="month_change" name="month">
-                  <option value="">{{ __('--THÁNG--') }}</option>
-                  @for($i = 1; $i <=12; $i++)
+              <div class="form-group col-xs-3 chon-thang" style="padding:0 4px">
+                <select class="form-control" id="month_change" name="month">
+                  @for($i = 1; $i <= 12; $i++)
                   <option value="{{ str_pad($i, 2, "0", STR_PAD_LEFT) }}" {{ $month == $i ? "selected" : "" }}>{{ str_pad($i, 2, "0", STR_PAD_LEFT) }}</option>
                   @endfor
                 </select>
               </div>
-              <div class="form-group col-xs-4 chon-thang">                
-                <select class="form-control select2" id="year_change" name="year">
-                  <option value="">{{ __('--NĂM--') }}</option>                  
-                  <option value="2025" {{ $year == 2025 ? "selected" : "" }}>2025</option>
-                  <option value="2026" {{ $year == 2026 ? "selected" : "" }}>2026</option>
+              <div class="form-group col-xs-3 chon-thang" style="padding:0 4px">
+                <select class="form-control" id="year_change" name="year">
+                  @for($y = (int) date('Y') + 1; $y >= 2024; $y--)
+                  <option value="{{ $y }}" {{ $year == $y ? "selected" : "" }}>{{ $y }}</option>
+                  @endfor
                 </select>
               </div>
-            @endif
-
-            @if($time_type == 2 || $time_type == 3)            
-              <div class="form-group @if($time_type == 3) col-xs-6 @else col-xs-4 @endif">
+              @endif
+              @if($time_type == 2 || $time_type == 3)
+              <div class="form-group {{ $time_type == 3 ? 'col-xs-6' : 'col-xs-3' }}" style="padding:0 4px">
                 <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_from" placeholder="{{ $time_type == 2 ? __('Từ ngày') : __('Ngày') }}" value="{{ $arrSearch['use_date_from'] }}">
               </div>
-              
               @if($time_type == 2)
-              <div class="form-group col-xs-4">
-                <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_to" placeholder="{{ __('Đến ngày') }}" value="{{ $arrSearch['use_date_to'] }}" >
+              <div class="form-group col-xs-3" style="padding:0 4px">
+                <input type="text" class="form-control datepicker" autocomplete="off" name="use_date_to" placeholder="{{ __('Đến ngày') }}" value="{{ $arrSearch['use_date_to'] }}">
               </div>
               @endif
-            @endif
-            </div>  
-           
-         
-            <div class="row">  
-              <div class="form-group col-xs-6">
+              @endif
+              <div class="form-group col-xs-4" style="padding:0 4px">
                 <input type="text" class="form-control" autocomplete="off" name="table_no" placeholder="{{ __('BÀN') }}" value="{{ $arrSearch['table_no'] }}">
-              </div>       
-              <div class="form-group col-xs-6">
-                <select class="form-control select2" name="nguoi_thu_tien" id="nguoi_thu_tien">
+              </div>
+              <div class="form-group col-xs-8" style="padding:0 4px">
+                <select class="form-control select2" name="nguoi_thu_tien" id="nguoi_thu_tien" style="width:100%">
                   <option value="">{{ __('-Người thu-') }}</option>
                   @foreach($collecterList as $payer)
                   <option value="{{ $payer->id }}" {{ $arrSearch['nguoi_thu_tien'] == $payer->id ? "selected" : "" }}>{{ $payer->name }}</option>
                   @endforeach
                 </select>
               </div>
-              
-            </div>            
-            <button type="submit" class="btn btn-info btn-sm">{{ __('Tìm') }}</button>
-            <button type="button" id="btnReset" class="btn btn-danger btn-sm">{{ __('Đặt lại') }}</button>
-          </form>         
+            </div>
+            <button type="submit" class="btn btn-info btn-sm"><i class="fa fa-search"></i> {{ __('Tìm') }}</button>
+            <button type="button" id="btnReset" class="btn btn-default btn-sm">{{ __('Đặt lại') }}</button>
+          </form>
         </div>
       </div>
- 
-        <div class="box-header with-border">
-              <h3 class="box-title">{{ __('Danh sách') }} ( <span class="value">{{ $items->total() }} {{ __('bill') }} )
-                @if($totalRupees > 0)
-                <span style="color: blue">({{ number_format($totalRupees) }} rupees)</span>
-                @endif
-               
-                @if($totalDrinks > 0)
-              - {{ __('Tổng tiền đồ uống') }}: <span style="color: red">{{ number_format($totalDrinks) }}</span>
-              @endif
-              
-              </h3>
+
+      @include('booking.partials.list-summary')
+
+      <div style="text-align:center">{{ $items->appends($arrSearch)->links() }}</div>
+      <ul class="bk-cards">
+      @forelse($items as $item)
+        @php
+          $arrEdit = array_merge(['id' => $item->booking_id], $arrSearch);
+          $noVat = \App\Services\AppSetting::isNoVat($item->no_vat, $item->branch_id);
+          $vatItem = $noVat ? 0 : \App\Services\AppSetting::vatOf($item->total_price, $item->discount, $item->no_vat, $item->branch_id);
+        @endphp
+        <li id="row-{{ $item->booking_id }}" class="booking bk-card" data-id="{{ $item->booking_id }}" data-date="{{ $item->use_date }}">
+          <span class="label label-sm label-danger" id="error_unc_{{ $item->booking_id }}"></span>
+          <div class="bk-card-head">
+            <div class="t">@if($item->table_no){{ __('BÀN') }} <b>{{ $item->table_no }}</b>@else — @endif <small>{{ date('H:i', strtotime($item->created_at)) }}</small></div>
+            <div class="r">#{{ $item->id }}</div>
           </div>
-      
-        <div style="text-align:center; margin-top: 10px;">
-            {{ $items->appends( $arrSearch )->links() }}
-          </div>  
-          <div class="table-responsive" style="font-size: 12px;border: none;">            
-            <ul style="padding: 0px; ">
-             @if( $items->count() > 0 )
-              <?php $i = 0; ?>
-              @foreach( $items as $item )
-                <?php $i ++; ?>
-                <li id="row-{{ $item->booking_id }}" class="booking" style="padding: 10px;background-color: #fff; font-size:15px;margin-bottom: 10px; border-radius: 5px; color: #2c323f;  @if($i%2 == 0)  background-color:#77777721 @endif"  data-id="{{ $item->booking_id }}" data-date="{{ $item->use_date }}"> 
-                <span class="label label-sm label-danger" id="error_unc_{{ $item->booking_id }}"></span>       
-                 
-                    @php $arrEdit = array_merge(['id' => $item->booking_id], $arrSearch) @endphp
-                    
-                   
-                    @if($item->table_no)
-                    <p style="font-size:20px !important; font-weight: bold">{{ __('BÀN :') }} <span style="color: blue; font-weight: bold">{{ $item->table_no }}</span> - <strong>{{ date('H:i', strtotime($item->created_at)) }}</strong></p>
-                    @endif
-                   @if($item->take_away == 1)
-                    <span style="color: blue">{{ __('MANG ĐI') }}</span>
-                    @endif
-                    @if($item->indian == 2)
-                    <span style="color: red">{{ __('KHÔNG PHẢI KHÁCH ẤN') }}</span>
-                    @endif                    
-                    @if($item->branch_id)
-                    <br><p style="color: blue">{{ optional($item->branch)->name ?? ('#' . $item->branch_id) }}</p>
-                    @endif
-                 <table class="table" style="margin-top:5px;margin-bottom: 10px;">
-                   @foreach($item->details as $service)
-                   <tr>
-                     <td width="50%">
-                      @if($service->dish)
-                      @if($service->is_drink == 1)
-                      <i class="fa fa-coffee" style="color: blue" aria-hidden="true"></i>
-                      @endif
-                       @if($service->done_qty == $service->amount)
-                      <label class="label label-sm label-info">{{ __('Xong') }}</label>
-                      @endif
-                      {{ $service->dish->name }}
-                
-                      <span style="color: red; font-weight: bold; padding-left: 10px; text-transform: uppercase;">{{ $service->notes }}</span>
-                      @else
-                      -error-
-                      @endif
-                    </td>
-                     <td width="20%">{{ $service->done_qty }}/{{ $service->amount }} 
-
-                     </td>
-                     <td width="30%" class="text-right">{{ number_format($service->total_price) }}</td>
-                   </tr>
-                   @endforeach
-                 </table>
-
-                    - Total: {{ number_format($item->total_price) }} 
-                    @if($item->tien_coc > 0)
-                    <br>- Cọc: {{ number_format($item->tien_coc) }} 
-                    @endif 
-                    @if($item->discount > 0) 
-                    <br>{{ __('- Giảm giá:') }} <span style="color: red;font-weight: bold;">{{ number_format($item->discount) }}</span>                    
-                    @endif
-                    @if($item->commision > 0) 
-                    <br>{{ __('- Tỷ lệ giảm giá (%):') }} <span style="color: red;font-weight: bold;">{{ number_format($item->commision) }} 
-                    @if($item->per_com <= 100 && $item->branch_id != 4 && $item->commision < 100)
-                    ({{ $item->per_com }}%)
-                    @endif
-                    </span>
-                    @endif
-                    <br>- Revenue: {{ number_format($item->con_lai) }}
-                    @if($item->rupees)
-                  <span style="color: red;">({{ number_format($item->rupees) }} rupees) </span
-                  @endif
-                    @if($item->nguoi_thu_tien)
-                  <br>- Receiver: {{ $collecterNameArr[$item->nguoi_thu_tien] }}
-                  @endif
-                    @if($item->notes)                    
-                    <br><span style="color:red; font-style: italic;">{!! nl2br($item->notes) !!}</span>
-                    @endif    
-                    
-                    <div class="clearfix" style="margin-bottom: 10px"></div>                   
-                    
-                   <a style="float:right; margin-left: 2px" href="{{ route( 'booking.edit', $arrEdit ) }}" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-pencil"></span></a>     <a class="btn btn-success btn-sm" href="{{ route( 'booking.detail', $item->id ) }}" target="_blank" >{{ __('Hóa đơn') }}</a>           
-                  
-                      <div style="clear: both;"></div>
-                      <br><input id="hoan_tat_{{ $item->id }}"  data-table="booking" type="checkbox" data-table="booking" data-column="checked" class="change-column-value-booking" {{ $item->checked == 1 ? "checked" : "" }} value="1" data-id="{{ $item->id }}">
-                    <label for="hoan_tat_{{ $item->id }}">{{ __('ĐÃ KIỂM') }}</label>
-                </li>              
-              @endforeach
-            @else
-            <li>
-              <p>{{ __('Không có dữ liệu.') }}</p>
+          <div>
+            @if($item->branch_id)<span class="bk-badge blue">{{ optional($item->branch)->name ?? ('#' . $item->branch_id) }}</span>@endif
+            @if($item->take_away == 1)<span class="bk-badge blue">{{ __('MANG ĐI') }}</span>@endif
+            @if($item->indian == 2)<span class="bk-badge red">{{ __('KHÔNG PHẢI KHÁCH ẤN') }}</span>@endif
+            @if($item->doi_tac_id && $item->doiTac)<span class="bk-badge orange">{{ $item->doiTac->name }}</span>@if($item->ghi_no)<span class="bk-badge red">{{ __('Ghi nợ') }}</span>@endif @endif
+          </div>
+          <ul class="bk-dishes">
+            @foreach($item->details as $service)
+            <li class="{{ $service->done_qty >= $service->amount ? 'done' : '' }}">
+              <span class="q">{{ $service->done_qty }}/{{ $service->amount }}</span>
+              <span class="n">@if($service->is_drink == 1)<i class="fa fa-coffee text-muted"></i> @endif{{ $service->dish ? $service->dish->name : '-error-' }}
+                @if($service->notes)<span class="bk-note">{{ $service->notes }}</span>@endif</span>
+              <span class="p">{{ number_format($service->total_price) }}</span>
             </li>
-            @endif
-            </ul>
-            <strong style="color: blue; font-weight: bold;">{{ number_format($totalRevenue) }} </strong>
+            @endforeach
+          </ul>
+          @if($item->notes)<div class="bk-note" style="font-style:italic;margin:4px 0">{!! nl2br(e($item->notes)) !!}</div>@endif
+          <table class="bk-m-money">
+            <tr><td>{{ __('Tổng') }}</td><td>{{ number_format($item->total_price) }}</td></tr>
+            @if($item->tien_coc > 0)<tr><td>{{ __('Cọc') }}</td><td>{{ number_format($item->tien_coc) }}</td></tr>@endif
+            @if($item->discount > 0)<tr><td>{{ __('Giảm giá') }}</td><td style="color:#c0392b">−{{ number_format($item->discount) }}</td></tr>@endif
+            <tr class="rev"><td>{{ __('Doanh thu') }}</td><td>{{ number_format($item->con_lai) }} @if($item->rupees)<small>({{ number_format($item->rupees) }} rupees)</small>@endif</td></tr>
+            @if(!$noVat)<tr><td>VAT · {{ __('Thanh toán') }}</td><td>{{ number_format($vatItem) }} · <b>{{ number_format($item->total_price - $item->discount + $vatItem) }}</b></td></tr>@endif
+            @if($item->com_amount > 0)<tr><td>{{ __('HH') }}</td><td>{{ number_format($item->com_amount) }}</td></tr>@endif
+            @if($item->nguoi_thu_tien)<tr><td>{{ __('Người thu') }}</td><td>{{ $collecterNameArr[$item->nguoi_thu_tien] ?? '' }}</td></tr>@endif
+          </table>
+          <div class="bk-card-foot">
+            <label><input type="checkbox" data-table="booking" data-column="checked" class="change-column-value-booking" {{ $item->checked == 1 ? "checked" : "" }} value="1" data-id="{{ $item->id }}"> {{ __('ĐÃ KIỂM') }}</label>
+            <span style="margin-left:auto">
+              <a class="btn btn-success btn-sm" href="{{ route('booking.detail', $item->id) }}" target="_blank">{{ __('Hóa đơn') }}</a>
+              <a href="{{ route('booking.edit', $arrEdit) }}" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-pencil"></span></a>
+            </span>
           </div>
-          <div style="text-align:center">
-            {{ $items->appends( $arrSearch )->links() }}
-          </div>       
-      </div>
-     
+        </li>
+      @empty
+        <li class="bk-card text-muted">{{ __('Không có dữ liệu.') }}</li>
+      @endforelse
+      </ul>
+      <div style="text-align:center">{{ $items->appends($arrSearch)->links() }}</div>
+    </div>
+
     <!-- /.col -->  
   </div> 
 </section>
@@ -257,9 +172,19 @@
   </div>
 </div>
 <style type="text/css">
-  .form-group{
-    margin-bottom: 10px !important;
-  }
+  .form-group{ margin-bottom: 8px !important; }
+  .bk-cards { list-style:none; padding:0; margin:0; }
+  .bk-card { background:#fff; border:1px solid #e3e6ea; border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:14px; color:#2c323f; }
+  .bk-card-head { display:flex; align-items:baseline; } .bk-card-head .t { font-size:18px; } .bk-card-head .t b { color:#1d6fa5; } .bk-card-head small { color:#888; margin-left:4px; }
+  .bk-card-head .r { margin-left:auto; color:#999; font-size:12px; }
+  .bk-dishes { list-style:none; padding:0; margin:6px 0; }
+  .bk-dishes li { display:flex; gap:8px; padding:3px 0; border-bottom:1px dashed #eee; font-size:13px; }
+  .bk-dishes .q { width:34px; color:#888; flex:none; } .bk-dishes .n { flex:1; } .bk-dishes .p { white-space:nowrap; color:#555; }
+  .bk-dishes li.done .q { color:#00a65a; font-weight:bold; }
+  .bk-note { color:#c0392b; font-weight:bold; text-transform:uppercase; font-size:12px; margin-left:4px; }
+  .bk-m-money { width:100%; font-size:13px; margin-top:4px; } .bk-m-money td { padding:1px 0; } .bk-m-money td:first-child { color:#888; } .bk-m-money td:last-child { text-align:right; }
+  .bk-m-money tr.rev td { font-weight:bold; color:#1d6fa5; font-size:15px; }
+  .bk-card-foot { display:flex; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid #f0f0f0; } .bk-card-foot label { font-weight:normal; margin:0; }
 </style>
 
 <input type="hidden" id="route_upload_tmp_image" value="{{ route('image.tmp-upload') }}"><div id="uncModal" class="modal fade" role="dialog">
@@ -543,7 +468,7 @@
             data : {
               id : id,
               col : obj.data('column'),
-              value: obj.val()
+              value: obj.is(':checkbox') ? (obj.is(':checked') ? 1 : 0) : obj.val()   // ô tick: bỏ tick thì gửi 0
             },
             success: function(data){
                 console.log(data);
