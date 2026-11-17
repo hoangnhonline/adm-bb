@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\DB;
  *
  * Quy tắc (theo yêu cầu anh Hoàng 14/11/2026):
  *  - Bill chỉ tính hoa hồng khi có đối tác VÀ tick "Có chiết khấu" (co_chiet_khau = 1). Mặc định không.
- *  - Bill có món tên bắt đầu bằng "BUFFET" => bill buffet: hoa hồng = tổng SL món BUFFET × mức/khách của đối tác (mặc định 20.000).
+ *  - Bill có món tên bắt đầu bằng "BUFFET" => bill buffet: hoa hồng = SL BUFFET người lớn × mức/khách của đối tác (mặc định 20.000)
+ *    + SL món buffet trẻ em (tên có chữ "TE", vd "BUFFET TE", "BUFFET 210 TE") × mức trẻ em chung (mặc định 10.000, cài trên trang Đối tác) — 17/11/2026.
  *  - Ngược lại => alacarte: hoa hồng = (tổng bill − giảm giá) × % (nhập riêng trên bill, hoặc % của đối tác; mặc định 15%).
  *  - Tiền chiết khấu sửa tay trên bill (com_manual) => dùng đúng số đó thay cho số tự tính.
  *  - Bill "Ghi nợ" => đối tác nợ lại (tổng bill − giảm giá).
@@ -27,6 +28,19 @@ class PartnerDebtService
     const INVALID_STATUS = [0, 3];
     const BUFFET_PREFIX = 'BUFFET';
 
+    /** Món buffet trẻ em: tên bắt đầu "BUFFET" và có chữ "TE" đứng riêng (vd "BUFFET TE", "BUFFET 210 TE") hoặc "TRẺ EM" */
+    public static function isChildBuffet($name)
+    {
+        $n = mb_strtoupper(trim((string) $name), 'UTF-8');
+        if (strpos($n, self::BUFFET_PREFIX) !== 0) return false;
+        return (bool) preg_match('/(^|[^\pL\pN])TE([^\pL\pN]|$)|TR[ẺE] ?EM/u', $n);
+    }
+
+    public static function childBuffetRate()
+    {
+        return (int) AppSetting::get('com_buffet_child_per_pax_default');
+    }
+
     /** Tính lại bill_type, pax, com_amount cho 1 bill và lưu. */
     public static function applyToBooking($bookingId)
     {
@@ -38,10 +52,11 @@ class PartnerDebtService
             ->where('bd.booking_id', $bookingId)
             ->get(['bd.amount', 'bd.total_price', 'd.name']);
 
-        $pax = 0;
+        $pax = 0; $paxChild = 0;
         foreach ($rows as $r) {
             if (stripos(ltrim((string) $r->name), self::BUFFET_PREFIX) === 0) {
                 $pax += (int) round($r->amount);
+                if (self::isChildBuffet($r->name)) $paxChild += (int) round($r->amount);
             }
         }
         $billType = $pax > 0 ? 1 : 2;
@@ -54,7 +69,7 @@ class PartnerDebtService
                 // % alacarte: ưu tiên % nhập riêng trên bill (com_pct), không có thì theo đối tác
                 $pct = isset($b->com_pct) && $b->com_pct !== null ? (float) $b->com_pct : (float) $p->com_alacarte_pct;
                 $com = $billType == 1
-                    ? $pax * (int) $p->com_buffet_per_pax
+                    ? ($pax - $paxChild) * (int) $p->com_buffet_per_pax + $paxChild * self::childBuffetRate()
                     : (int) round($net * $pct / 100);
             }
             // tiền chiết khấu người dùng sửa tay trên bill: dùng đúng số đã nhập

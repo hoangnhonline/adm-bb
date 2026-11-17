@@ -10,7 +10,7 @@
   $dtTypes = array_map('__', \App\Models\Partner::$doiTacTypes);
 @endphp
 <input type="hidden" name="doi_tac_form" value="1">
-<div class="row" id="doi-tac-box" style="background:#f4f8fb;border:1px solid #d6e4f0;margin:5px 0 12px;padding-top:10px">
+<div class="row" id="doi-tac-box" data-child-rate="{{ \App\Services\PartnerDebtService::childBuffetRate() }}" style="background:#f4f8fb;border:1px solid #d6e4f0;margin:5px 0 12px;padding-top:10px">
   <div class="form-group col-md-5 col-xs-12">
     <label>{{ __('Đối tác') }}</label>
     <select class="form-control select2" name="doi_tac_id" id="doi_tac_id" style="width:100%">
@@ -66,21 +66,29 @@
     $('#com_pct').attr('placeholder', opt.data('pct') + '% (' + {!! json_encode(__('theo đối tác')) !!} + ')');
     var pctIn = String($('#com_pct').val() || '').replace(',', '.');
     var pct = pctIn !== '' && !isNaN(parseFloat(pctIn)) ? parseFloat(pctIn) : parseFloat(opt.data('pct'));
-    var pax = 0;
+    var pax = 0, paxChild = 0, childRate = num($('#doi-tac-box').data('child-rate'));
     $('.services').each(function(){
       var r = $(this), t = (r.find('.cate option:selected').text()||'').toUpperCase();
-      var nm = $.trim(t).replace(/^\d+\s*(-\s*)?/, ''); // "12 - BUFFET..." hoặc "12 BUFFET ... - giá"
-      if(nm.indexOf('BUFFET') === 0 && r.find('.cate').val()){ pax += num(r.find('.amount').val()); }
+      var nm = $.trim(t).replace(/^\d+\s*(-\s*)?/, '').replace(/\s+/g, ' '); // "12 - BUFFET..." hoặc "12 BUFFET ... - giá"
+      if(nm.indexOf('BUFFET') === 0 && r.find('.cate').val()){
+        var q = num(r.find('.amount').val()); pax += q;
+        if(/(^|[^A-ZÀ-Ỹ0-9])TE([^A-ZÀ-Ỹ0-9]|$)|TR[ẺE] ?EM/.test(nm.split(' - ')[0])) paxChild += q;   // buffet trẻ em (có chữ "TE")
+      }
     });
+    var paxAdult = pax - paxChild;
+    var buffetCom = paxAdult * opt.data('buffet') + paxChild * childRate;
     var net = Math.max(0, num($('#total_price').val()) - num($('#discount').val()));
     var txt = '', autoCom = 0;
-    if($('#co_chiet_khau').is(':checked')) autoCom = pax > 0 ? pax*opt.data('buffet') : Math.round(net*pct/100);
+    if($('#co_chiet_khau').is(':checked')) autoCom = pax > 0 ? buffetCom : Math.round(net*pct/100);
     // ô Tiền chiết khấu: chưa sửa tay thì luôn hiện số tự tính
     if($('#com_manual_flag').val() != '1') $('#com_manual').val(fmt(autoCom));
     if(!$('#co_chiet_khau').is(':checked')){
       txt = {!! json_encode(__('Không tính hoa hồng (chưa tick "Có chiết khấu").')) !!};
     }else if(pax > 0){
-      txt = {!! json_encode(__('Bill BUFFET – hoa hồng dự kiến')) !!} + ': ' + pax + ' ' + {!! json_encode(__('khách')) !!} + ' × ' + fmt(opt.data('buffet')) + ' = ' + fmt(pax*opt.data('buffet')) + ' đ';
+      txt = {!! json_encode(__('Bill BUFFET – hoa hồng dự kiến')) !!} + ': ';
+      if(paxAdult > 0) txt += paxAdult + ' NL × ' + fmt(opt.data('buffet'));
+      if(paxChild > 0) txt += (paxAdult > 0 ? ' + ' : '') + paxChild + ' TE × ' + fmt(childRate);
+      txt += ' = ' + fmt(buffetCom) + ' đ';
     }else{
       txt = {!! json_encode(__('Bill ALACARTE – hoa hồng dự kiến')) !!} + ': ' + pct + '% × ' + fmt(net) + ' = ' + fmt(net*pct/100) + ' đ';
     }

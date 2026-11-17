@@ -813,5 +813,13 @@
     "Ghi nhận chi hoa hồng": "Record commission payment",
     "Cọc": "Deposit",
     "Rupees": "Rupees",
-    "Thanh toán": "Payable"
+    "Thanh toán": "Payable",
+    "buffet NL": "adult buffet",
+    "buffet TE": "child buffet",
+    "Buffet người lớn (đ / khách)": "Adult buffet (VND / guest)",
+    "Chỉ tính lại hoa hồng bill cũ (giữ mức riêng của từng đối tác)": "Only recalculate old bills (keep each partner's rates)",
+    "Tính lại hoa hồng các bill cũ của đối tác? Bill đã sửa tay tiền chiết khấu được giữ nguyên.": "Recalculate commission on old partner bills? Bills with a manually edited amount are kept.",
+    "Mức buffet trẻ em áp dụng chung cho mọi đối tác.": "The child buffet rate applies to all partners.",
+    "đã tính lại :n bill": "recalculated :n bills",
+    "Buffet trẻ em – món có chữ \"TE\" (đ / khách)": "Child buffet – dishes with \"TE\" (VND / guest)"
 }

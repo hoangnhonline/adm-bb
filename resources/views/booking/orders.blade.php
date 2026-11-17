@@ -9,7 +9,7 @@
     <style>
         /* Màn hình bếp (thiết kế lại 14/11/2026) */
         :root { --ok:#16a34a; --warn:#f59e0b; --late:#dc2626; }
-        body { background:#1f2430; color:#111; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+        body { background:#e5e7eb; color:#111; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
         .kds-top { position:sticky; top:0; z-index:10; background:#111827; color:#fff; padding:8px 12px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; box-shadow:0 2px 6px rgba(0,0,0,.4); }
         .kds-top .brand { font-weight:800; font-size:20px; letter-spacing:.5px; }
         .kds-top .brand small { color:#9ca3af; font-weight:600; font-size:14px; margin-left:6px; }
@@ -21,16 +21,17 @@
         .live-dot { width:10px; height:10px; border-radius:50%; background:var(--ok); display:inline-block; }
         .live-dot.off { background:var(--late); }
 
-        .kds-sum { background:#2b3242; padding:8px 12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-        .kds-sum .lbl { color:#9ca3af; font-weight:700; font-size:13px; text-transform:uppercase; margin-right:4px; }
-        .kds-sum .chip { background:#fff; border-radius:20px; padding:3px 4px 3px 12px; font-weight:700; font-size:14px; text-transform:uppercase; display:inline-flex; align-items:center; gap:8px; border-left:6px solid #999; }
+        .kds-sum { background:#f3f4f6; border-bottom:1px solid #d1d5db; padding:8px 12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+        .kds-sum .lbl { color:#6b7280; font-weight:700; font-size:13px; text-transform:uppercase; margin-right:4px; }
+        .kds-sum .chip { background:#fff; border-radius:20px; padding:3px 4px 3px 12px; font-weight:700; font-size:14px; text-transform:uppercase; display:inline-flex; align-items:center; gap:8px; border:1px solid #d1d5db; }
         .kds-sum .chip .q { background:#111827; color:#fff; border-radius:14px; padding:1px 9px; font-size:15px; }
 
+        /* danh sách order thu nhỏ còn 75% để xem được nhiều bàn hơn (16/11/2026) */
+        #kdsLive { zoom: .75; }
         .kds-board { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:12px; padding:12px; align-items:start; }
-        .kds-card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,.35); border-top:8px solid var(--ok); }
+        .kds-card { background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.15); border-top:5px solid #9ca3af; }
         .kds-card.warn { border-top-color:var(--warn); }
-        .kds-card.late { border-top-color:var(--late); animation:pulse 1.6s ease-in-out infinite; }
-        @keyframes pulse { 50% { box-shadow:0 0 0 4px rgba(220,38,38,.55); } }
+        .kds-card.late { border-top-color:var(--late); }
         .kds-head { display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f3f4f6; border-bottom:1px solid #e5e7eb; }
         .kds-head .tbl { font-size:28px; font-weight:900; line-height:1; }
         .kds-head .tbl small { font-size:13px; color:#6b7280; font-weight:700; display:block; text-transform:uppercase; }
@@ -40,11 +41,11 @@
         .kds-head .time { font-size:12px; color:#6b7280; font-weight:600; }
         .kds-tags { padding:6px 12px 0; display:flex; gap:6px; flex-wrap:wrap; }
         .tag { font-size:12px; font-weight:800; padding:2px 8px; border-radius:6px; text-transform:uppercase; }
-        .tag-ta { background:#dbeafe; color:#1d4ed8; } .tag-ni { background:#fee2e2; color:#b91c1c; }
-        .kds-note { margin:6px 12px 0; padding:5px 8px; background:#fff7ed; border-left:4px solid #f97316; color:#9a3412; font-weight:700; border-radius:4px; }
+        .tag-ta, .tag-ni { background:#f3f4f6; color:#111827; border:1px solid #9ca3af; }
+        .kds-note { margin:6px 12px 0; padding:5px 8px; background:#f9fafb; border-left:4px solid #6b7280; color:#111827; font-weight:700; border-radius:4px; }
 
         .kds-items { padding:8px; display:grid; gap:6px; }
-        .dish-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; border-left:8px solid #999; background:#f9fafb; cursor:pointer; user-select:none; transition:transform .08s, opacity .2s; }
+        .dish-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; user-select:none; transition:transform .08s, opacity .2s; }
         .dish-row:active { transform:scale(.98); }
         .dish-row.is-loading { opacity:.5; }
         .dish-row .q { min-width:46px; text-align:center; font-size:22px; font-weight:900; background:#111827; color:#fff; border-radius:8px; padding:2px 6px; }
@@ -54,20 +55,17 @@
         .dish-row .tm { font-size:12px; color:#6b7280; }
         .dish-row .boxes { margin-left:auto; display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; max-width:45%; }
         .dish-row .bx { width:22px; height:22px; border-radius:5px; border:2px solid #9ca3af; background:#fff; }
-        .dish-row .bx.on { background:var(--ok); border-color:var(--ok); }
+        .dish-row .bx.on { background:#374151; border-color:#374151; }
         .dish-row.dish-done { display:none; }
         .kds-done-toggle .dish-row.dish-done { display:flex; opacity:.45; cursor:default; }
         .kds-foot { padding:0 12px 8px; font-size:12px; color:#6b7280; }
-        .kds-empty { color:#9ca3af; text-align:center; padding:80px 20px; font-size:22px; font-weight:700; }
+        .kds-empty { color:#6b7280; text-align:center; padding:80px 20px; font-size:22px; font-weight:700; }
         .btn-showdone { background:#374151; color:#e5e7eb; border:0; border-radius:8px; padding:3px 10px; font-weight:600; }
         .btn-showdone.on { background:#2563eb; color:#fff; }
     </style>
 </head>
 <body>
 @php
-    if (!function_exists('kdsDishHue')) {
-        function kdsDishHue($dishId) { return crc32((string) $dishId) % 360; }
-    }
     $branchName = optional(\App\Models\Branch::find(Auth::user()->branch_id))->name;
     $pendingDishes = $pendingSummary->sum('qty');
 @endphp
@@ -87,7 +85,7 @@
     <div class="kds-sum">
         <span class="lbl">To cook:</span>
         @foreach($pendingSummary as $s)
-        <span class="chip" style="border-left-color:hsl({{ kdsDishHue($s['dish_id']) }},70%,50%)">{{ $s['name'] }} <span class="q">{{ $s['qty'] }}</span></span>
+        <span class="chip">{{ $s['name'] }} <span class="q">{{ $s['qty'] }}</span></span>
         @endforeach
     </div>
     @endif
@@ -129,10 +127,8 @@
                             $qty = max(1, (int) ($d->amount ?? 1));
                             $doneQty = min($qty, (int) ($d->done_qty ?? 0));
                             $isDone = $doneQty >= $qty;
-                            $hue = kdsDishHue($d->dish_id);
                         @endphp
                         <div class="dish-row js-dish {{ $isDone ? 'dish-done' : '' }}"
-                             style="border-left-color:hsl({{ $hue }},70%,50%);background:hsl({{ $hue }},70%,95%)"
                              data-detail-id="{{ $d->id }}" data-url="{{ route('booking.dish-done', $d->id) }}"
                              data-qty="{{ $qty }}" data-done-qty="{{ $doneQty }}" title="Tap = 1 done">
                             <div class="q"><span class="js-pending">{{ $qty - $doneQty }}</span>@if($qty > 1)<small>/{{ $qty }}</small>@endif</div>
