@@ -174,6 +174,9 @@
                   <a class="btn btn-success btn-sm" href="{{ route('booking.detail', $item->id) }}">{{ __('HÓA ĐƠN') }}</a>
                   <div class="bk-flags">
                     <label><input type="checkbox" data-table="booking" data-column="checked" class="change-column-value-booking" {{ $item->checked == 1 ? "checked" : "" }} value="1" data-id="{{ $item->id }}"> {{ __('ĐÃ KIỂM') }}</label>
+                    @if(in_array((int) $item->branch_id, (array) config('bombay.kiot_branches', []), true))
+                    <label><input type="checkbox" data-table="booking" data-column="is_kiot" class="change-column-value-booking" {{ $item->is_kiot == 1 ? "checked" : "" }} value="1" data-id="{{ $item->id }}"> {{ __('KIOT') }}</label>
+                    @endif
                     @if(!in_array((int) $item->branch_id, \App\Services\AppSetting::noVatBranches(), true))
                     <label><input type="checkbox" data-table="booking" data-column="no_vat" class="change-column-value-booking" {{ $item->no_vat == 1 ? "checked" : "" }} value="1" data-id="{{ $item->id }}"> {{ __('KHÔNG VAT') }}</label>
                     @endif

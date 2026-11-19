@@ -72,7 +72,8 @@ class Booking extends Model  {
                             'pax',
                             'com_amount',
                             'com_pct',
-                            'com_manual'
+                            'com_manual',
+                            'is_kiot'
                             ];
     public static function getList($params = []){
         $query = self::where('status', 1);
