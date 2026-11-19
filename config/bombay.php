@@ -9,6 +9,8 @@ return [
     'no_vat_branches' => [12],
     // Chi nhánh dùng màn hình bếp (BẾP / CURRY / BÁNH): 1 = Night Market. Chi nhánh khác: bill lưu xong là hoàn tất
     'kitchen_branch_id' => 1,
+    // Chi nhánh có ô tick "KIOT" trên danh sách bill (booking.is_kiot): 1 = Night Market, 2 = 124 THD
+    'kiot_branches' => [1, 2],
     // Hoa hồng đối tác mặc định (dùng khi chưa có cài đặt trong bảng settings)
     'com_alacarte_pct_default' => 15,
     'com_buffet_per_pax_default' => 20000,
