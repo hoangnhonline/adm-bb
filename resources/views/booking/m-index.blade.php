@@ -123,7 +123,7 @@
           <div class="bk-card-foot">
             <label><input type="checkbox" data-table="booking" data-column="checked" class="change-column-value-booking" {{ $item->checked == 1 ? "checked" : "" }} value="1" data-id="{{ $item->id }}"> {{ __('ĐÃ KIỂM') }}</label>
             @if(in_array((int) $item->branch_id, (array) config('bombay.kiot_branches', []), true))
-            <label><input type="checkbox" data-table="booking" data-column="is_kiot" class="change-column-value-booking" {{ $item->is_kiot == 1 ? "checked" : "" }} value="1" data-id="{{ $item->id }}"> {{ __('KIOT') }}</label>
+            <label><input type="checkbox" data-table="booking" data-column="is_kiot" data-revenue="{{ (int) $item->con_lai }}" class="change-column-value-booking" {{ $item->is_kiot == 1 ? "checked" : "" }} value="1" data-id="{{ $item->id }}"> {{ __('KIOT') }}</label>
             @endif
             <span style="margin-left:auto">
               <a class="btn btn-success btn-sm" href="{{ route('booking.detail', $item->id) }}" target="_blank">{{ __('Hóa đơn') }}</a>

@@ -852,7 +852,14 @@ class BookingController extends Controller
         $totalRupees = 0;
         $totalDrinks = 0;
         $totalVat = 0; $totalCom = 0; $totalNet = 0; // VAT + hoa hồng đối tác (14/11/2026)
+        // Kiot (19/11/2026): tổng doanh thu bill đã tick KIOT, trên các chi nhánh có ô KIOT
+        $kiotBranches = array_map('intval', (array) config('bombay.kiot_branches', []));
+        $kiotStat = ['revenue' => 0, 'count' => 0, 'base_revenue' => 0, 'base_count' => 0];
         foreach($allList as $item){
+            if (in_array((int) $item->branch_id, $kiotBranches, true)) {
+                $kiotStat['base_revenue'] += $item->con_lai; $kiotStat['base_count']++;
+                if ($item->is_kiot) { $kiotStat['revenue'] += $item->con_lai; $kiotStat['count']++; }
+            }
             $totalNet += $item->total_price - $item->discount;
             $totalVat += \App\Services\AppSetting::vatOf($item->total_price, $item->discount, $item->no_vat, $item->branch_id);
             $totalCom += (int) $item->com_amount;
@@ -927,7 +934,7 @@ class BookingController extends Controller
         }
         
       
-        return view($view, compact( 'items', 'arrSearch', 'keyword', 'time_type', 'month', 'year', 'month_do', 'arrData', 'chietkhauList', 'branch_id', 'cateList', 'use_date_from_format', 'use_date_to_format', 'branchList', 'beachArr', 'partners', 'partner_id', 'cateArr', 'totalRevenue', 'totalRupees', 'totalDrinks', 'isView', 'totalRevenueKoGiam', 'doiTacList', 'totalVat', 'totalCom', 'totalNet'));
+        return view($view, compact( 'items', 'arrSearch', 'keyword', 'time_type', 'month', 'year', 'month_do', 'arrData', 'chietkhauList', 'branch_id', 'cateList', 'use_date_from_format', 'use_date_to_format', 'branchList', 'beachArr', 'partners', 'partner_id', 'cateArr', 'totalRevenue', 'totalRupees', 'totalDrinks', 'isView', 'totalRevenueKoGiam', 'doiTacList', 'totalVat', 'totalCom', 'totalNet', 'kiotStat'));
 
     }
 
